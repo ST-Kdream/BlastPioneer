@@ -1,0 +1,38 @@
+# Visual Studio
+.vs/
+*.sln
+*.slnx
+*.suo
+*.user
+*.db
+*.idb
+*.pdb
+*.opendb
+*.vcxproj.user
+
+# 编译输出
+x64/
+Debug/
+Release/
+*.exe
+*.ilk
+*.obj
+*.pch
+*.lib
+*.dll
+*.exp
+
+# Qt
+moc_*.cpp
+moc_*.h
+ui_*.h
+qrc_*.cpp
+*.qm
+
+# 其他
+*.log
+*.tlog
+*.ipch/
+*.aps
+*.ncb
+*.sdf
