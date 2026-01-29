@@ -1,5 +1,6 @@
 #pragma once
 #include "MainWindow.h"
+#include "settings.h"
 #include <QWidget>
 #include <QPushButton>
 #include <QVBoxLayout>
@@ -18,8 +19,8 @@ private:
 	MainWindow* mainWin;
 	QPushButton* backBtn = new QPushButton("·µ»Ø", this);
 	QTextEdit* Qrules = new QTextEdit(this);
-	QSettings* settings;
 	void getRules();
+	void setupUI();
 
 public:
 	explicit RulesWindow(MainWindow* mainWin, QWidget* parent = nullptr);

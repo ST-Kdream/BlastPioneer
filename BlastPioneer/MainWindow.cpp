@@ -3,15 +3,22 @@
 //构造函数
 MainWindow::MainWindow(QWidget* parent)
 {
+	setupUI();
+	btnConnect();
+}
+
+//UI设置函数
+void MainWindow::setupUI()
+{
 	setWindowTitle("爆破先锋-首页");
 	setFixedSize(800, 600);
-	btnConnect();
 
 	//创建控件
 	btn1 = new QPushButton("玩家信息", this);
-	btn2 = new QPushButton("开始游戏", this);
-	btn3 = new QPushButton("游戏规则", this);
-	btn4 = new QPushButton("⚙",this);
+	btn2 = new QPushButton("单人游戏", this);
+	btn3 = new QPushButton("多人游戏", this);
+	btn4 = new QPushButton("游戏规则", this);
+	btn5 = new QPushButton("⚙", this);
 	mainTitle = new QLabel("爆破先锋", this);
 
 	//样式设置
@@ -25,7 +32,8 @@ MainWindow::MainWindow(QWidget* parent)
 
 	btn1->setObjectName("playerBtn");
 	btn2->setObjectName("startBtn");
-	btn3->setObjectName("rulesBtn");
+	btn3->setObjectName("startBtn");
+	btn4->setObjectName("rulesBtn");
 
 	QString mainStyle = R"(
 								QPushButton{color: #000000; border-radius: 3px;}
@@ -38,7 +46,7 @@ MainWindow::MainWindow(QWidget* parent)
 								#rulesBtn{background-color: #33FF66;}
 								#rulesBtn:hover{background-color: #66FF99;}
 								#rulesBtn:pressed{background-color: #26CC66;}
-						   )";					//前三个按钮样式表
+						   )";					//前四个按钮样式表（按钮二、三一致）
 
 	btn1->setStyleSheet(mainStyle);
 	btn2->setStyleSheet(mainStyle);
@@ -51,17 +59,21 @@ MainWindow::MainWindow(QWidget* parent)
 								QPushButton:pressed{background-color: #994DCC;}
 						   )");
 
-	//布局（标题最上面，3个按钮垂直排布，btn4在右下角）
+	//布局（标题最上面，3行按钮垂直排布（按钮二、三在同一行），btn4在右下角）
+
+	QHBoxLayout* settingLayout = new QHBoxLayout(this);  //第五个设置按钮布局
+	settingLayout->addStretch();
+	settingLayout->addWidget(btn5);
+
+	QHBoxLayout* startLayout = new QHBoxLayout(this);
+	startLayout->addWidget(btn2);
+	startLayout->addWidget(btn3);
+
 	QVBoxLayout* mainLayout = new QVBoxLayout(this);
 	mainLayout->addWidget(mainTitle, 2);
 	mainLayout->addWidget(btn1, 1);
-	mainLayout->addWidget(btn2, 1);
-	mainLayout->addWidget(btn3, 1);
-
-	QHBoxLayout* settingLayout = new QHBoxLayout(this);  //第四个设置按钮布局
-	settingLayout->addStretch();
-	settingLayout->addWidget(btn4);
-
+	mainLayout->addLayout(startLayout, 2);
+	mainLayout->addWidget(btn4, 1);
 	mainLayout->addLayout(settingLayout);
 	setLayout(mainLayout);
 }
@@ -70,18 +82,24 @@ MainWindow::MainWindow(QWidget* parent)
 void MainWindow::btnConnect()
 {
 	connect(btn1, &QPushButton::clicked, this, &MainWindow::GoPlayerWindow);
-	connect(btn2, &QPushButton::clicked, this, &MainWindow::GoGamemodeWindow);
-	connect(btn3, &QPushButton::clicked, this, &MainWindow::GoRulesWindow);
-	connect(btn4, &QPushButton::clicked, this, &MainWindow::GoSettingsWindow);
+	connect(btn2, &QPushButton::clicked, this, &MainWindow::GoSingleGame);
+	connect(btn3, &QPushButton::clicked, this, &MainWindow::GoInternetGame);
+	connect(btn4, &QPushButton::clicked, this, &MainWindow::GoRulesWindow);
+	connect(btn5, &QPushButton::clicked, this, &MainWindow::GoSettingsWindow);
 }
 
-//4个切换窗口的函数
+//5个切换窗口的函数
 void MainWindow::GoPlayerWindow()
 {
 
 }
 
-void MainWindow::GoGamemodeWindow()
+void MainWindow::GoSingleGame()
+{
+
+}
+
+void MainWindow::GoInternetGame()
 {
 
 }

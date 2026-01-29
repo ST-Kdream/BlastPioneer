@@ -3,6 +3,12 @@
 //构造函数
 RulesWindow::RulesWindow(MainWindow* mainWin, QWidget* parent) :QWidget(parent),mainWin(mainWin)
 {
+	setupUI();
+}
+
+//UI设置函数（包括一个信号槽链接）
+void RulesWindow::setupUI()
+{
 	// 设置默认大小，如果QSettings中没有保存的值则使用默认值
 	int defaultWidth = 600;
 	int defaultHeight = 400;
@@ -17,7 +23,7 @@ RulesWindow::RulesWindow(MainWindow* mainWin, QWidget* parent) :QWidget(parent),
 
 	//文本控件和返回按钮控件
 	backBtn = new QPushButton("返回", this);
-    Qrules = new QTextEdit(this);
+	Qrules = new QTextEdit(this);
 	backBtn->setStyleSheet(R"(
 								  QPushButton{background-color:#4CAF50;color:white;font-size:20px;padding:10px;border-radius:5px;}
 								  QPushButton:hover{background-color:#45a049;}

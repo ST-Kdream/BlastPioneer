@@ -1,5 +1,6 @@
 #pragma once
 #include "RulesWindow.h"
+#include "settings.h"
 #include <QWidget>
 #include <QLabel>
 #include <QPushButton>
@@ -11,12 +12,14 @@ class MainWindow :public QWidget
 	Q_OBJECT
 
 private:
-	//4个按钮和一个标题
+	//5个按钮和一个标题
 	QLabel* mainTitle;
 	QPushButton* btn1;
 	QPushButton* btn2;
 	QPushButton* btn3;
 	QPushButton* btn4;
+	QPushButton* btn5;
+	void setupUI();
 
 public:
 	explicit MainWindow(QWidget* parent = nullptr);
@@ -25,7 +28,8 @@ public:
 private slots:
 	//窗口跳转函数
 	void GoPlayerWindow();
-	void GoGamemodeWindow();
+	void GoSingleGame();
+	void GoInternetGame();
 	void GoRulesWindow();
 	void GoSettingsWindow();
 };
