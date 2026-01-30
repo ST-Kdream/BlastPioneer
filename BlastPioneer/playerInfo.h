@@ -3,6 +3,7 @@
 #include <QMap>
 #include <QDateTime>
 #include <QJsonObject>
+#include <QMessageBox>
 
 //玩家信息类，处理所有与玩家信息相关的逻辑，主要依赖于json
 class playerInfo

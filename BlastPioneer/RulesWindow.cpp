@@ -67,7 +67,7 @@ void RulesWindow::getRules()
 	else
 	{
 		ssrules << "wrong!"<<std::endl;
-		QMessageBox::warning(nullptr, "游戏规则文件读取错误","无法打开游戏规则文件，请保证其与可执行程序在同一个文件夹下！");
+		QMessageBox::critical(this, "游戏规则文件读取错误","无法打开游戏规则文件，请保证其与可执行程序在同一个文件夹下！");
 	}
 
 	Qrules->setText(QString::fromStdString(ssrules.str()));
