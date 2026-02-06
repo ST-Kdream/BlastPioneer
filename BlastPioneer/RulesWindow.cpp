@@ -9,9 +9,11 @@ RulesWindow::RulesWindow(MainWindow* mainWin, QWidget* parent) :QWidget(parent),
 //UI设置函数（包括一个信号槽链接）
 void RulesWindow::setupUI()
 {
+	setWindowTitle("游戏规则");
+
 	// 设置默认大小，如果QSettings中没有保存的值则使用默认值
-	int defaultWidth = 600;
-	int defaultHeight = 400;
+	int defaultWidth = 800;
+	int defaultHeight = 600;
 	int width = settings->value("windows/width", defaultWidth).toInt();
 	int height = settings->value("windows/height", defaultHeight).toInt();
 	resize(width, height);

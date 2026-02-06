@@ -36,7 +36,7 @@
     <Import Project="$(QtMsBuild)\qt_defaults.props" />
   </ImportGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="QtSettings">
-    <QtInstall>QtMSVC6.10.1</QtInstall>
+    <QtInstall>QtMSVC6.10.2</QtInstall>
     <QtModules>core;gui;network;qml;quick;widgets</QtModules>
     <QtBuildConfig>debug</QtBuildConfig>
   </PropertyGroup>
@@ -94,15 +94,24 @@
   <ItemGroup>
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MainWindow.cpp" />
+    <ClCompile Include="PlayerInfo.cpp" />
+    <ClCompile Include="PlayerWindow.cpp" />
     <ClCompile Include="RulesWindow.cpp" />
     <ClCompile Include="settings.cpp" />
+    <ClCompile Include="StartupEffectWindow.cpp" />
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="MainWindow.h" />
   </ItemGroup>
   <ItemGroup>
+    <QtMoc Include="StartupEffectWindow.h" />
     <QtMoc Include="RulesWindow.h" />
+    <ClInclude Include="PlayerInfo.h" />
+    <QtMoc Include="PlayerWindow.h" />
     <ClInclude Include="settings.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="startupEffect.qml" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">

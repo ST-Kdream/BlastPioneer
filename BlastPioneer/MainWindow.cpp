@@ -31,8 +31,8 @@ void MainWindow::setupUI()
 	btn4->setToolTip("设置");
 
 	btn1->setObjectName("playerBtn");
-	btn2->setObjectName("startBtn");
-	btn3->setObjectName("startBtn");
+	btn2->setObjectName("startBtn1");
+	btn3->setObjectName("startBtn2");
 	btn4->setObjectName("rulesBtn");
 
 	QString mainStyle = R"(
@@ -40,9 +40,12 @@ void MainWindow::setupUI()
 								#playerBtn{background-color: #33CCFF;}
 								#playerBtn:hover{background-color: #66D9FF;}
 								#playerBtn:pressed{background-color: #2699CC;}
-								#startBtn{background-color: #FFCC00;}
-								#startBtn:hover{background-color: #FFF000;}
-								#startBtn:pressed{background-color: #CC9900;}
+								#startBtn1{background-color: #FFCC00;}
+								#startBtn1:hover{background-color: #FFF000;}
+								#startBtn1:pressed{background-color: #CC9900;}
+								#startBtn2{background-color: #FFCC00;}
+								#startBtn2:hover{background-color: #FFF000;}
+								#startBtn2:pressed{background-color: #CC9900;}
 								#rulesBtn{background-color: #33FF66;}
 								#rulesBtn:hover{background-color: #66FF99;}
 								#rulesBtn:pressed{background-color: #26CC66;}

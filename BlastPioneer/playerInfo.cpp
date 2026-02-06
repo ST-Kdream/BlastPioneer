@@ -1,27 +1,27 @@
 #include "playerInfo.h"
 
-//¹¹Ôìº¯Êı
-playerInfo::playerInfo()
+//æ„é€ å‡½æ•°
+PlayerInfo::PlayerInfo()
 {
 	setDefaults();
 }
 
-//´Ójson¶ÁÈ¡Êı¾İ
-bool playerInfo::loadFromJson(const QJsonObject& json)
+//ä»jsonè¯»å–æ•°æ®
+bool PlayerInfo::loadFromJson(const QJsonObject& json)
 {
-	if (!json.contains("userName"))  //¼ì²éjsonÎÄ¼şÊÇ·ñ°üº¬ÓÃ»§Ãû×Ö¶Î
+	if (!json.contains("userName"))  //æ£€æŸ¥jsonæ–‡ä»¶æ˜¯å¦åŒ…å«ç”¨æˆ·åå­—æ®µ
 	{
 		return false;
 	}
 
-	//»ù´¡ĞÅÏ¢¶ÁÈ¡
+	//åŸºç¡€ä¿¡æ¯è¯»å–
 	userName = json["userName"].toString();
 	rank = json["rank"].toString();
 	EP = json["EP"].toInt(100);
 	passedLevels = json["passedLevels"].toInt(1);
 	coins = json["coins"].toInt(100);
 
-	//Ê±¼ä¶ÁÈ¡
+	//æ—¶é—´è¯»å–
 	QString strCreateDate = json["createDate"].toString();
 	QString strLastLogin = json["lastLogin"].toString();
 	if (!strCreateDate.isEmpty())
@@ -33,7 +33,7 @@ bool playerInfo::loadFromJson(const QJsonObject& json)
 		lastLogin = QDateTime::fromString(strLastLogin, Qt::ISODate);
 	}
 
-	//Íæ¼Ò±³°ü¶ÁÈ¡
+	//ç©å®¶èƒŒåŒ…è¯»å–
 	if (json.contains("inventory") && json["inventory"].isObject())
 	{
 		QJsonObject inventoryObject = json["inventory"].toObject();
@@ -52,23 +52,23 @@ bool playerInfo::loadFromJson(const QJsonObject& json)
 	return true;
 }
 
-//Ïòjson±£´æÊı¾İ
-QJsonObject playerInfo::toJson() const
+//å‘jsonä¿å­˜æ•°æ®
+QJsonObject PlayerInfo::toJson() const
 {
 	QJsonObject json;
 
-	//±£´æÍæ¼Ò»ù±¾ĞÅÏ¢
+	//ä¿å­˜ç©å®¶åŸºæœ¬ä¿¡æ¯
 	json["userName"] = userName;
 	json["rank"] = rank;
 	json["EP"] = EP;
 	json["passedLevels"] = passedLevels;
 	json["coins"] = coins;
 
-	//±£´æÊ±¼ä
+	//ä¿å­˜æ—¶é—´
 	json["createDate"] = createDate.toString(Qt::ISODate);
 	json["lastLogin"] = QDateTime::currentDateTime().toString(Qt::ISODate);
 
-	//±£´æ±³°üÊı¾İ
+	//ä¿å­˜èƒŒåŒ…æ•°æ®
 	QJsonObject inventoryObject;
 	for (auto it = inventory.begin(); it != inventory.end(); ++it)
 	{
@@ -82,11 +82,11 @@ QJsonObject playerInfo::toJson() const
 	return json;
 }
 
-//Éè¶¨Íæ¼ÒĞÅÏ¢µÄÄ¬ÈÏÖµ
-void playerInfo::setDefaults()
+//è®¾å®šç©å®¶ä¿¡æ¯çš„é»˜è®¤å€¼
+void PlayerInfo::setDefaults()
 {
 	userName = "Bommer";
-	rank = "ÃÈµ¯ĞÂÊÖ";
+	rank = "èŒå¼¹æ–°æ‰‹";
 	EP = 0;
 	passedLevels = 0;
 	coins = 100;
@@ -95,14 +95,14 @@ void playerInfo::setDefaults()
 
 	inventory.clear();
 
-	//ĞÂÊÖÀñ°ü
-	inventory["ÉúÃüÒ©Ë®"] = 3;
-	inventory["Ñ¸ÃÍÖ®Ñ¥"] = 1;
-	inventory["¸ÄÔì°âÊÖ"] = 1;
+	//æ–°æ‰‹ç¤¼åŒ…
+	inventory["ç”Ÿå‘½è¯æ°´"] = 3;
+	inventory["è¿…çŒ›ä¹‹é´"] = 1;
+	inventory["æ”¹é€ æ‰³æ‰‹"] = 1;
 }
 
-//Ïò±³°üÌí¼ÓÎïÆ·
-void playerInfo::addItem(const QString& itemName, int count)
+//å‘èƒŒåŒ…æ·»åŠ ç‰©å“
+void PlayerInfo::addItem(const QString& itemName, int count)
 {
 	if (inventory.contains(itemName))
 	{
@@ -114,12 +114,12 @@ void playerInfo::addItem(const QString& itemName, int count)
 	}
 }
 
-//Ïò±³°ü¼õÉÙÎïÆ·
-void playerInfo::removeItem(const QString& itemName, int count)
+//å‘èƒŒåŒ…å‡å°‘ç‰©å“
+void PlayerInfo::removeItem(const QString& itemName, int count)
 {
 	if (!inventory.contains(itemName))
 	{
-		QMessageBox::critical(nullptr, "´íÎó", "ÊÔÍ¼ÒÆ³ı²»´æÔÚµÄÎïÆ·");
+		QMessageBox::critical(nullptr, "é”™è¯¯", "è¯•å›¾ç§»é™¤ä¸å­˜åœ¨çš„ç‰©å“");
 	}
 
 	int newCount = inventory[itemName] = count;

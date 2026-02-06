@@ -3,10 +3,11 @@
 #include <QMap>
 #include <QDateTime>
 #include <QJsonObject>
+#include <QJsonDocument>
 #include <QMessageBox>
 
 //玩家信息类，处理所有与玩家信息相关的逻辑，主要依赖于json
-class playerInfo
+class PlayerInfo
 {
 private:
 	QString userName;
@@ -19,7 +20,7 @@ private:
 	QDateTime lastLogin;
 
 public:
-	playerInfo();
+	PlayerInfo();
 	bool loadFromJson(const QJsonObject& json);
 	QJsonObject toJson() const;
 	void setDefaults();     //设定默认值
@@ -27,6 +28,7 @@ public:
 	//获取玩家信息的函数接口
 	QString getUserName() const { return userName; }
 	QString getRank() const { return rank; }
+	int getCoins() const { return coins; }
 	int getEP() const { return EP; }
 	int getPassedLevels() const { return passedLevels; }
 	QDateTime getCreateDate() const { return createDate; }
@@ -35,6 +37,7 @@ public:
 	//设置玩家信息的函数
 	void setUserName(QString& name) { userName = name; }
 	void setRank(QString rk) { rank = rk; }    //段位系统类返回玩家段位
+	void setCoins(int gold) { coins = gold; }
 	void setEP(int ep) { EP = ep; }
 	void setPassedLevels(int passedlev) { passedLevels = passedlev; }
 	void setCreateDate() { createDate = QDateTime::currentDateTime(); }

@@ -1,6 +1,6 @@
 #include "StartupEffectWindow.h"
 
-//¹¹Ôìº¯Êý
+//æž„é€ å‡½æ•°
 StartupEffectWindow::StartupEffectWindow(QWidget* parent) :QWidget(parent), timer(nullptr)
 {
 	setWindowFlags(Qt::FramelessWindowHint);
@@ -10,14 +10,14 @@ StartupEffectWindow::StartupEffectWindow(QWidget* parent) :QWidget(parent), time
 	connect(timer, &QTimer::timeout, this, &StartupEffectWindow::onTimeout);
 }
 
-//Õ¹Ê¾´°¿Ú²¢Æô¶¯¼ÆÊ±Æ÷
+//å±•ç¤º
 void StartupEffectWindow::showup(int displayTime)
 {
 	show();
 	timer->start(displayTime);
 }
 
-//¼ÆÊ±Æ÷´ïµ½Ä¿±ê´¦Àíº¯Êý
+//è¶…æ—¶å¤„ç†å‡½æ•°
 void StartupEffectWindow::onTimeout()
 {
 	timer->stop();
