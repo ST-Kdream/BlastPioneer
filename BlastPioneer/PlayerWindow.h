@@ -5,6 +5,8 @@
 #include <QWidget>
 #include <QPushButton>
 #include <QLabel>
+#include <QDialog>
+#include <QLineEdit>
 #include <QFile>
 #include <QByteArray>
 #include <QShowEvent>
@@ -20,6 +22,7 @@ private:
 	QPushButton* backBtn;
 	QPushButton* bagBtn;
 	QPushButton* shopBtn;
+	QPushButton* newNameBtn;
 
 	//变量
 	PlayerInfo playerInfo;
@@ -38,6 +41,7 @@ public:
 	void showEvent(QShowEvent* event) override;
 
 private slots:
+	void changeName();
 	void goBack();
 	void goBag();
 	void goShopping();

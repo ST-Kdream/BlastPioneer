@@ -25,10 +25,11 @@ void PlayerWindow::setupUI()
 	QPoint savedPos = settings->value("RulesWindow/position", defaultPos).toPoint();
 	move(savedPos);
 
-	//3个按钮
+	//3+1个按钮
 	backBtn = new QPushButton("返回", this);
 	bagBtn = new QPushButton("背包", this);
 	shopBtn = new QPushButton("商店", this);
+	newNameBtn = new QPushButton("更改名字", this);   //注意：还未设置样式
 
 	//玩家信息（标题加数据）
 	QLabel* userNameLabel=new QLabel("id：", this);
@@ -69,6 +70,39 @@ void PlayerWindow::setupUI()
 	//布局
 	QVBoxLayout* mainLayout = new QVBoxLayout(this);
 
+	QHBoxLayout* userNameLine = new QHBoxLayout(this);
+	userNameLine->addWidget(userNameLabel);
+	userNameLine->addWidget(userName);
+	userNameLine->addWidget(newNameBtn);
+
+	QHBoxLayout* coinsLine = new QHBoxLayout(this);
+	coinsLine->addWidget(coinsLabel);
+	coinsLine->addWidget(coins);
+
+	QHBoxLayout* rankLine = new QHBoxLayout(this);
+	rankLine->addWidget(rankLabel);
+	rankLine->addWidget(rank);
+
+	QHBoxLayout* EPLine = new QHBoxLayout(this);
+	EPLine->addWidget(EPLabel);
+	EPLine->addWidget(EP);
+
+	QHBoxLayout* passedLevelsLine = new QHBoxLayout(this);
+	passedLevelsLine->addWidget(passedLevelLabel);
+	passedLevelsLine->addWidget(passedLevels);
+
+	QHBoxLayout* btnLine = new QHBoxLayout(this);
+	btnLine->addWidget(bagBtn);
+	btnLine->addWidget(shopBtn);
+	btnLine->addWidget(backBtn);
+
+	mainLayout->addLayout(userNameLine);
+	mainLayout->addLayout(coinsLine);
+	mainLayout->addLayout(rankLine);
+	mainLayout->addLayout(EPLine);
+	mainLayout->addLayout(passedLevelsLine);
+	mainLayout->addLayout(btnLine);
+	setLayout(mainLayout);
 }
 
 //链接信号槽函数
@@ -120,6 +154,49 @@ void PlayerWindow::updateUI()
 	rank->setText(playerInfo.getRank());
 	EP->setText(QString::number(playerInfo.getEP()));
 	passedLevels->setText(QString::number(playerInfo.getPassedLevels()));
+}
+
+
+//更改玩家姓名函数
+void PlayerWindow::changeName()
+{
+	//窗口设置
+	QDialog newNameInput(nullptr);
+	newNameInput.setAttribute(Qt::WA_DeleteOnClose);
+	newNameInput.setWindowTitle("更改姓名");
+	setFixedSize(90, 70);
+
+	//变量与控件
+	QString name;
+	QLineEdit* nameInput = new QLineEdit(&newNameInput);
+	nameInput->setPlaceholderText("输入新姓名");
+	QDialogButtonBox* btn = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, &newNameInput);
+
+	//链接信号槽
+	QObject::connect(btn, &QDialogButtonBox::accepted, &newNameInput, &QDialog::accept);
+	QObject::connect(btn, &QDialogButtonBox::rejected, &newNameInput, &QDialog::reject);
+
+	//布局
+	QVBoxLayout* mainLayout = new QVBoxLayout(&newNameInput);
+	mainLayout->addWidget(nameInput);
+	mainLayout->addWidget(btn);
+
+	//监听事件并等待输入
+	if (newNameInput.exec() == QDialog::Accepted)
+	{
+		name = nameInput->text().trimmed();
+		if (name.isEmpty())
+		{
+			QMessageBox::warning(nullptr, "不合法的姓名", "姓名不能为空");
+		}
+		else
+		{
+			//若得到姓名且不为空，更新玩家信息并重新渲染UI
+			userName->setText(name);
+			playerInfo.toJson();
+		}
+	}
+
 }
 
 //3个窗口跳转函数
