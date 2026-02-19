@@ -17,10 +17,10 @@ class RulesWindow :public QWidget
 
 private:
 	MainWindow* mainWin;
-	QPushButton* backBtn = new QPushButton("·µ»Ø", this);
-	QTextEdit* Qrules = new QTextEdit(this);
-	void getRules();
+	QPushButton* backBtn;
+	QTextEdit* Qrules;
 	void setupUI();
+	void getRules();
 
 public:
 	explicit RulesWindow(MainWindow* mainWin, QWidget* parent = nullptr);

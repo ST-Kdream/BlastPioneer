@@ -1,30 +1,30 @@
 #include "RulesWindow.h"
 
-//¹¹Ôìº¯Êı
+//æ„é€ å‡½æ•°
 RulesWindow::RulesWindow(MainWindow* mainWin, QWidget* parent) :QWidget(parent),mainWin(mainWin)
 {
 	setupUI();
 }
 
-//UIÉèÖÃº¯Êı£¨°üÀ¨Ò»¸öĞÅºÅ²ÛÁ´½Ó£©
+//UIè®¾ç½®å‡½æ•°ï¼ˆåŒ…æ‹¬ä¸€ä¸ªä¿¡å·æ§½é“¾æ¥ï¼‰
 void RulesWindow::setupUI()
 {
-	setWindowTitle("ÓÎÏ·¹æÔò");
+	setWindowTitle("æ¸¸æˆè§„åˆ™");
 
-	// ÉèÖÃÄ¬ÈÏ´óĞ¡£¬Èç¹ûQSettingsÖĞÃ»ÓĞ±£´æµÄÖµÔòÊ¹ÓÃÄ¬ÈÏÖµ
+	// è®¾ç½®é»˜è®¤å¤§å°ï¼Œå¦‚æœQSettingsä¸­æ²¡æœ‰ä¿å­˜çš„å€¼åˆ™ä½¿ç”¨é»˜è®¤å€¼
 	int defaultWidth = 800;
 	int defaultHeight = 600;
 	int width = settings->value("windows/width", defaultWidth).toInt();
 	int height = settings->value("windows/height", defaultHeight).toInt();
 	resize(width, height);
 
-	// »Ö¸´´°¿ÚÎ»ÖÃ
-	QPoint defaultPos(100, 100);  // Ä¬ÈÏÎ»ÖÃ
-	QPoint savedPos = settings->value("RulesWindow/position", defaultPos).toPoint();
+	// æ¢å¤çª—å£ä½ç½®
+	QPoint defaultPos(100, 100);  // é»˜è®¤ä½ç½®
+	QPoint savedPos = settings->value("windows/position", defaultPos).toPoint();
 	move(savedPos);
 
-	//ÎÄ±¾¿Ø¼şºÍ·µ»Ø°´Å¥¿Ø¼ş
-	backBtn = new QPushButton("·µ»Ø", this);
+	//æ–‡æœ¬æ§ä»¶å’Œè¿”å›æŒ‰é’®æ§ä»¶
+	backBtn = new QPushButton("è¿”å›", this);
 	Qrules = new QTextEdit(this);
 	backBtn->setStyleSheet(R"(
 								  QPushButton{background-color:#4CAF50;color:white;font-size:20px;padding:10px;border-radius:5px;}
@@ -35,23 +35,23 @@ void RulesWindow::setupUI()
 	connect(backBtn, &QPushButton::clicked, this, &RulesWindow::goBack);
 	getRules();
 
-	//²¼¾Ö
+	//å¸ƒå±€
 	QVBoxLayout* mainLayout = new QVBoxLayout();
 	mainLayout->addWidget(Qrules);
 	mainLayout->addWidget(backBtn);
 	setLayout(mainLayout);
 }
 
-//Îö¹¹º¯Êı
+//ææ„å‡½æ•°
 RulesWindow::~RulesWindow()
 {
-	//±£´æ´°¿ÚÉèÖÃ
+	//ä¿å­˜çª—å£è®¾ç½®
 	settings->setValue("windows/width", width());
 	settings->setValue("windows/height", height());
 	settings->setValue("windows/position", pos());
 }
 
-//¶ÁÈ¡¹æÔòº¯Êı
+//è¯»å–è§„åˆ™å‡½æ•°
 void RulesWindow::getRules()
 {
 	std::string ruleLine;
@@ -69,21 +69,21 @@ void RulesWindow::getRules()
 	else
 	{
 		ssrules << "wrong!"<<std::endl;
-		QMessageBox::critical(this, "ÓÎÏ·¹æÔòÎÄ¼ş¶ÁÈ¡´íÎó","ÎŞ·¨´ò¿ªÓÎÏ·¹æÔòÎÄ¼ş£¬Çë±£Ö¤ÆäÓë¿ÉÖ´ĞĞ³ÌĞòÔÚÍ¬Ò»¸öÎÄ¼ş¼ĞÏÂ£¡");
+		QMessageBox::critical(this, "æ¸¸æˆè§„åˆ™æ–‡ä»¶è¯»å–é”™è¯¯","æ— æ³•æ‰“å¼€æ¸¸æˆè§„åˆ™æ–‡ä»¶ï¼Œè¯·ä¿è¯å…¶ä¸å¯æ‰§è¡Œç¨‹åºåœ¨åŒä¸€ä¸ªæ–‡ä»¶å¤¹ä¸‹ï¼");
 	}
 
 	Qrules->setText(QString::fromStdString(ssrules.str()));
 }
 
-//·µ»Øº¯Êı
+//è¿”å›å‡½æ•°
 void RulesWindow::goBack()
 {
-	// ±£´æ´°¿ÚÉèÖÃ
-	settings->setValue("RulesWindow/width", width());
-	settings->setValue("RulesWindow/height", height());
-	settings->setValue("RulesWindow/position", pos());
+	// ä¿å­˜çª—å£è®¾ç½®
+	settings->setValue("windows/width", width());
+	settings->setValue("windows/height", height());
+	settings->setValue("windows/position", pos());
 
-	// ÏÔÊ¾Ö÷´°¿Ú£¬¹Ø±Õ¹æÔò´°¿Ú
+	// æ˜¾ç¤ºä¸»çª—å£ï¼Œå…³é—­è§„åˆ™çª—å£
 	mainWin->show();
-	this->close();
+	this->hide();
 }

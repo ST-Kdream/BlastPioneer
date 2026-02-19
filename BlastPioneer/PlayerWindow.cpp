@@ -22,7 +22,7 @@ void PlayerWindow::setupUI()
 
 	// 恢复窗口位置
 	QPoint defaultPos(100, 100);  // 默认位置
-	QPoint savedPos = settings->value("RulesWindow/position", defaultPos).toPoint();
+	QPoint savedPos = settings->value("windows/position", defaultPos).toPoint();
 	move(savedPos);
 
 	//3+1个按钮
@@ -52,15 +52,15 @@ void PlayerWindow::setupUI()
 	QString mainStyle = R"(
 								QPushButton { font-size: 16px; color: #000000;padding: 8px 16px;border: none;
 											  border-radius: 6px; text-shadow: 1px 1px 0 #ffffff33; }
-								#btnBack { background-color: #E65C00; }
-								#btnBack:hover { background-color: #FF7F00; }
-								#btnBack:pressed { background-color: #B34700; }
-								#btnBag { background-color: #FFCC00; }
-								#btnBag:hover { background-color: #FFF000; }
-								#btnBag:pressed { background-color: #CC9900; }
-								#btnShop { background-color: #3399FF; }
-								#btnShop:hover { background-color: #66B2FF; }
-								#btnShop:pressed { background-color: #2673CC; }
+								#backBtn { background-color: #E65C00; }
+								#backBtn:hover { background-color: #FF7F00; }
+								#backBtn:pressed { background-color: #B34700; }
+								#bagBtn { background-color: #FFCC00; }
+								#bagBtn:hover { background-color: #FFF000; }
+								#bagBtn:pressed { background-color: #CC9900; }
+								#shopBtn { background-color: #3399FF; }
+								#shopBtn:hover { background-color: #66B2FF; }
+								#shopBtn:pressed { background-color: #2673CC; }
 						)";   //前3个按钮样式表
 
 	backBtn->setStyleSheet(mainStyle);
@@ -115,6 +115,7 @@ void PlayerWindow::connectBtn()
 	connect(backBtn, &QPushButton::clicked, this, &PlayerWindow::goBack);
 	connect(bagBtn, &QPushButton::clicked, this, &PlayerWindow::goBag);
 	connect(shopBtn, &QPushButton::clicked, this, &PlayerWindow::goShopping);
+	connect(newNameBtn, &QPushButton::clicked, this, &PlayerWindow::changeName);
 }
 
 //获取玩家信息函数

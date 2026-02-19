@@ -122,7 +122,7 @@ void PlayerInfo::removeItem(const QString& itemName, int count)
 		QMessageBox::critical(nullptr, "错误", "试图移除不存在的物品");
 	}
 
-	int newCount = inventory[itemName] = count;
+	int newCount = inventory[itemName] - count;
 	if (newCount == 0)
 	{
 		inventory.remove(itemName);

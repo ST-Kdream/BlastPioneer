@@ -6,7 +6,7 @@
 #include <QJsonDocument>
 #include <QMessageBox>
 
-//Íæ¼ÒĞÅÏ¢Àà£¬´¦ÀíËùÓĞÓëÍæ¼ÒĞÅÏ¢Ïà¹ØµÄÂß¼­£¬Ö÷ÒªÒÀÀµÓÚjson
+//ç©å®¶ä¿¡æ¯ç±»ï¼Œå¤„ç†æ‰€æœ‰ä¸ç©å®¶ä¿¡æ¯ç›¸å…³çš„é€»è¾‘ï¼Œä¸»è¦ä¾èµ–äºjson
 class PlayerInfo
 {
 private:
@@ -23,9 +23,9 @@ public:
 	PlayerInfo();
 	bool loadFromJson(const QJsonObject& json);
 	QJsonObject toJson() const;
-	void setDefaults();     //Éè¶¨Ä¬ÈÏÖµ
+	void setDefaults();     //è®¾å®šé»˜è®¤å€¼
 
-	//»ñÈ¡Íæ¼ÒĞÅÏ¢µÄº¯Êı½Ó¿Ú
+	//è·å–ç©å®¶ä¿¡æ¯çš„å‡½æ•°æ¥å£
 	QString getUserName() const { return userName; }
 	QString getRank() const { return rank; }
 	int getCoins() const { return coins; }
@@ -34,16 +34,16 @@ public:
 	QDateTime getCreateDate() const { return createDate; }
 	QDateTime getLastLogin() const { return lastLogin; }
 
-	//ÉèÖÃÍæ¼ÒĞÅÏ¢µÄº¯Êı
+	//è®¾ç½®ç©å®¶ä¿¡æ¯çš„å‡½æ•°
 	void setUserName(QString& name) { userName = name; }
-	void setRank(QString rk) { rank = rk; }    //¶ÎÎ»ÏµÍ³Àà·µ»ØÍæ¼Ò¶ÎÎ»
+	void setRank(QString rk) { rank = rk; }    //æ®µä½ç³»ç»Ÿç±»è¿”å›ç©å®¶æ®µä½
 	void setCoins(int gold) { coins = gold; }
 	void setEP(int ep) { EP = ep; }
 	void setPassedLevels(int passedlev) { passedLevels = passedlev; }
 	void setCreateDate() { createDate = QDateTime::currentDateTime(); }
 	void setLastLogin() { lastLogin = QDateTime::currentDateTime(); }
 
-	//Íæ¼Ò±³°üÏà¹Øº¯Êı½Ó¿Ú
+	//ç©å®¶èƒŒåŒ…ç›¸å…³å‡½æ•°æ¥å£
 	void addItem(const QString& itemName, int count = 1);
 	void removeItem(const QString& itemName, int count = 1);
 };

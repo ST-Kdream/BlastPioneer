@@ -22,6 +22,9 @@ private:
 	QPushButton* btn5;
 	void setupUI();
 
+	//其他窗口指针
+	RulesWindow* rulesWin;
+	PlayerWindow* playerWin;
 
 public:
 	explicit MainWindow(QWidget* parent = nullptr);

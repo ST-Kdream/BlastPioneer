@@ -3,6 +3,8 @@
 //构造函数
 MainWindow::MainWindow(QWidget* parent)
 {
+	playerWin = nullptr;
+	rulesWin = nullptr;
 	setupUI();
 	btnConnect();
 }
@@ -95,14 +97,14 @@ void MainWindow::btnConnect()
 void MainWindow::GoPlayerWindow()
 {
 	this->hide();
-	PlayerWindow* playerWin = new PlayerWindow(this);
-	playerWin->setAttribute(Qt::WA_DeleteOnClose);
-	if (playerWin)
+	if (!playerWin)
 	{
-		playerWin->show();
-		playerWin->raise();
-		playerWin->activateWindow();
+		playerWin = new PlayerWindow(this);
+		playerWin->setAttribute(Qt::WA_DeleteOnClose);
 	}
+	playerWin->show();
+	playerWin->raise();
+	playerWin->activateWindow();
 }
 
 void MainWindow::GoSingleGame()
@@ -118,14 +120,14 @@ void MainWindow::GoInternetGame()
 void MainWindow::GoRulesWindow()
 {
 	this->hide();
-	RulesWindow* rulesWin = new RulesWindow(this);
-	rulesWin->setAttribute(Qt::WA_DeleteOnClose);
-	if (rulesWin)
+	if (!rulesWin)
 	{
-		rulesWin->show();
-		rulesWin->raise();
-		rulesWin->activateWindow();
+		rulesWin = new RulesWindow(this);
+		rulesWin->setAttribute(Qt::WA_DeleteOnClose);
 	}
+	rulesWin->show();
+	rulesWin->raise();
+	rulesWin->activateWindow();
 }
 
 void MainWindow::GoSettingsWindow()
