@@ -1,5 +1,6 @@
 #pragma once
 #include "RulesWindow.h"
+#include "PlayerWindow.h"
 #include "settings.h"
 #include <QWidget>
 #include <QLabel>
@@ -20,6 +21,7 @@ private:
 	QPushButton* btn4;
 	QPushButton* btn5;
 	void setupUI();
+
 
 public:
 	explicit MainWindow(QWidget* parent = nullptr);

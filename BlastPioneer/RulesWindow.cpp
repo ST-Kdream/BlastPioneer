@@ -36,7 +36,7 @@ void RulesWindow::setupUI()
 	getRules();
 
 	//²¼¾Ö
-	QVBoxLayout* mainLayout = new QVBoxLayout(this);
+	QVBoxLayout* mainLayout = new QVBoxLayout();
 	mainLayout->addWidget(Qrules);
 	mainLayout->addWidget(backBtn);
 	setLayout(mainLayout);

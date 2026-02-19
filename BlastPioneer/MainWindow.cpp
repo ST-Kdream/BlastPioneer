@@ -94,7 +94,15 @@ void MainWindow::btnConnect()
 //5个切换窗口的函数
 void MainWindow::GoPlayerWindow()
 {
-
+	this->hide();
+	PlayerWindow* playerWin = new PlayerWindow(this);
+	playerWin->setAttribute(Qt::WA_DeleteOnClose);
+	if (playerWin)
+	{
+		playerWin->show();
+		playerWin->raise();
+		playerWin->activateWindow();
+	}
 }
 
 void MainWindow::GoSingleGame()

@@ -1,7 +1,7 @@
-#include <PlayerWindow.h>
+#include "PlayerWindow.h"
 
 //构造函数
-PlayerWindow::PlayerWindow(MainWindow* mainWin, QWidget* parent): MainWindow(parent), mainWin(mainWin)
+PlayerWindow::PlayerWindow(MainWindow* mainWin, QWidget* parent): QWidget(parent), mainWin(mainWin)
 {
 	getPlayerInfo();
 	setupUI();
@@ -29,7 +29,7 @@ void PlayerWindow::setupUI()
 	backBtn = new QPushButton("返回", this);
 	bagBtn = new QPushButton("背包", this);
 	shopBtn = new QPushButton("商店", this);
-	newNameBtn = new QPushButton("更改名字", this);   //注意：还未设置样式
+	newNameBtn = new QPushButton("更改名字", this);
 
 	//玩家信息（标题加数据）
 	QLabel* userNameLabel=new QLabel("id：", this);
@@ -44,7 +44,7 @@ void PlayerWindow::setupUI()
 	EP = new QLabel(QString::number(playerInfo.getEP()), this);
 	passedLevels = new QLabel(QString::number(playerInfo.getPassedLevels()), this);
 
-	//3个按钮设置样式
+	//4个按钮设置样式
 	backBtn->setObjectName("backBtn");
 	bagBtn->setObjectName("bagBtn");
 	shopBtn->setObjectName("shopBtn");
@@ -61,37 +61,41 @@ void PlayerWindow::setupUI()
 								#btnShop { background-color: #3399FF; }
 								#btnShop:hover { background-color: #66B2FF; }
 								#btnShop:pressed { background-color: #2673CC; }
-						)";
+						)";   //前3个按钮样式表
 
 	backBtn->setStyleSheet(mainStyle);
 	bagBtn->setStyleSheet(mainStyle);
 	shopBtn->setStyleSheet(mainStyle);
+	newNameBtn->setStyleSheet(	R"(QPushButton { font-size: 16px; color: #000000; border-radius: 6px; background-color: #CC66FF; }
+								   QPushButton:hover { background-color: #D999FF; }
+								   QPushButton:pressed { background-color: #994DCC; }
+								)");
 
 	//布局
-	QVBoxLayout* mainLayout = new QVBoxLayout(this);
+	QVBoxLayout* mainLayout = new QVBoxLayout();
 
-	QHBoxLayout* userNameLine = new QHBoxLayout(this);
+	QHBoxLayout* userNameLine = new QHBoxLayout();
 	userNameLine->addWidget(userNameLabel);
 	userNameLine->addWidget(userName);
 	userNameLine->addWidget(newNameBtn);
 
-	QHBoxLayout* coinsLine = new QHBoxLayout(this);
+	QHBoxLayout* coinsLine = new QHBoxLayout();
 	coinsLine->addWidget(coinsLabel);
 	coinsLine->addWidget(coins);
 
-	QHBoxLayout* rankLine = new QHBoxLayout(this);
+	QHBoxLayout* rankLine = new QHBoxLayout();
 	rankLine->addWidget(rankLabel);
 	rankLine->addWidget(rank);
 
-	QHBoxLayout* EPLine = new QHBoxLayout(this);
+	QHBoxLayout* EPLine = new QHBoxLayout();
 	EPLine->addWidget(EPLabel);
 	EPLine->addWidget(EP);
 
-	QHBoxLayout* passedLevelsLine = new QHBoxLayout(this);
+	QHBoxLayout* passedLevelsLine = new QHBoxLayout();
 	passedLevelsLine->addWidget(passedLevelLabel);
 	passedLevelsLine->addWidget(passedLevels);
 
-	QHBoxLayout* btnLine = new QHBoxLayout(this);
+	QHBoxLayout* btnLine = new QHBoxLayout();
 	btnLine->addWidget(bagBtn);
 	btnLine->addWidget(shopBtn);
 	btnLine->addWidget(backBtn);
@@ -161,7 +165,7 @@ void PlayerWindow::updateUI()
 void PlayerWindow::changeName()
 {
 	//窗口设置
-	QDialog newNameInput(nullptr);
+	QDialog newNameInput(this);
 	newNameInput.setAttribute(Qt::WA_DeleteOnClose);
 	newNameInput.setWindowTitle("更改姓名");
 	setFixedSize(90, 70);

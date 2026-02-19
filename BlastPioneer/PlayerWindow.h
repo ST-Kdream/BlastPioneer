@@ -12,7 +12,7 @@
 #include <QShowEvent>
 #include <QMessageBox>
 
-class PlayerWindow :public MainWindow
+class PlayerWindow :public QWidget
 {
 	Q_OBJECT
 
