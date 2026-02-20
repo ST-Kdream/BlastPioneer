@@ -65,10 +65,8 @@ void MainWindow::setupUI()
 						   )");
 
 	//布局（标题最上面，3行按钮垂直排布（按钮二、三在同一行），btn4在右下角）
-
-	QHBoxLayout* settingLayout = new QHBoxLayout(this);  //第五个设置按钮布局
-	settingLayout->addStretch();
-	settingLayout->addWidget(btn5);
+	QHBoxLayout* settingLayout = new QHBoxLayout(this);  //第五个设置按钮布局);
+	settingLayout->addWidget(btn5,Qt::AlignRight);
 
 	QHBoxLayout* startLayout = new QHBoxLayout(this);
 	startLayout->addWidget(btn2);

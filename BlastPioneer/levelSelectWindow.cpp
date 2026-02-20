@@ -1,7 +1,96 @@
-#include "levelSelectWindow.h"
+#include "LevelSelectWindow.h"
 
 //构造函数
-levelSelectWindow::levelSelectWindow(MainWindow* mainWin, QWidget* parent)
+LevelSelectWindow::LevelSelectWindow(MainWindow* mainWin, QWidget* parent)
+{
+	gameWin = nullptr;
+	setupUI();
+	setupLevelBtn();
+}
+
+
+//UI设置（包含返回按钮的信号槽链接）
+void LevelSelectWindow::setupUI()
+{
+	setWindowTitle("难度选择");
+
+	// 设置默认大小，如果QSettings中没有保存的值则使用默认值
+	int defaultWidth = 800;
+	int defaultHeight = 600;
+	int width = settings->value("windows/width", defaultWidth).toInt();
+	int height = settings->value("windows/height", defaultHeight).toInt();
+	resize(width, height);
+
+	// 恢复窗口位置
+	QPoint defaultPos(100, 100);  // 默认位置
+	QPoint savedPos = settings->value("windows/position", defaultPos).toPoint();
+	move(savedPos);
+
+	//标题
+	title = new QLabel("关卡选择", this);
+	title->setAlignment(Qt::AlignCenter);
+	title->setStyleSheet("font-size: 32px; font-weight: bold; color: #FFCC00;");
+
+	//返回按钮
+	backBtn = new QPushButton("返回", this);
+	backBtn->setStyleSheet(
+								"QPushButton { background-color: #E65C00; color: white; font-size: 18px; padding: 8px; border-radius: 5px; }"
+								"QPushButton:hover { background-color: #FF7F00; }"
+								"QPushButton:pressed { background-color: #B34700; }"
+							);
+	connect(backBtn, &QPushButton::clicked, this, &LevelSelectWindow::goBack);
+
+	//创建关卡选择按钮
+	for (int i = 0; i < 6; ++i)
+	{
+		levelBtns[i] = new QPushButton(QString("%1").arg(i+1), this);
+	}
+
+	//布局
+	QHBoxLayout* mainLayout = new QHBoxLayout();
+	mainLayout->addWidget(title);
+
+	QGridLayout* levelBtnLayout = new QGridLayout();
+	int cnt = 0;
+	for (int i = 0; i < 2; ++i)
+	{
+		for (int j = 0; j < 3; ++j)
+		{
+			levelBtnLayout->addWidget(levelBtns[cnt], i, j);
+			++cnt;
+		}
+	}
+	mainLayout->addLayout(levelBtnLayout);
+
+	mainLayout->addWidget(backBtn, Qt::AlignRight);
+	setLayout(mainLayout);
+}
+
+//按钮设置
+void LevelSelectWindow::setupLevelBtn()
+{
+
+}
+
+//界面更新
+void LevelSelectWindow::showEvent(QShowEvent* event)
+{
+
+}
+
+//两个窗口跳转函数
+void LevelSelectWindow::goBack()
+{
+	this->hide();
+	if (mainWin)
+	{
+		mainWin->show();
+		mainWin->raise();
+		mainWin->activateWindow();
+	}
+}
+
+void LevelSelectWindow::goGameWindow()
 {
 
 }
