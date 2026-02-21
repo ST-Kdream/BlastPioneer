@@ -145,6 +145,18 @@ void PlayerWindow::getPlayerInfo()
 	}
 }
 
+//保存玩家信息函数
+void PlayerWindow::savePlayerInfo()
+{
+	QFile file("playerData.json");
+	if (file.open(QIODevice::WriteOnly))
+	{
+		QJsonDocument doc(playerInfo.toJson());
+		file.write(doc.toJson());
+		file.close();
+	}
+}
+
 //展示窗口时更新数据
 void PlayerWindow::showEvent(QShowEvent* event)
 {
@@ -152,6 +164,14 @@ void PlayerWindow::showEvent(QShowEvent* event)
 	updateUI();
 }
 
+//关闭窗口时保存玩家信息
+void PlayerWindow::closeEvent(QCloseEvent* event)
+{
+	savePlayerInfo();
+	QWidget::closeEvent(event);
+}
+
+//UI更新函数
 void PlayerWindow::updateUI()
 {
 	userName->setText(playerInfo.getUserName());
@@ -169,7 +189,7 @@ void PlayerWindow::changeName()
 	QDialog newNameInput(this);
 	newNameInput.setAttribute(Qt::WA_DeleteOnClose);
 	newNameInput.setWindowTitle("更改姓名");
-	setFixedSize(90, 70);
+	newNameInput.setFixedSize(90, 70);
 
 	//变量与控件
 	QString name;
@@ -207,6 +227,7 @@ void PlayerWindow::changeName()
 //3个窗口跳转函数
 void PlayerWindow::goBack()
 {
+	savePlayerInfo();
 	this->hide();
 	if (mainWin)
 	{

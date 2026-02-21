@@ -10,6 +10,7 @@
 #include <QFile>
 #include <QByteArray>
 #include <QShowEvent>
+#include <QCloseEvent>
 #include <QMessageBox>
 
 class PlayerWindow :public QWidget
@@ -32,6 +33,9 @@ private:
 	QLabel* EP;
 	QLabel* passedLevels;
 
+	//保存函数
+	void savePlayerInfo();
+
 public:
 	explicit PlayerWindow(MainWindow* mainWin, QWidget* parent = nullptr);
 	void setupUI();
@@ -39,6 +43,7 @@ public:
 	void connectBtn();
 	void getPlayerInfo();
 	void showEvent(QShowEvent* event) override;
+	void closeEvent(QCloseEvent* event) override;
 
 private slots:
 	void changeName();

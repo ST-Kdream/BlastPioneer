@@ -1,6 +1,7 @@
 #pragma once
 #include "RulesWindow.h"
 #include "PlayerWindow.h"
+#include "LevelSelectWindow.h"
 #include "settings.h"
 #include <QWidget>
 #include <QLabel>
@@ -25,6 +26,7 @@ private:
 	//其他窗口指针
 	RulesWindow* rulesWin;
 	PlayerWindow* playerWin;
+	LevelSelectWindow* levelSelectWin;
 
 public:
 	explicit MainWindow(QWidget* parent = nullptr);

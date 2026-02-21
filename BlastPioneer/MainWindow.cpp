@@ -5,6 +5,7 @@ MainWindow::MainWindow(QWidget* parent)
 {
 	playerWin = nullptr;
 	rulesWin = nullptr;
+	levelSelectWin = nullptr;
 	setupUI();
 	btnConnect();
 }
@@ -28,9 +29,10 @@ void MainWindow::setupUI()
 	mainTitle->setToolTip("欢迎来到爆破先锋小游戏！");
 
 	btn1->setToolTip("点击此处查看玩家个人信息");        //设置悬浮提示
-	btn2->setToolTip("点击此处开始游戏并选择游戏模式");
-	btn3->setToolTip("点击此处查看游戏规则");
-	btn4->setToolTip("设置");
+	btn2->setToolTip("点击此处开始单人游戏");
+	btn3->setToolTip("点击此处开始多人游戏");
+	btn4->setToolTip("点击此处查看游戏规则");
+	btn5->setToolTip("设置");
 
 	btn1->setObjectName("playerBtn");
 	btn2->setObjectName("startBtn1");
@@ -64,10 +66,7 @@ void MainWindow::setupUI()
 								QPushButton:pressed{background-color: #994DCC;}
 						   )");
 
-	//布局（标题最上面，3行按钮垂直排布（按钮二、三在同一行），btn4在右下角）
-	QHBoxLayout* settingLayout = new QHBoxLayout(this);  //第五个设置按钮布局);
-	settingLayout->addWidget(btn5,Qt::AlignRight);
-
+	//布局（标题最上面，3行按钮垂直排布（按钮二、三在同一行），btn5在右下角）
 	QHBoxLayout* startLayout = new QHBoxLayout(this);
 	startLayout->addWidget(btn2);
 	startLayout->addWidget(btn3);
@@ -77,7 +76,7 @@ void MainWindow::setupUI()
 	mainLayout->addWidget(btn1, 1);
 	mainLayout->addLayout(startLayout, 2);
 	mainLayout->addWidget(btn4, 1);
-	mainLayout->addLayout(settingLayout);
+	mainLayout->addWidget(btn5,Qt::AlignRight);
 	setLayout(mainLayout);
 }
 
@@ -107,7 +106,15 @@ void MainWindow::GoPlayerWindow()
 
 void MainWindow::GoSingleGame()
 {
-
+	this->hide();
+	if (!levelSelectWin)
+	{
+		levelSelectWin = new LevelSelectWindow(this);
+		levelSelectWin->setAttribute(Qt::WA_DeleteOnClose);
+	}
+	levelSelectWin->show();
+	levelSelectWin->raise();
+	levelSelectWin->activateWindow();
 }
 
 void MainWindow::GoInternetGame()

@@ -1,6 +1,7 @@
 #pragma once
 #include <QWidget>
 #include <QTimer>
+#include <QQuickWidget>
 
 class StartupEffectWindow :public QWidget
 {

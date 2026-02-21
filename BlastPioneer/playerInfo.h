@@ -33,10 +33,11 @@ public:
 	int getPassedLevels() const { return passedLevels; }
 	QDateTime getCreateDate() const { return createDate; }
 	QDateTime getLastLogin() const { return lastLogin; }
+	QMap<QString, int> getInventory() const { return inventory; }
 
 	//设置玩家信息的函数
-	void setUserName(QString& name) { userName = name; }
-	void setRank(QString rk) { rank = rk; }    //段位系统类返回玩家段位
+	void setUserName(const QString& name) { userName = name; }
+	void setRank(const QString& rk) { rank = rk; }    //段位系统类返回玩家段位
 	void setCoins(int gold) { coins = gold; }
 	void setEP(int ep) { EP = ep; }
 	void setPassedLevels(int passedlev) { passedLevels = passedlev; }

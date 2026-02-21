@@ -1,7 +1,7 @@
 #include "LevelSelectWindow.h"
 
 //构造函数
-LevelSelectWindow::LevelSelectWindow(MainWindow* mainWin, QWidget* parent)
+LevelSelectWindow::LevelSelectWindow(MainWindow* mainWin, QWidget* parent) :mainWin(mainWin), QWidget(parent)
 {
 	gameWin = nullptr;
 	setupUI();
@@ -9,7 +9,7 @@ LevelSelectWindow::LevelSelectWindow(MainWindow* mainWin, QWidget* parent)
 }
 
 
-//UI设置（包含返回按钮的信号槽链接）
+//UI设置（包含返回按钮的信号槽链接，关卡按钮另外设置）
 void LevelSelectWindow::setupUI()
 {
 	setWindowTitle("难度选择");
@@ -66,16 +66,25 @@ void LevelSelectWindow::setupUI()
 	setLayout(mainLayout);
 }
 
-//按钮设置
+//按钮设置（样式及初始化）
 void LevelSelectWindow::setupLevelBtn()
 {
-
+	for (int i = 0; i < 6; ++i) 
+	{
+		levelBtns[i]->setStyleSheet(
+										"QPushButton { background-color: #3399FF; color: white; font-size: 18px; border-radius: 75px; }"
+										"QPushButton:hover { background-color: #66B2FF; }"
+										"QPushButton:pressed { background-color: #2673CC; }"
+										"QPushButton:disabled { background-color: #AAAAAA; }" 
+									);
+		connect(levelBtns[i], &QPushButton::clicked, this, [this, i]() {goGameWindow(i + 1); });
+	}
 }
 
 //界面更新
 void LevelSelectWindow::showEvent(QShowEvent* event)
 {
-
+	QWidget::showEvent(event);
 }
 
 //两个窗口跳转函数
@@ -90,7 +99,20 @@ void LevelSelectWindow::goBack()
 	}
 }
 
-void LevelSelectWindow::goGameWindow()
+void LevelSelectWindow::goGameWindow(int level)
 {
-
+	if (gameWin)
+	{
+		gameWin->setLevel(level);
+	}
+	else
+	{
+		gameWin = new GameWindow(level, this);
+		gameWin->setAttribute(Qt::WA_DeleteOnClose);
+	}
+	
+	this->hide();
+	gameWin->show();
+	gameWin->raise();
+	gameWin->activateWindow();
 }

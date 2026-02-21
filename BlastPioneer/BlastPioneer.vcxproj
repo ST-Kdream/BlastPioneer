@@ -65,7 +65,7 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <LanguageStandard>stdcpp20</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
     </ClCompile>
   </ItemDefinitionGroup>
@@ -115,7 +115,7 @@
     <QtMoc Include="StartupEffectWindow.h" />
     <QtMoc Include="RulesWindow.h" />
     <QtMoc Include="LevelSelectWindow.h" />
-    <ClInclude Include="GameWindow.h" />
+    <QtMoc Include="GameWindow.h" />
     <ClInclude Include="PlayerInfo.h" />
     <QtMoc Include="PlayerWindow.h" />
     <ClInclude Include="settings.h" />

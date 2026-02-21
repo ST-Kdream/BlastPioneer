@@ -31,5 +31,5 @@ public:
 
 private slots:
 	void goBack();
-	void goGameWindow();
+	void goGameWindow(int level);
 };

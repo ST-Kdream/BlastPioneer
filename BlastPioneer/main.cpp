@@ -1,5 +1,6 @@
 #include <QApplication>
 #include "MainWindow.h"
+#include "settings.h"
 #include "StartupEffectWindow.h"
 
 int main(int argc, char *argv[])
@@ -7,6 +8,8 @@ int main(int argc, char *argv[])
     QApplication app(argc, argv);
     app.setOrganizationName("ST-Kdream");
     app.setApplicationVersion("1.0.0");
+
+    settings = new QSettings();
 
     StartupEffectWindow startWin;
     MainWindow mainWin;

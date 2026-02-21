@@ -79,6 +79,9 @@
     <QtMoc Include="LevelSelectWindow.h">
       <Filter>Header Files\UI</Filter>
     </QtMoc>
+    <QtMoc Include="GameWindow.h">
+      <Filter>Header Files\UI</Filter>
+    </QtMoc>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="PlayerInfo.h">
@@ -86,9 +89,6 @@
     </ClInclude>
     <ClInclude Include="settings.h">
       <Filter>Header Files\Logic</Filter>
-    </ClInclude>
-    <ClInclude Include="GameWindow.h">
-      <Filter>Header Files\UI</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
