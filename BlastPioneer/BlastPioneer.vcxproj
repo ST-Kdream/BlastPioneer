@@ -37,12 +37,12 @@
   </ImportGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="QtSettings">
     <QtInstall>QtMSVC6.10.2</QtInstall>
-    <QtModules>core;gui;network;qml;quick;widgets</QtModules>
+    <QtModules>core;gui;network;qml;quick;widgets;quickwidgets</QtModules>
     <QtBuildConfig>debug</QtBuildConfig>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'" Label="QtSettings">
     <QtInstall>QtMSVC6.10.1</QtInstall>
-    <QtModules>core;gui;network;qml;quick;widgets</QtModules>
+    <QtModules>core;gui;network;qml;quick;widgets;quickwidgets</QtModules>
     <QtBuildConfig>release</QtBuildConfig>
   </PropertyGroup>
   <Target Name="QtMsBuildNotFound" BeforeTargets="CustomBuild;ClCompile" Condition="!Exists('$(QtMsBuild)\qt.targets') or !Exists('$(QtMsBuild)\qt.props')">
@@ -66,6 +66,16 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <LanguageStandard>stdcpp20</LanguageStandard>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
     </ClCompile>
   </ItemDefinitionGroup>
@@ -98,7 +108,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="BagWindow.cpp" />
     <ClCompile Include="GameWindow.cpp" />
+    <ClCompile Include="Item.cpp" />
     <ClCompile Include="LevelSelectWindow.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MainWindow.cpp" />
@@ -116,6 +128,8 @@
     <QtMoc Include="RulesWindow.h" />
     <QtMoc Include="LevelSelectWindow.h" />
     <QtMoc Include="GameWindow.h" />
+    <QtMoc Include="BagWindow.h" />
+    <ClInclude Include="Item.h" />
     <ClInclude Include="PlayerInfo.h" />
     <QtMoc Include="PlayerWindow.h" />
     <ClInclude Include="settings.h" />

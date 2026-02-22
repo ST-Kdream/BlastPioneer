@@ -1,6 +1,8 @@
 #pragma once
 #include "MainWindow.h"
 #include "PlayerInfo.h"
+#include "BagWindow.h"
+#include "ShopWindow.h"
 #include <vector>
 #include <QWidget>
 #include <QPushButton>
@@ -32,6 +34,10 @@ private:
 	QLabel* rank;
 	QLabel* EP;
 	QLabel* passedLevels;
+
+	//其他窗口指针
+	BagWindow* bagWin;
+	ShopWindow* shopWin;
 
 	//保存函数
 	void savePlayerInfo();

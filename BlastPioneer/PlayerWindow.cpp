@@ -3,6 +3,8 @@
 //构造函数
 PlayerWindow::PlayerWindow(MainWindow* mainWin, QWidget* parent): QWidget(parent), mainWin(mainWin)
 {
+	bagBtn = nullptr;
+	shopWin = nullptr;
 	getPlayerInfo();
 	setupUI();
 	connectBtn();
@@ -239,10 +241,26 @@ void PlayerWindow::goBack()
 
 void PlayerWindow::goBag()
 {
-
+	if (!bagWin)
+	{
+		bagWin = new BagWindow(playerInfo, this);
+		bagWin->setAttribute(Qt::WA_DeleteOnClose);
+		connect(bagWin, &QObject::destroyed, this, [this]() {bagWin = nullptr; });
+	}
+	bagWin->show();
+	bagWin->raise();
+	bagWin->activateWindow();
 }
 
 void PlayerWindow::goShopping()
 {
-
+	if (!shopWin)
+	{
+		shopWin = new ShopWindow(playerInfo, this);
+		shopWin->setAttribute(Qt::WA_DeleteOnClose);
+		connect(shopWin, &QObject::destroyed, this, [this]() {shopWin = nullptr; });
+	}
+	shopWin->show();
+	shopWin->raise();
+	shopWin->activateWindow();
 }
