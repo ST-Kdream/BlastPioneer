@@ -2,6 +2,7 @@
 #include "Item.h"
 #include "PlayerInfo.h"
 #include "settings.h"
+#include "PlayerWindow.h"
 #include <QWidget>
 #include <QList>
 #include <QListWidget>
@@ -10,12 +11,17 @@
 #include <QMessageBox>
 #include <QHBoxLayout>
 #include <QVBoxLayout>
+#include <QCoreApplication>
+#include <QIcon>
+#include <QDir>
+#include <QJsonArray>
 
 class ShopWindow :public QWidget
 {
 	Q_OBJECT
 
 private:
+	PlayerWindow* playerWin;
 	PlayerInfo& playerInfo;
 	QList<Item> shopItems;
 	QListWidget* shopList;
@@ -30,7 +36,7 @@ private:
 	void setupUI();
 
 public:
-	explicit ShopWindow(PlayerInfo& playerInfo, QWidget* parent = nullptr);
+	explicit ShopWindow(PlayerInfo& playerInfo, QWidget* parent = nullptr, PlayerWindow* playerWin);;
 
 private slots:
 	void buyItem();

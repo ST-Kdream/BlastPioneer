@@ -243,7 +243,7 @@ void PlayerWindow::goBag()
 {
 	if (!bagWin)
 	{
-		bagWin = new BagWindow(playerInfo, this);
+		bagWin = new BagWindow(playerInfo, this, this);
 		bagWin->setAttribute(Qt::WA_DeleteOnClose);
 		connect(bagWin, &QObject::destroyed, this, [this]() {bagWin = nullptr; });
 	}
@@ -256,7 +256,7 @@ void PlayerWindow::goShopping()
 {
 	if (!shopWin)
 	{
-		shopWin = new ShopWindow(playerInfo, this);
+		shopWin = new ShopWindow(playerInfo, this, this);
 		shopWin->setAttribute(Qt::WA_DeleteOnClose);
 		connect(shopWin, &QObject::destroyed, this, [this]() {shopWin = nullptr; });
 	}

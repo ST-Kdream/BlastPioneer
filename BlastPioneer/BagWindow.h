@@ -10,6 +10,9 @@
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 #include <QMessageBox>
+#include <QCoreApplication>
+#include <QIcon>
+#include <QDir>
 
 class BagWindow :public QWidget
 {
@@ -22,12 +25,14 @@ private:
 	QPushButton* backBtn;
 	QPushButton* useBtn;
 	QListWidget* itemList;
+	QMap<QString, QString> itemIconMap;
 
 	void setupUI();
 	void refreshItemList();
+	void loadItemMap();
 
 public:
-	explicit BagWindow(PlayerInfo& playerInfo, QWidget* parent = nullptr);
+	explicit BagWindow(PlayerInfo& playerInfo, QWidget* parent = nullptr, PlayerWindow* playerWin);
 
 private slots:
 	void goBack();

@@ -1,7 +1,7 @@
 #include "ShopWindow.h"
 
 //构造函数
-ShopWindow::ShopWindow(PlayerInfo& playerInfo, QWidget* parent) :QWidget(parent), playerInfo(playerInfo)
+ShopWindow::ShopWindow(PlayerInfo& playerInfo, QWidget* parent, PlayerWindow* playerWin) :QWidget(parent), playerInfo(playerInfo), playerWin(playerWin)
 {
 	loadShopItems();
 	setupUI();
@@ -32,7 +32,7 @@ void ShopWindow::setupUI()
 	coinsLabel->setStyleSheet("font-size: 16px; color: gold;");
 
 	//商品列表
-	shopList = new QListWidget(this);
+	shopList = new QListWidget();
 
 	//按钮（包括信号槽链接）
 	buyBtn = new QPushButton("购买", this);
@@ -56,18 +56,66 @@ void ShopWindow::setupUI()
 void ShopWindow::refreshShopList()
 {
 	shopList->clear();
+	//获取可执行路径，防止获取资源失败
+	QString appDir = QCoreApplication::applicationDirPath();
+
 	for (const Item& item : shopItems)
 	{
 		QString displayText= QString("%1 - %2 金币\n   %3")
 									.arg(item.getName()).arg(item.getPrice()).arg(item.getDescription());
-		shopList->addItem(displayText);
+
+		QListWidgetItem* itemList = new QListWidgetItem(displayText, shopList);
+
+		//加载图片资源
+		QString iconPath = item.getIconPath();
+		if (!iconPath.isEmpty())
+		{
+			QString fullPath = appDir + '/' + iconPath;
+			QPixmap pixmap(fullPath);
+			if (!pixmap.isNull())
+			{
+				pixmap = pixmap.scaled(32, 32, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+				itemList->setIcon(QIcon(pixmap));
+			}
+			else
+			{
+				QMessageBox::critical(this, "错误", "无法找到图片资源");
+			}
+		}
+		else
+		{
+			QMessageBox::critical(this, "错误", "资源路径加载错误");
+		}
 	}
 }
 
 //从json文件读取道具
 void ShopWindow::loadShopItems()
 {
+	QFile file(":/itemInfo.json");
+	if (!file.open(QIODevice::ReadOnly))
+	{
+		QMessageBox::critical(this, "错误", "加载道具资源失败");
+		return;
+	}
+	QByteArray itemData = file.readAll();
+	file.close();
 
+	QJsonDocument doc = QJsonDocument::fromJson(itemData);
+	if (!doc.isArray()) { return; }
+
+	QJsonArray itemArray = doc.array();
+	for (const QJsonValue& val : itemArray)
+	{
+		QJsonObject obj = val.toObject();
+		QString name = obj["name"].toString();
+		QString description = obj["description"].toString();
+		int price = obj["price"].toInt();
+		QString iconPath = obj["iconPath"].toString();
+
+		if (name.isEmpty()) { continue; }
+		shopItems.append(Item(name, description, price, iconPath));
+	}
 }
 
 //购买商品
@@ -105,5 +153,11 @@ void ShopWindow::updateCoins()
 //返回
 void ShopWindow::goBack()
 {
-	close();
+	this->hide();
+	if (playerWin)
+	{
+		playerWin->show();
+		playerWin->raise();
+		playerWin->activateWindow();
+	}
 }

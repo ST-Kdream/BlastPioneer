@@ -1,8 +1,9 @@
 #include "BagWindow.h"
 
 //构造函数
-BagWindow::BagWindow(PlayerInfo& playerInfo, QWidget* parent) :QWidget(parent), playerInfo(playerInfo)
+BagWindow::BagWindow(PlayerInfo& playerInfo, QWidget* parent, PlayerWindow* playerWin) :QWidget(parent), playerInfo(playerInfo), playerWin(playerWin)
 {
+	loadItemMap();
 	setupUI();
 	refreshItemList();
 }
@@ -49,16 +50,57 @@ void BagWindow::setupUI()
 	setLayout(mainLayout);
 }
 
+//加载资源图标
+void BagWindow::loadItemMap()
+{
+	QFile file(":/itemInfo.json");
+	if (!file.open(QIODevice::ReadOnly))
+	{
+		QMessageBox::critical(this, "错误", "加载道具资源失败");
+		return;
+	}
+	QByteArray itemData = file.readAll();
+	file.close();
+
+	QJsonDocument doc = QJsonDocument::fromJson(itemData);
+	if (!doc.isArray()) { return; }
+
+	for (auto val : doc.array())
+	{
+		QJsonObject obj = val.toObject();
+		QString name = obj["name"].toString();
+		QString iconPath = obj["iconPath"].toString();
+		if ((!name.isEmpty()) && (!iconPath.isEmpty()))
+		{
+			itemIconMap[name] = iconPath;
+		}
+	}
+}
+
 //更新道具列表
 void BagWindow::refreshItemList()
 {
 	itemList->clear();
+	QString appDir = QCoreApplication::applicationDirPath();
 	QMap<QString, int> inventory = playerInfo.getInventory();
 
 	for (auto it = inventory.begin(); it != inventory.end(); ++it)
 	{
 		QString displayText = QString("%1：%2").arg(it.key()).arg(it.value());
-		itemList->addItem(displayText);
+		QListWidgetItem* item = new QListWidgetItem(displayText, itemList);
+
+		if (itemIconMap.contains(it.key()))
+		{
+			QString iconPath = itemIconMap[it.key()];
+			QString fullPath = appDir + '/' + iconPath;
+			QPixmap pixmap(fullPath);
+			if (!pixmap.isNull())
+			{
+				pixmap = pixmap.scaled(32, 32, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+				item->setIcon(QIcon(pixmap));
+			}
+		}
+		//商店窗口已经报过错了，这里就不报了
 	}
 	if (inventory.empty())
 	{

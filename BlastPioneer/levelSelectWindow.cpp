@@ -109,6 +109,7 @@ void LevelSelectWindow::goGameWindow(int level)
 	{
 		gameWin = new GameWindow(level, this);
 		gameWin->setAttribute(Qt::WA_DeleteOnClose);
+		connect(gameWin, &QObject::destroyed, this, [this]() {gameWin = nullptr; });
 	}
 	
 	this->hide();

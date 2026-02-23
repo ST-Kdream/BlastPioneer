@@ -116,14 +116,17 @@
     <ClCompile Include="MainWindow.cpp" />
     <ClCompile Include="PlayerInfo.cpp" />
     <ClCompile Include="PlayerWindow.cpp" />
+    <ClCompile Include="Rank.cpp" />
     <ClCompile Include="RulesWindow.cpp" />
     <ClCompile Include="settings.cpp" />
+    <ClCompile Include="ShopWindow.cpp" />
     <ClCompile Include="StartupEffectWindow.cpp" />
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="MainWindow.h" />
   </ItemGroup>
   <ItemGroup>
+    <QtMoc Include="ShopWindow.h" />
     <QtMoc Include="StartupEffectWindow.h" />
     <QtMoc Include="RulesWindow.h" />
     <QtMoc Include="LevelSelectWindow.h" />
@@ -132,10 +135,14 @@
     <ClInclude Include="Item.h" />
     <ClInclude Include="PlayerInfo.h" />
     <QtMoc Include="PlayerWindow.h" />
+    <ClInclude Include="Rank.h" />
     <ClInclude Include="settings.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="startupEffect.qml" />
+  </ItemGroup>
+  <ItemGroup>
+    <QtRcc Include="Resource.qrc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">

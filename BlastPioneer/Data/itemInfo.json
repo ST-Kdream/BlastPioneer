@@ -1,0 +1,38 @@
+[
+  {
+    "name": "生命药水",
+    "description": "回复2点生命值",
+    "price": 50,
+    "iconPath": ""
+  },
+  {
+    "name": "迅猛之靴",
+    "description": "移动速度提升15%，原地起飞",
+    "price": 50,
+    "iconPath": ""
+  },
+  {
+    "name": "改造扳手",
+    "description": "4级钳工，似乎能手搓炸弹，制造出比普通炸弹爆炸范围增加一格的进阶炸弹",
+    "price": 45,
+    "iconPath": ""
+  },
+  {
+    "name": "黑锅",
+    "description": "嗯...能帮你抵挡一次伤害",
+    "price": 60,
+    "iconPath": ""
+  },
+  {
+    "name": "解弦之眼",
+    "description": "对敌人造成1点伤害，拾取场上剩余道具,貌似是作者夹带私货",
+    "price": 152,
+    "iconPath": ""
+  },
+  {
+    "name": "远航星",
+    "description": "对敌人造成3点伤害，并找到出口，嗯...应该也是作者私货",
+    "price": 152,
+    "iconPath": ""
+  }
+]
