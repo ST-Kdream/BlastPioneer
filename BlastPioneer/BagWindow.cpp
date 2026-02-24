@@ -128,5 +128,16 @@ void BagWindow::useItem()
 //返回
 void BagWindow::goBack()
 {
-	close();
+	this->hide();
+	// 保存窗口设置
+	settings->setValue("windows/width", width());
+	settings->setValue("windows/height", height());
+	settings->setValue("windows/position", pos());
+
+	if (playerWin)
+	{
+		playerWin->show();
+		playerWin->raise();
+		playerWin->activateWindow();
+	}
 }

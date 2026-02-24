@@ -47,7 +47,7 @@ void LevelSelectWindow::setupUI()
 	}
 
 	//布局
-	QHBoxLayout* mainLayout = new QHBoxLayout();
+	QVBoxLayout* mainLayout = new QVBoxLayout();
 	mainLayout->addWidget(title);
 
 	QGridLayout* levelBtnLayout = new QGridLayout();
@@ -91,6 +91,11 @@ void LevelSelectWindow::showEvent(QShowEvent* event)
 void LevelSelectWindow::goBack()
 {
 	this->hide();
+	// 保存窗口设置
+	settings->setValue("windows/width", width());
+	settings->setValue("windows/height", height());
+	settings->setValue("windows/position", pos());
+
 	if (mainWin)
 	{
 		mainWin->show();
@@ -107,12 +112,17 @@ void LevelSelectWindow::goGameWindow(int level)
 	}
 	else
 	{
-		gameWin = new GameWindow(level, this);
+		gameWin = new GameWindow(level, playerInfo, this);   //这里有bug，记得修
 		gameWin->setAttribute(Qt::WA_DeleteOnClose);
 		connect(gameWin, &QObject::destroyed, this, [this]() {gameWin = nullptr; });
 	}
 	
 	this->hide();
+	// 保存窗口设置
+	settings->setValue("windows/width", width());
+	settings->setValue("windows/height", height());
+	settings->setValue("windows/position", pos());
+
 	gameWin->show();
 	gameWin->raise();
 	gameWin->activateWindow();

@@ -4,6 +4,7 @@
 ShopWindow::ShopWindow(PlayerInfo& playerInfo, QWidget* parent, PlayerWindow* playerWin) :QWidget(parent), playerInfo(playerInfo), playerWin(playerWin)
 {
 	loadShopItems();
+	refreshShopList();
 	setupUI();
 }
 
@@ -160,4 +161,8 @@ void ShopWindow::goBack()
 		playerWin->raise();
 		playerWin->activateWindow();
 	}
+	// 保存窗口设置
+	settings->setValue("windows/width", width());
+	settings->setValue("windows/height", height());
+	settings->setValue("windows/position", pos());
 }

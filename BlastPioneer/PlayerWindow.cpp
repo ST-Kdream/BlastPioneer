@@ -123,9 +123,7 @@ void PlayerWindow::connectBtn()
 //获取玩家信息函数
 void PlayerWindow::getPlayerInfo()
 {
-	QString filePath = "playerData.json";
-	QFile file(filePath);
-
+	QFile file("playerData.json");
 	if (file.exists() && file.open(QIODevice::ReadOnly))
 	{
 		QByteArray data = file.readAll();
@@ -221,6 +219,7 @@ void PlayerWindow::changeName()
 			//若得到姓名且不为空，更新玩家信息并重新渲染UI
 			userName->setText(name);
 			playerInfo.toJson();
+			savePlayerInfo();
 		}
 	}
 
@@ -231,6 +230,11 @@ void PlayerWindow::goBack()
 {
 	savePlayerInfo();
 	this->hide();
+	// 保存窗口设置
+	settings->setValue("windows/width", width());
+	settings->setValue("windows/height", height());
+	settings->setValue("windows/position", pos());
+
 	if (mainWin)
 	{
 		mainWin->show();
@@ -241,6 +245,12 @@ void PlayerWindow::goBack()
 
 void PlayerWindow::goBag()
 {
+	this->hide();
+	// 保存窗口设置
+	settings->setValue("windows/width", width());
+	settings->setValue("windows/height", height());
+	settings->setValue("windows/position", pos());
+
 	if (!bagWin)
 	{
 		bagWin = new BagWindow(playerInfo, this, this);
@@ -254,6 +264,12 @@ void PlayerWindow::goBag()
 
 void PlayerWindow::goShopping()
 {
+	this->hide();
+	// 保存窗口设置
+	settings->setValue("windows/width", width());
+	settings->setValue("windows/height", height());
+	settings->setValue("windows/position", pos());
+
 	if (!shopWin)
 	{
 		shopWin = new ShopWindow(playerInfo, this, this);
