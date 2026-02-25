@@ -90,4 +90,161 @@ void GameWindow::initMap(int level)
 			map[row][col] = brickTile;
 		}
 	}
+
+	//玩家起始位置
+	playerPos = QPoint(1, 1);
+	map[1][1] = playerTile;
+
+	//敌人
+	enemyList.clear();
+	int enemyCount = level;
+	spawnEnemies(enemyCount);
+
+	bombList.clear();
+}
+
+//放置敌人
+void GameWindow::spawnEnemies(int count)
+{
+	QRandomGenerator randomGenerator(level * 200 + count);
+	for (int i = 0; i < count; ++i)
+	{
+		int attempts = 0;
+		while (attempts < 100)
+		{
+			int row = randomGenerator.bounded(1, ROWS - 1);
+			int col = randomGenerator.bounded(1, COLS - 1);
+			if ((map[row][col] == emptyTile) && (!(row == 1 && col == 1)))
+			{
+				map[row][col] = enemyTile;
+				enemyList.append(QPoint(row, col));
+				break;
+			}
+		}
+		++attempts;
+	}
+}
+
+//画面渲染
+void GameWindow::paintEvent(QPaintEvent* event)
+{
+	QPainter painter(this);
+	int cellSize = 50;
+
+	painter.setBrush(Qt::black);
+	painter.drawRect(rect());
+
+	for (int i = 0; i < ROWS; ++i)
+	{
+		for (int j = 0; j < COLS; ++j)
+		{
+			QRect rect(j * cellSize, i * cellSize, cellSize, cellSize);
+			switch (map[i][j])
+			{
+			case wallTile:
+				painter.setBrush(Qt::darkGray);
+				painter.drawRect(rect);
+				break;
+			case brickTile:
+				painter.setBrush(Qt::lightGray);
+				painter.drawRect(rect);
+				break;
+			case playerTile:
+				painter.setBrush(Qt::blue);
+				painter.drawEllipse(rect.adjusted(5, 5, -5, -5));
+				break;
+			case bombTile:
+				painter.setBrush(Qt::yellow);
+				painter.drawEllipse(rect.adjusted(10, 10, - 10, -10));
+				break;
+			case explosionTile:
+				painter.setBrush(Qt::white);
+				painter.drawRect(rect);
+				break;
+			default:
+				painter.setBrush(Qt::gray);
+				painter.drawRect(rect);
+				break;
+			}
+
+			//网格线
+			painter.setPen(Qt::gray);
+			painter.drawRect(rect);
+		}
+	}
+}
+
+//处理输入事件
+void GameWindow::keyPressEvent(QKeyEvent* event)
+{
+	if (state != running) { return; }
+
+	int dx = 0, dy = 0;
+	switch (event->key())
+	{
+	case Qt::Key_W:
+		dy = -1;
+		break;
+	case Qt::Key_S:
+		dy = 1;
+		break;
+	case Qt::Key_A:
+		dx = -1;
+		break;
+	case Qt::Key_D:
+		dx = 1;
+		break;
+	case Qt::Key_Space:
+		placeBomb();
+		return;
+	case Qt::Key_B:
+		openBag();
+		return;
+	}
+
+	//移动玩家
+	int newRow = playerPos.x() + dx;
+	int newCol = playerPos.y() + dy;
+	if (isWalkable(newRow, newCol, true))
+	{
+		map[playerPos.x()][playerPos.y()] = emptyTile();
+		playerPos = QPoint(newRow, newCol);
+		map[newRow][newCol] = playerTile;
+		update();
+	}
+}
+
+//判断砖块是否可走
+bool GameWindow::isWalkable(int row, int col, bool ignorePlayer)
+{
+	if (row < 0 || row >= ROWS || col < 0 || col >= COLS) { return false; }
+	TileType tile = map[row][col];
+	if (tile == wallTile || tile == brickTile || tile == bombTile) { return false; }
+	if ((!ignorePlayer) && (tile == playerTile)) { return false; }
+	return true;
+}
+
+//放置炸弹
+void GameWindow::placeBomb()
+{
+	for (const Bomb& bombs : bombList)
+	{
+		if (bombs.pos == playerPos) { return; }
+	}
+
+	Bomb bomb;
+	bomb.pos = playerPos;
+	bomb.timer = 10;
+	bomb.power = 2;
+	bombList.append(bomb);
+	map[playerPos.x()][playerPos.y()] = bombTile;
+	update();
+}
+
+//更新游戏
+void GameWindow::updateGame()
+{
+	if (state != running) { return; }
+
+	QList<Bomb> newBombs;
 }

@@ -63,7 +63,6 @@ private:
 	void placeBomb();
 	void updateExplosions();
 	bool isWalkable(int row, int col, bool ignorePlayer = false);
-	void checkGameover();
 	void winGame();
 	void loseGame();
 	void openBag();
