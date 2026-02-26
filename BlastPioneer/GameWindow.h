@@ -34,7 +34,7 @@ private:
 	BagWindow* bagWin;
 
 	//游戏状态枚举
-	enum GameState { running, pauesd, victory, defeat };
+	enum GameState { running, paused, victory, defeat };
 	GameState state;
 
 	//游戏数据

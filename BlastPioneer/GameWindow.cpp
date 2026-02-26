@@ -247,4 +247,186 @@ void GameWindow::updateGame()
 	if (state != running) { return; }
 
 	QList<Bomb> newBombs;
+	for (Bomb& bomb : bombList)
+	{
+		bomb.timer--;
+		//炸弹爆炸
+		if (bomb.timer <= 0)
+		{
+			int row = bomb.pos.x();
+			int col = bomb.pos.y();
+			QList<QPoint> explosionCells;
+			explosionCells.append(QPoint(row, col));
+			int directions[4][2] = { {-1,0},{1,0},{0,-1},{0,1} };
+			for (int d = 0; d < 4; ++d)
+			{
+				for (int step = 1; step <= bomb.power; ++step)
+				{
+					int r = row + directions[d][0] * step;
+					int c = col + directions[d][1] * step;
+					if (r<0 || r>ROWS || c<0 || c>COLS) { break; }
+					TileType tile = map[r][c];
+					if (tile == wallTile) { break; }
+					explosionCells.append(QPoint(r, c));
+					if (tile == brickTile) { break; }
+				}
+			}
+			//处理爆炸效果
+			for (const QPoint& position : explosionCells)
+			{
+				int row = position.x();
+				int col = position.y();
+				TileType& tile = map[row][col];
+				if (tile == brickTile) { tile == emptyTile; }
+				else if (tile == enemyTile) { tile = emptyTile; enemyList.removeAll(position); }
+				else if (tile == playerTile) 
+				{ 
+					--playerLives;
+					if (playerLives <= 0) { loseGame(); }
+				}
+				else { tile == explosionTile; }
+			}
+			for (const QPoint& position : explosionCells)
+			{
+				if(map[position.x()][position.y()]==explosionTile)
+				{
+					map[position.x()][position.y()] == emptyTile;
+				}
+			}
+		}
+		else
+		{
+			newBombs.append(bomb);
+		}
+	}
+	bombList = newBombs;
+
+	for (const Bomb& bomb : bombList) 
+	{
+		map[bomb.pos.x()][bomb.pos.y()] = bombTile;
+	}
+
+	//移动动人
+	moveEnemies();
+	for (const QPoint& enemy : enemyList)
+	{
+		if (enemy == playerPos)
+		{
+			loseGame();
+			return;
+		}
+	}
+
+	//检查胜利条件
+	if (enemyList.isEmpty())
+	{
+		winGame();
+		return;
+	}
+
+	update();
+}
+
+//移动敌人
+void GameWindow::moveEnemies()
+{
+	QRandomGenerator randomGenerator;
+	QList<QPoint> newEnemyList;
+	for (QPoint enemy : enemyList)
+	{
+		int direction = randomGenerator.bounded(4);
+		int row = enemy.x();
+		int col = enemy.y();
+		switch (direction)
+		{
+		case 0:
+			row--;
+			break;
+		case 1:
+			row++;
+			break;
+		case 2:
+			col--;
+			break;
+		case 3:
+			col++;
+			break;
+		}
+
+		if (isWalkable(row, col) && map[row][col] != enemyTile)
+		{
+			enemy = QPoint(row, col);
+			newEnemyList.append(enemy);
+			map[enemy.x()][enemy.y()] = enemyTile;
+		}
+	}
+	enemyList = newEnemyList;
+}
+
+//游戏胜利
+void GameWindow::winGame()
+{
+	state = victory;
+	gameTimer->stop();
+	if (level > playerInfo.getPassedLevels())
+	{
+		playerInfo.setPassedLevels(level);
+	}
+	playerInfo.setCoins(playerInfo.getCoins() + 50 + 5 * level);
+	playerInfo.setEP(playerInfo.getEP() + 10 * level);
+	QMessageBox::information(this, "胜利",
+		QString("恭喜通过关卡 %1！\n获得 %2 金币").arg(level).arg(50 * level));
+	close();
+}
+
+//游戏失败
+void GameWindow::loseGame()
+{
+	state = defeat;
+	gameTimer->stop();
+	QMessageBox::information(this, "失败", "你被炸死了...");
+	close();
+}
+
+//打开背包
+void GameWindow::openBag()
+{
+	if (!bagWin)
+	{
+		bagWin = new BagWindow(playerInfo, this, nullptr);
+		bagWin->setAttribute(Qt::WA_DeleteOnClose);
+		connect(bagWin, &QObject::destroyed, this, [this]() {bagWin = nullptr; });
+		connect(bagWin, &QObject::destroyed, this, &GameWindow::closeBag);
+	}
+	state = paused;
+	gameTimer->stop();
+	bagWin->show();
+	bagWin->raise();
+	bagWin->activateWindow();
+}
+
+//背包关闭
+void GameWindow::closeBag()
+{
+	if (state == paused)
+	{
+		state = running;
+		gameTimer->start();
+	}
+}
+
+//关闭与显示窗口
+void GameWindow::showEvent(QShowEvent* event)
+{
+	QWidget::showEvent(event);
+	initMap(level);
+	state = running;
+	gameTimer->start();
+}
+
+void GameWindow::closeEvent(QCloseEvent* event)
+{
+	gameTimer->stop();
+	if (bagWin) { bagWin->close(); }
+	QWidget::closeEvent(event);
 }
