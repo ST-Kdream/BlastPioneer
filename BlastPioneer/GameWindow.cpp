@@ -74,7 +74,7 @@ void GameWindow::initMap(int level)
 	}
 	for (int j = 0; j < COLS; ++j)
 	{
-		map[0][j] == wallTile;
+		map[0][j] = wallTile;
 		map[ROWS - 1][j] = wallTile;
 	}
 
@@ -277,7 +277,7 @@ void GameWindow::updateGame()
 				int row = position.x();
 				int col = position.y();
 				TileType& tile = map[row][col];
-				if (tile == brickTile) { tile == emptyTile; }
+				if (tile == brickTile) { tile = emptyTile; }
 				else if (tile == enemyTile) { tile = emptyTile; enemyList.removeAll(position); }
 				else if (tile == playerTile) 
 				{ 
@@ -290,7 +290,7 @@ void GameWindow::updateGame()
 			{
 				if(map[position.x()][position.y()]==explosionTile)
 				{
-					map[position.x()][position.y()] == emptyTile;
+					map[position.x()][position.y()] = emptyTile;
 				}
 			}
 		}

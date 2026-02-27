@@ -2,7 +2,7 @@
 #include "RulesWindow.h"
 #include "PlayerWindow.h"
 #include "LevelSelectWindow.h"
-#include "settings.h"
+#include "SettingsManager.h"
 #include <QWidget>
 #include <QLabel>
 #include <QPushButton>
@@ -30,6 +30,7 @@ private:
 
 public:
 	explicit MainWindow(QWidget* parent = nullptr);
+	MainWindow(const PlayerInfo& playerInfo, const QList<Item>& items, QWidget* parent = nullptr);
 	void btnConnect();
 
 private slots:

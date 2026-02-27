@@ -1,26 +1,84 @@
 #include "StartupEffectWindow.h"
 
 //构造函数
-StartupEffectWindow::StartupEffectWindow(QWidget* parent) :QWidget(parent), timer(nullptr)
+StartupEffectWindow::StartupEffectWindow(QWidget* parent) :
+	QQuickWidget(parent), minTimer(nullptr), maxTimer(nullptr),
+	loaderThread(nullptr), dataLoader(nullptr), isDataLoaded(false), isMinTimePassed(false)
 {
-	setWindowFlags(Qt::FramelessWindowHint);
+	setSource(QUrl("qrc:/startupEffect.qml"));
+	setResizeMode(QQuickWidget::SizeRootObjectToView);
+	setWindowFlags(Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint);
 	setFixedSize(800, 600);
 
-	timer = new QTimer(this);
-	connect(timer, &QTimer::timeout, this, &StartupEffectWindow::onTimeout);
+	//向QML传递特效质量
+	int quality = SettingsManager::instance()->effectQuality();
+	rootContext()->setContextProperty("effectQuality", quality);
+
+	//创建计时器
+	minTimer = new QTimer(this);
+	minTimer->setSingleShot(true);
+	connect(minTimer, &QTimer::timeout, this, &StartupEffectWindow::minTimeout);
+	maxTimer = new QTimer(this);
+	maxTimer->setSingleShot(true);
+	connect(maxTimer, &QTimer::timeout, this, &StartupEffectWindow::maxTimeout);
+
+	//创建新线程并加载数据
+	loaderThread = new QThread(this);
+	dataLoader = new DataLoader();
+	dataLoader->moveToThread(loaderThread);
+	connect(loaderThread, &QThread::started, dataLoader, &DataLoader::load);
+	connect(dataLoader, &DataLoader::finished, &StartupEffectWindow::onDataLoaded);
 }
 
-//展示
-void StartupEffectWindow::showup(int displayTime)
+//析构函数
+StartupEffectWindow::~StartupEffectWindow()
+{
+	if (loaderThread->isRunning())
+	{
+		loaderThread->quit();
+		loaderThread->wait();
+	}
+	delete dataLoader;
+}
+
+//开始显示
+void StartupEffectWindow::start()
 {
 	show();
-	timer->start(displayTime);
+	loaderThread->start();
+	minTimer->start(5000);
+	maxTimer->start(15000);
 }
 
-//超时处理函数
-void StartupEffectWindow::onTimeout()
+//检查数据是否加载完毕
+void StartupEffectWindow::onDataLoaded(const PlayerInfo& playerInfo, const QList<Item>& items)
 {
-	timer->stop();
+	emit dataLoaded(playerInfo, items);
+	isDataLoaded = true;
+	if (isMinTimePassed) { closeWindow(); }
+}
+
+//超过最短显示时间
+void StartupEffectWindow::minTimeout()
+{
+	isMinTimePassed = true;
+	if (isDataLoaded) { closeWindow(); }
+}
+
+//超过最大显示时间
+void StartupEffectWindow::maxTimeout()
+{
+	closeWindow();
+}
+
+//关闭窗口
+void StartupEffectWindow::closeWindow()
+{
+	if (loaderThread->isRunning())
+	{
+		loaderThread->quit();
+		loaderThread->wait();
+	}
 	emit finished();
 	close();
 }

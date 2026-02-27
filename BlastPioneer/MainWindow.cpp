@@ -1,6 +1,6 @@
 #include "MainWindow.h"
 
-//构造函数
+//构造函数（不初始化）
 MainWindow::MainWindow(QWidget* parent)
 {
 	playerWin = nullptr;
@@ -8,6 +8,12 @@ MainWindow::MainWindow(QWidget* parent)
 	levelSelectWin = nullptr;
 	setupUI();
 	btnConnect();
+}
+
+//构造函数（初始化）
+MainWindow::MainWindow(const PlayerInfo& playerInfo, const QList<Item>& items, QWidget* parent)
+{
+
 }
 
 //UI设置函数
