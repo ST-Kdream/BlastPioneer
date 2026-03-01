@@ -3,17 +3,30 @@
 //构造函数（不初始化）
 MainWindow::MainWindow(QWidget* parent)
 {
+	playerInfo.setDefaults();
 	playerWin = nullptr;
-	rulesWin = nullptr;
 	levelSelectWin = nullptr;
-	setupUI();
+	rulesWin = nullptr;
+	bagWin = nullptr;
+	shopWin = nullptr;
+
 	btnConnect();
+	setupUI();
 }
 
 //构造函数（初始化）
-MainWindow::MainWindow(const PlayerInfo& playerInfo, const QList<Item>& items, QWidget* parent)
+MainWindow::MainWindow(const PlayerInfo& playerInfo, const QList<Item>& items, QWidget* parent) :
+	QWidget(parent), playerInfo(playerInfo), itemList(items)
 {
+	playerWin = nullptr;
+	levelSelectWin = nullptr;
+	rulesWin = nullptr;
+	bagWin = nullptr;
+	shopWin = nullptr;
 
+	setupUI();
+	btnConnect();
+	createWindows();
 }
 
 //UI设置函数
@@ -96,14 +109,36 @@ void MainWindow::btnConnect()
 	connect(btn5, &QPushButton::clicked, this, &MainWindow::GoSettingsWindow);
 }
 
+//创建常用窗口
+void MainWindow::createWindows()
+{
+	//玩家窗口
+	playerWin = new PlayerWindow(playerInfo, this);
+	playerWin->hide();
+	playerWin->setAttribute(Qt::WA_DeleteOnClose);
+	//关卡选择窗口
+	levelSelectWin = new LevelSelectWindow(playerInfo, this);
+	levelSelectWin->hide();
+	levelSelectWin->setAttribute(Qt::WA_DeleteOnClose);
+	//背包窗口
+	bagWin = new BagWindow(playerInfo, this, playerWin);
+	bagWin->hide();
+	bagWin->setAttribute(Qt::WA_DeleteOnClose);
+	//商店窗口
+	shopWin = new ShopWindow(playerInfo, this, playerWin);
+	shopWin->hide();
+	shopWin->setAttribute(Qt::WA_DeleteOnClose);
+}
+
 //5个切换窗口的函数
 void MainWindow::GoPlayerWindow()
 {
 	this->hide();
 	if (!playerWin)
 	{
-		playerWin = new PlayerWindow(this);
+		playerWin = new PlayerWindow(playerInfo,this);
 		playerWin->setAttribute(Qt::WA_DeleteOnClose);
+		connect(playerWin, &QObject::destroyed, this, [this]() { playerWin = nullptr; });
 	}
 	playerWin->show();
 	playerWin->raise();
@@ -115,8 +150,9 @@ void MainWindow::GoSingleGame()
 	this->hide();
 	if (!levelSelectWin)
 	{
-		levelSelectWin = new LevelSelectWindow(this);
+		levelSelectWin = new LevelSelectWindow(playerInfo,this);
 		levelSelectWin->setAttribute(Qt::WA_DeleteOnClose);
+		connect(levelSelectWin, &QObject::destroyed, this, [this]() {levelSelectWin = nullptr; });
 	}
 	levelSelectWin->show();
 	levelSelectWin->raise();
@@ -125,7 +161,7 @@ void MainWindow::GoSingleGame()
 
 void MainWindow::GoInternetGame()
 {
-
+	//未实现
 }
 
 void MainWindow::GoRulesWindow()
@@ -133,8 +169,9 @@ void MainWindow::GoRulesWindow()
 	this->hide();
 	if (!rulesWin)
 	{
-		rulesWin = new RulesWindow(this);
+		rulesWin = new RulesWindow(this, this);
 		rulesWin->setAttribute(Qt::WA_DeleteOnClose);
+		connect(rulesWin, &QObject::destroyed, this, [this]() {rulesWin = nullptr; });
 	}
 	rulesWin->show();
 	rulesWin->raise();
@@ -143,5 +180,5 @@ void MainWindow::GoRulesWindow()
 
 void MainWindow::GoSettingsWindow()
 {
-
+	//未实现
 }

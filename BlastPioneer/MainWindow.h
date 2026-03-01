@@ -29,14 +29,20 @@ private:
 	void setupUI();
 
 	//其他窗口指针
-	RulesWindow* rulesWin;
-	PlayerWindow* playerWin;
 	LevelSelectWindow* levelSelectWin;
+	PlayerWindow* playerWin;
+	RulesWindow* rulesWin;
+	BagWindow* bagWin;
+	ShopWindow* shopWin;
 
 public:
 	explicit MainWindow(QWidget* parent = nullptr);
 	MainWindow(const PlayerInfo& playerInfo, const QList<Item>& items, QWidget* parent = nullptr);
 	void btnConnect();
+	void createWindows(); //预创建常用窗口
+	//返回预创建窗口
+	BagWindow* getBagWin() const { return bagWin; }
+	ShopWindow* getShopWin() const { return shopWin; }
 
 private slots:
 	//窗口跳转函数

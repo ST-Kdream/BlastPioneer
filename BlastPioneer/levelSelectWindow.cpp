@@ -1,9 +1,10 @@
 #include "LevelSelectWindow.h"
 
 //构造函数
-LevelSelectWindow::LevelSelectWindow(MainWindow* mainWin, QWidget* parent) :mainWin(mainWin), QWidget(parent)
+LevelSelectWindow::LevelSelectWindow(PlayerInfo& playerInfo, QWidget* parent) :playerInfo(playerInfo), QWidget(parent)
 {
 	gameWin = nullptr;
+	mainWin = qobject_cast<MainWindow*>(parent);
 	setupUI();
 	setupLevelBtn();
 }
@@ -112,7 +113,13 @@ void LevelSelectWindow::goGameWindow(int level)
 	{
 		gameWin = new GameWindow(level, playerInfo, this);   //这里有bug，记得修
 		gameWin->setAttribute(Qt::WA_DeleteOnClose);
-		connect(gameWin, &QObject::destroyed, this, [this]() {gameWin = nullptr; });
+		connect(gameWin, &QObject::destroyed, this, [this]() 
+			{
+				gameWin = nullptr; 
+				this->show();
+				this->raise();
+				this->activateWindow();
+			});
 	}
 	
 	this->hide();

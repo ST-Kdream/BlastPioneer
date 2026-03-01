@@ -20,6 +20,10 @@ class PlayerWindow :public QWidget
 	Q_OBJECT
 
 private:
+
+	//数据
+	PlayerInfo& playerInfo;
+
 	//控件
 	MainWindow* mainWin;
 	QPushButton* backBtn;
@@ -28,7 +32,6 @@ private:
 	QPushButton* newNameBtn;
 
 	//变量
-	PlayerInfo playerInfo;
 	QLabel* userName;
 	QLabel* coins;
 	QLabel* rank;
@@ -41,13 +44,13 @@ private:
 
 	//函数
 	void savePlayerInfo();
+	void closeEvent(QCloseEvent* event) override;
 
 public:
-	explicit PlayerWindow(MainWindow* mainWin, QWidget* parent = nullptr);
+	explicit PlayerWindow(PlayerInfo& playerInfo, QWidget* parent = nullptr);
 	void setupUI();
 	void updateUI();
 	void connectBtn();
-	void getPlayerInfo();
 	void showEvent(QShowEvent* event) override;
 	void closeEvent(QCloseEvent* event) override;
 

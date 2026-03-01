@@ -15,6 +15,8 @@ class LevelSelectWindow :public QWidget
 	Q_OBJECT
 
 private:
+	PlayerInfo& playerInfo;
+
 	MainWindow* mainWin;
 	GameWindow* gameWin;
 
@@ -27,7 +29,7 @@ private:
 	void showEvent(QShowEvent* event) override;
 
 public:
-	explicit LevelSelectWindow(MainWindow* mainWin,QWidget* parent=nullptr);
+	explicit LevelSelectWindow(PlayerInfo& playerInfo, QWidget* parent = nullptr);
 
 private slots:
 	void goBack();

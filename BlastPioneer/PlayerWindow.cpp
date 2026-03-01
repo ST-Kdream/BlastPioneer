@@ -1,11 +1,9 @@
 #include "PlayerWindow.h"
 
 //构造函数
-PlayerWindow::PlayerWindow(MainWindow* mainWin, QWidget* parent): QWidget(parent), mainWin(mainWin)
+PlayerWindow::PlayerWindow(PlayerInfo& playerInfo, QWidget* parent) : QWidget(parent), playerInfo(playerInfo)
 {
-	bagBtn = nullptr;
-	shopWin = nullptr;
-	getPlayerInfo();
+	mainWin = qobject_cast<MainWindow*>(parent);
 	setupUI();
 	connectBtn();
 }
@@ -119,31 +117,6 @@ void PlayerWindow::connectBtn()
 	connect(newNameBtn, &QPushButton::clicked, this, &PlayerWindow::changeName);
 }
 
-//获取玩家信息函数
-void PlayerWindow::getPlayerInfo()
-{
-	QFile file("playerData.json");
-	if (file.exists() && file.open(QIODevice::ReadOnly))
-	{
-		QByteArray data = file.readAll();
-		file.close();
-
-		QJsonDocument doc = QJsonDocument::fromJson(data);
-		if (!doc.isNull() && doc.isObject())
-		{
-			playerInfo.loadFromJson(doc.object());
-		}
-		else
-		{
-			playerInfo.setDefaults();
-		}
-	}
-	else
-	{
-		playerInfo.setDefaults();
-	}
-}
-
 //保存玩家信息函数
 void PlayerWindow::savePlayerInfo()
 {
@@ -247,6 +220,7 @@ void PlayerWindow::goBag()
 	// 保存窗口设置
 	SettingsManager::instance()->saveWindowGeometry(saveGeometry());
 
+	bagWin = mainWin ? mainWin->getBagWin() : nullptr;
 	if (!bagWin)
 	{
 		bagWin = new BagWindow(playerInfo, this, this);
@@ -264,6 +238,7 @@ void PlayerWindow::goShopping()
 	// 保存窗口设置
 	SettingsManager::instance()->saveWindowGeometry(saveGeometry());
 
+	shopWin = mainWin ? mainWin->getShopWin() : nullptr;
 	if (!shopWin)
 	{
 		shopWin = new ShopWindow(playerInfo, this, this);
@@ -273,4 +248,12 @@ void PlayerWindow::goShopping()
 	shopWin->show();
 	shopWin->raise();
 	shopWin->activateWindow();
+}
+
+//关闭窗口
+void PlayerWindow::closeEvent(QCloseEvent* event)
+{
+	savePlayerInfo();
+	SettingsManager::instance()->saveWindowGeometry(saveGeometry());
+	QWidget::closeEvent(event);
 }
