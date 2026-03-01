@@ -59,7 +59,7 @@ void SettingsManager::saveWindowGeometry(const QByteArray& geometry)
     settings.setValue("windows/geometry", geometry);
 }
 
-QByteArray SettingsManager::loadWindowGeometry(const QByteArray& defaultGeometry)
+QByteArray SettingsManager::loadWindowGeometry() const
 {
-    return settings.value("windows/geometry", defaultGeometry).toByteArray();
+    return settings.value("windows/geometry").toByteArray();
 }

@@ -1,6 +1,6 @@
 #pragma once
 #include "PlayerInfo.h"
-#include "settings.h"
+#include "SettingsManager.h"
 #include "PlayerWindow.h"
 #include <QWidget>
 #include <QMap>
@@ -30,6 +30,7 @@ private:
 	void setupUI();
 	void refreshItemList();
 	void loadItemMap();
+	void closeEvent(QCloseEvent* event) override;
 
 public:
 	explicit BagWindow(PlayerInfo& playerInfo, QWidget* parent = nullptr, PlayerWindow* playerWin);

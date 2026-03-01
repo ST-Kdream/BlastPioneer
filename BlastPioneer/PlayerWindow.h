@@ -39,7 +39,7 @@ private:
 	BagWindow* bagWin;
 	ShopWindow* shopWin;
 
-	//保存函数
+	//函数
 	void savePlayerInfo();
 
 public:

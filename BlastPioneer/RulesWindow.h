@@ -1,6 +1,6 @@
 #pragma once
 #include "MainWindow.h"
-#include "settings.h"
+#include "SettingsManager.h"
 #include <QWidget>
 #include <QPushButton>
 #include <QVBoxLayout>
@@ -21,6 +21,7 @@ private:
 	QTextEdit* Qrules;
 	void setupUI();
 	void getRules();
+	void closeEvent(QCloseEvent* event) override;
 
 public:
 	explicit RulesWindow(MainWindow* mainWin, QWidget* parent = nullptr);

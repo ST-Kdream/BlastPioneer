@@ -47,9 +47,6 @@
     <ClCompile Include="RulesWindow.cpp">
       <Filter>Source Files\UI</Filter>
     </ClCompile>
-    <ClCompile Include="settings.cpp">
-      <Filter>Source Files\Logic</Filter>
-    </ClCompile>
     <ClCompile Include="PlayerInfo.cpp">
       <Filter>Source Files\Logic</Filter>
     </ClCompile>
@@ -72,6 +69,12 @@
       <Filter>Source Files\UI</Filter>
     </ClCompile>
     <ClCompile Include="Rank.cpp">
+      <Filter>Source Files\Logic</Filter>
+    </ClCompile>
+    <ClCompile Include="DataLoader.cpp">
+      <Filter>Source Files\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="SettingsManager.cpp">
       <Filter>Source Files\Logic</Filter>
     </ClCompile>
   </ItemGroup>
@@ -100,18 +103,21 @@
     <QtMoc Include="ShopWindow.h">
       <Filter>Header Files\UI</Filter>
     </QtMoc>
+    <QtMoc Include="DataLoader.h">
+      <Filter>Header Files\Logic</Filter>
+    </QtMoc>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="PlayerInfo.h">
-      <Filter>Header Files\Logic</Filter>
-    </ClInclude>
-    <ClInclude Include="settings.h">
       <Filter>Header Files\Logic</Filter>
     </ClInclude>
     <ClInclude Include="Item.h">
       <Filter>Header Files\Logic</Filter>
     </ClInclude>
     <ClInclude Include="Rank.h">
+      <Filter>Header Files\Logic</Filter>
+    </ClInclude>
+    <ClInclude Include="SettingsManager.h">
       <Filter>Header Files\Logic</Filter>
     </ClInclude>
   </ItemGroup>

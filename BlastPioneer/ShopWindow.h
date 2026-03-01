@@ -1,7 +1,7 @@
 #pragma once
 #include "Item.h"
 #include "PlayerInfo.h"
-#include "settings.h"
+#include "SettingsManager.h"
 #include "PlayerWindow.h"
 #include <QWidget>
 #include <QList>

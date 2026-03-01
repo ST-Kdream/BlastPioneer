@@ -4,19 +4,18 @@
 GameWindow::GameWindow(int level, PlayerInfo& playerInfo, QWidget* parent)
 	: level(level), QWidget(parent), playerInfo(playerInfo)
 {
-	// 设置默认大小，如果QSettings中没有保存的值则使用默认值
-	int defaultWidth = 800;
-	int defaultHeight = 600;
-	int width = settings->value("windows/width", defaultWidth).toInt();
-	int height = settings->value("windows/height", defaultHeight).toInt();
-	resize(width, height);
-
-	// 恢复窗口位置
-	QPoint defaultPos(100, 100);  // 默认位置
-	QPoint savedPos = settings->value("windows/position", defaultPos).toPoint();
-	move(savedPos);
-
 	setWindowTitle(QString("关卡-%1").arg(level));
+
+	QByteArray savedGeo = SettingsManager::instance()->loadWindowGeometry();
+	if (!savedGeo.isEmpty()) 
+	{
+		restoreGeometry(savedGeo);
+	}
+	else 
+	{
+		resize(800, 600);
+		move(100, 100);
+	}
 
 	//初始化成员变量
 	bagWin = nullptr;
@@ -426,6 +425,7 @@ void GameWindow::showEvent(QShowEvent* event)
 
 void GameWindow::closeEvent(QCloseEvent* event)
 {
+	SettingsManager::instance()->saveWindowGeometry(saveGeometry());
 	gameTimer->stop();
 	if (bagWin) { bagWin->close(); }
 	QWidget::closeEvent(event);

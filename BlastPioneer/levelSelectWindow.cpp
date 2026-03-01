@@ -14,17 +14,16 @@ void LevelSelectWindow::setupUI()
 {
 	setWindowTitle("难度选择");
 
-	// 设置默认大小，如果QSettings中没有保存的值则使用默认值
-	int defaultWidth = 800;
-	int defaultHeight = 600;
-	int width = settings->value("windows/width", defaultWidth).toInt();
-	int height = settings->value("windows/height", defaultHeight).toInt();
-	resize(width, height);
-
-	// 恢复窗口位置
-	QPoint defaultPos(100, 100);  // 默认位置
-	QPoint savedPos = settings->value("windows/position", defaultPos).toPoint();
-	move(savedPos);
+	QByteArray savedGeo = SettingsManager::instance()->loadWindowGeometry();
+	if (!savedGeo.isEmpty())
+	{
+		restoreGeometry(savedGeo);
+	}
+	else
+	{
+		resize(800, 600);
+		move(100, 100);
+	}
 
 	//标题
 	title = new QLabel("关卡选择", this);
@@ -84,6 +83,7 @@ void LevelSelectWindow::setupLevelBtn()
 //界面更新
 void LevelSelectWindow::showEvent(QShowEvent* event)
 {
+	//未实现
 	QWidget::showEvent(event);
 }
 
@@ -92,9 +92,7 @@ void LevelSelectWindow::goBack()
 {
 	this->hide();
 	// 保存窗口设置
-	settings->setValue("windows/width", width());
-	settings->setValue("windows/height", height());
-	settings->setValue("windows/position", pos());
+	SettingsManager::instance()->saveWindowGeometry(saveGeometry());
 
 	if (mainWin)
 	{
@@ -119,9 +117,7 @@ void LevelSelectWindow::goGameWindow(int level)
 	
 	this->hide();
 	// 保存窗口设置
-	settings->setValue("windows/width", width());
-	settings->setValue("windows/height", height());
-	settings->setValue("windows/position", pos());
+	SettingsManager::instance()->saveWindowGeometry(saveGeometry());
 
 	gameWin->show();
 	gameWin->raise();

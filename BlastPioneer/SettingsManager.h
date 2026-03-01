@@ -27,5 +27,5 @@ public:
     void setVolume(int vol);
     // 窗口位置与大小
     void saveWindowGeometry(const QByteArray& geometry);
-    QByteArray loadWindowGeometry(const QByteArray& defaultGeometry);
+    QByteArray loadWindowGeometry() const;
 };

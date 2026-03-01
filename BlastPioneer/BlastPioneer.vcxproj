@@ -109,6 +109,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="BagWindow.cpp" />
+    <ClCompile Include="DataLoader.cpp" />
     <ClCompile Include="GameWindow.cpp" />
     <ClCompile Include="Item.cpp" />
     <ClCompile Include="LevelSelectWindow.cpp" />
@@ -118,7 +119,7 @@
     <ClCompile Include="PlayerWindow.cpp" />
     <ClCompile Include="Rank.cpp" />
     <ClCompile Include="RulesWindow.cpp" />
-    <ClCompile Include="settings.cpp" />
+    <ClCompile Include="SettingsManager.cpp" />
     <ClCompile Include="ShopWindow.cpp" />
     <ClCompile Include="StartupEffectWindow.cpp" />
   </ItemGroup>
@@ -126,17 +127,18 @@
     <QtMoc Include="MainWindow.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="SettingsManager.h" />
     <QtMoc Include="ShopWindow.h" />
     <QtMoc Include="StartupEffectWindow.h" />
     <QtMoc Include="RulesWindow.h" />
     <QtMoc Include="LevelSelectWindow.h" />
     <QtMoc Include="GameWindow.h" />
     <QtMoc Include="BagWindow.h" />
+    <QtMoc Include="DataLoader.h" />
     <ClInclude Include="Item.h" />
     <ClInclude Include="PlayerInfo.h" />
     <QtMoc Include="PlayerWindow.h" />
     <ClInclude Include="Rank.h" />
-    <ClInclude Include="settings.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="startupEffect.qml" />

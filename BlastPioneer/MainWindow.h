@@ -14,6 +14,11 @@ class MainWindow :public QWidget
 	Q_OBJECT
 
 private:
+
+	//主窗口持有相关数据
+	PlayerInfo playerInfo;
+	QList<Item> itemList;
+
 	//5个按钮和一个标题
 	QLabel* mainTitle;
 	QPushButton* btn1;

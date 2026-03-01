@@ -61,7 +61,6 @@ private:
 	void spawnEnemies(int count);
 	void moveEnemies();
 	void placeBomb();
-	void updateExplosions();
 	bool isWalkable(int row, int col, bool ignorePlayer = false);
 	void winGame();
 	void loseGame();
