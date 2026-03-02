@@ -43,6 +43,7 @@ private:
 	TileType map[ROWS][COLS];
 	QPoint playerPos;
 	int playerLives;
+	int maxLives;
 	int bombRange;
 	int maxBombPlace;
 

@@ -3,6 +3,7 @@
 #include "PlayerWindow.h"
 #include "LevelSelectWindow.h"
 #include "SettingsManager.h"
+#include "SettingsWindow.h"
 #include <QWidget>
 #include <QLabel>
 #include <QPushButton>
@@ -34,6 +35,7 @@ private:
 	RulesWindow* rulesWin;
 	BagWindow* bagWin;
 	ShopWindow* shopWin;
+	SettingsWindow* settingsWin;
 
 public:
 	explicit MainWindow(QWidget* parent = nullptr);

@@ -41,7 +41,7 @@
     <QtBuildConfig>debug</QtBuildConfig>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'" Label="QtSettings">
-    <QtInstall>QtMSVC6.10.1</QtInstall>
+    <QtInstall>QtMSVC6.10.2</QtInstall>
     <QtModules>core;gui;network;qml;quick;widgets;quickwidgets</QtModules>
     <QtBuildConfig>release</QtBuildConfig>
   </PropertyGroup>
@@ -120,6 +120,7 @@
     <ClCompile Include="Rank.cpp" />
     <ClCompile Include="RulesWindow.cpp" />
     <ClCompile Include="SettingsManager.cpp" />
+    <ClCompile Include="SettingsWindow.cpp" />
     <ClCompile Include="ShopWindow.cpp" />
     <ClCompile Include="StartupEffectWindow.cpp" />
   </ItemGroup>
@@ -128,6 +129,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SettingsManager.h" />
+    <QtMoc Include="SettingsWindow.h" />
     <QtMoc Include="ShopWindow.h" />
     <QtMoc Include="StartupEffectWindow.h" />
     <QtMoc Include="RulesWindow.h" />

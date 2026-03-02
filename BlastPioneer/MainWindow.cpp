@@ -9,6 +9,7 @@ MainWindow::MainWindow(QWidget* parent)
 	rulesWin = nullptr;
 	bagWin = nullptr;
 	shopWin = nullptr;
+	settingsWin = nullptr;
 
 	btnConnect();
 	setupUI();
@@ -23,6 +24,7 @@ MainWindow::MainWindow(const PlayerInfo& playerInfo, const QList<Item>& items, Q
 	rulesWin = nullptr;
 	bagWin = nullptr;
 	shopWin = nullptr;
+	settingsWin = nullptr;
 
 	setupUI();
 	btnConnect();
@@ -180,5 +182,13 @@ void MainWindow::GoRulesWindow()
 
 void MainWindow::GoSettingsWindow()
 {
-	//未实现
+	if (!settingsWin)
+	{
+		settingsWin = new SettingsWindow(this);
+		settingsWin->setAttribute(Qt::WA_DeleteOnClose);
+		connect(settingsWin, &QObject::destroyed, this, [this]() {settingsWin = nullptr; });
+	}
+	settingsWin->show();
+	settingsWin->raise();
+	settingsWin->activateWindow();
 }

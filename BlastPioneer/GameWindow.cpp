@@ -19,6 +19,7 @@ GameWindow::GameWindow(int level, PlayerInfo& playerInfo, QWidget* parent)
 
 	//初始化成员变量
 	bagWin = nullptr;
+	maxLives = 3;
 	playerLives = 3;
 	maxBombPlace= 1;
 	bombRange = 2;
@@ -128,11 +129,12 @@ void GameWindow::spawnEnemies(int count)
 void GameWindow::paintEvent(QPaintEvent* event)
 {
 	QPainter painter(this);
-	int cellSize = 50;
+	const int cellSize = 50;
 
 	painter.setBrush(Qt::black);
 	painter.drawRect(rect());
 
+	//绘制地图
 	for (int i = 0; i < ROWS; ++i)
 	{
 		for (int j = 0; j < COLS; ++j)
@@ -171,6 +173,18 @@ void GameWindow::paintEvent(QPaintEvent* event)
 			painter.drawRect(rect);
 		}
 	}
+	
+	//绘制玩家血条
+	int barWidth = cellSize - 10;
+	int barHeight = 6;
+	int barX = playerPos.y() * cellSize + 5;
+	int barY = playerPos.x() * cellSize + cellSize - barHeight - 5;
+
+	painter.setBrush(Qt::red);
+	painter.drawRect(barX, barY, barWidth, barHeight);
+	painter.setBrush(Qt::green);
+	int width = barWidth * playerLives / maxLives;
+	painter.drawRect(barX, barY, width, barHeight);
 }
 
 //处理输入事件
@@ -206,7 +220,7 @@ void GameWindow::keyPressEvent(QKeyEvent* event)
 	int newCol = playerPos.y() + dy;
 	if (isWalkable(newRow, newCol, true))
 	{
-		map[playerPos.x()][playerPos.y()] = emptyTile();
+		map[playerPos.x()][playerPos.y()] = emptyTile;
 		playerPos = QPoint(newRow, newCol);
 		map[newRow][newCol] = playerTile;
 		update();
@@ -283,7 +297,7 @@ void GameWindow::updateGame()
 					--playerLives;
 					if (playerLives <= 0) { loseGame(); }
 				}
-				else { tile == explosionTile; }
+				else { tile = explosionTile; }
 			}
 			for (const QPoint& position : explosionCells)
 			{

@@ -5,6 +5,9 @@
 #include <QSlider>
 #include <QComboBox>
 #include <QPushButton>
+#include <QVBoxLayout>
+#include <QLabel>
+#include <QCloseEvent>
 
 class SettingsWindow :public QDialog
 {
@@ -12,10 +15,10 @@ class SettingsWindow :public QDialog
 
 private:
 	//控件
-	QCheckBox* StartupEffectCheck;
+	QCheckBox* startupEffectCheck;
 	QSlider* frameRateSlider;
 	QSlider* volumeSlider;
-	QComboBox* efffectQualityCombo;
+	QComboBox* effectQualityCombo;
 	QPushButton* okBtn;
 	QPushButton* cancelBtn;
 

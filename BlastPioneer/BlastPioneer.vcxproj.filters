@@ -77,6 +77,9 @@
     <ClCompile Include="SettingsManager.cpp">
       <Filter>Source Files\Logic</Filter>
     </ClCompile>
+    <ClCompile Include="SettingsWindow.cpp">
+      <Filter>Source Files\UI</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="MainWindow.h">
@@ -105,6 +108,9 @@
     </QtMoc>
     <QtMoc Include="DataLoader.h">
       <Filter>Header Files\Logic</Filter>
+    </QtMoc>
+    <QtMoc Include="SettingsWindow.h">
+      <Filter>Header Files\UI</Filter>
     </QtMoc>
   </ItemGroup>
   <ItemGroup>

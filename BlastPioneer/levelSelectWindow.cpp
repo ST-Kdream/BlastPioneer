@@ -84,8 +84,12 @@ void LevelSelectWindow::setupLevelBtn()
 //界面更新
 void LevelSelectWindow::showEvent(QShowEvent* event)
 {
-	//未实现
 	QWidget::showEvent(event);
+	int passedLevels = playerInfo.getPassedLevels();
+	for (int i = 0; i < 6; ++i)
+	{
+		levelBtns[i]->setEnabled(passedLevels >= i);
+	}
 }
 
 //两个窗口跳转函数
