@@ -24,6 +24,16 @@ void SettingsManager::setShowStartupEffect(bool isShow)
     settings.setValue("ui/showStartupEffect", isShow);
 }
 
+bool SettingsManager::showGrid() const
+{
+    return settings.value("game/showGrid", true).toBool();
+}
+
+void SettingsManager::setShowGrid(bool isShow)
+{
+    settings.setValue("game/showGrid", isShow);
+}
+
 int SettingsManager::effectQuality() const
 {
     return settings.value("graphics/effectQuality", 2).toInt();

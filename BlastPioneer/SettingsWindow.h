@@ -16,6 +16,7 @@ class SettingsWindow :public QDialog
 private:
 	//控件
 	QCheckBox* startupEffectCheck;
+	QCheckBox* gridCheck;
 	QSlider* frameRateSlider;
 	QSlider* volumeSlider;
 	QComboBox* effectQualityCombo;

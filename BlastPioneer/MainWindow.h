@@ -45,6 +45,8 @@ public:
 	//返回预创建窗口
 	BagWindow* getBagWin() const { return bagWin; }
 	ShopWindow* getShopWin() const { return shopWin; }
+	//查找道具
+	Item* getItem(const QString& name);
 
 private slots:
 	//窗口跳转函数

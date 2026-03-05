@@ -1,8 +1,28 @@
 #include "BagWindow.h"
 
 //构造函数
-BagWindow::BagWindow(PlayerInfo& playerInfo, QWidget* parent, PlayerWindow* playerWin) :QWidget(parent), playerInfo(playerInfo), playerWin(playerWin)
+BagWindow::BagWindow(PlayerInfo& playerInfo, QWidget* parent, PlayerWindow* playerWin) :QWidget(parent), playerInfo(playerInfo), 
+	playerWin(playerWin),gameWin(nullptr)
 {
+	isGameRunning = false;
+
+	//遍历父窗口链找到主窗口
+	mainWin = qobject_cast<MainWindow*>(parent);
+	if (!mainWin && playerWin)
+	{
+		mainWin = qobject_cast<MainWindow*>(playerWin->parent());
+	}
+	if (!mainWin)
+	{
+		QWidget* p = parentWidget();
+		while (p)
+		{
+			mainWin = qobject_cast<MainWindow*>(p);
+			if (mainWin) { break; }
+			p = p->parentWidget();
+		}
+	}
+
 	loadItemMap();
 	setupUI();
 	refreshItemList();
@@ -118,9 +138,27 @@ void BagWindow::useItem()
 
 	QString itemText = currentItem->text();
 	QString itemName = itemText.section("：", 0, 0);
-	playerInfo.removeItem(itemName);
-	QMessageBox::information(this, "提示", QString("道具：%1 使用成功").arg(itemName));
-	refreshItemList();
+
+	if (!isGameRunning)
+	{
+		QMessageBox::information(this, "提示", "道具只能在游戏运行时才能使用（游戏时按B键打开）");
+		return;
+	}
+
+	Item* item = mainWin->getItem(itemName);
+	if (item->use(gameWin))
+	{
+		playerInfo.removeItem(itemName);
+		refreshItemList();
+		QMessageBox::information(this, "提示", QString("使用道具%1成功").arg(itemName));
+	}
+}
+
+//通过是否存在游戏窗口判断游戏是否正在运行
+void BagWindow::setGameWindow(GameWindow* gameWin)
+{
+	this->gameWin = gameWin;
+	isGameRunning = (gameWin != nullptr);
 }
 
 //返回

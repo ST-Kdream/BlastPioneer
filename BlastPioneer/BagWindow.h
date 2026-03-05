@@ -2,6 +2,8 @@
 #include "PlayerInfo.h"
 #include "SettingsManager.h"
 #include "PlayerWindow.h"
+#include "MainWindow.h"
+#include "GameWindow.h"
 #include <QWidget>
 #include <QMap>
 #include <QListWidget>
@@ -19,13 +21,18 @@ class BagWindow :public QWidget
 	Q_OBJECT
 
 private:
+	MainWindow* mainWin;
 	PlayerWindow* playerWin;
 	PlayerInfo& playerInfo;
+	GameWindow* gameWin;
+
 	QLabel* title;
 	QPushButton* backBtn;
 	QPushButton* useBtn;
 	QListWidget* itemList;
 	QMap<QString, QString> itemIconMap;
+
+	bool isGameRunning;
 
 	void setupUI();
 	void refreshItemList();
@@ -34,8 +41,11 @@ private:
 
 public:
 	explicit BagWindow(PlayerInfo& playerInfo, QWidget* parent = nullptr, PlayerWindow* playerWin);
+	void setGameWindow(GameWindow* gameWin);
 
 private slots:
 	void goBack();
 	void useItem();
+	void runningGame() { isGameRunning = true; }
+	void pauseGame() { isGameRunning = true; }
 };

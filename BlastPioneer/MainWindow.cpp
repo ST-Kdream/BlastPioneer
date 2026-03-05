@@ -132,6 +132,19 @@ void MainWindow::createWindows()
 	shopWin->setAttribute(Qt::WA_DeleteOnClose);
 }
 
+//查找道具
+Item* MainWindow::getItem(const QString& name)
+{
+	for (auto& item : itemList)
+	{
+		if (item.getName() == name)
+		{
+			return &item;
+		}
+	}
+	return nullptr;
+}
+
 //5个切换窗口的函数
 void MainWindow::GoPlayerWindow()
 {

@@ -27,6 +27,7 @@ void SettingsWindow::setupUI()
 
 	//创建控件
 	startupEffectCheck = new QCheckBox("显示启动特效并预加载");
+	gridCheck = new QCheckBox("游戏时是否显示网格");
 
 	frameRateSlider = new QSlider(Qt::Horizontal);
 	frameRateSlider->setRange(30, 120);
@@ -49,6 +50,7 @@ void SettingsWindow::setupUI()
 	//布局
 	QVBoxLayout* mainLayout = new QVBoxLayout();
 	mainLayout->addWidget(startupEffectCheck);
+	mainLayout->addWidget(gridCheck);
 
 	mainLayout->addWidget(new QLabel("特效质量："));
 	mainLayout->addWidget(effectQualityCombo);
@@ -70,6 +72,7 @@ void SettingsWindow::setupUI()
 void SettingsWindow::loadSettings()
 {
 	startupEffectCheck->setChecked(SettingsManager::instance()->showStartupEffect());
+	gridCheck->setChecked(SettingsManager::instance()->showGrid());
 	effectQualityCombo->setCurrentIndex(SettingsManager::instance()->effectQuality());
 	volumeSlider->setValue(SettingsManager::instance()->volume());
 	frameRateSlider->setValue(SettingsManager::instance()->frameRate());
@@ -79,6 +82,7 @@ void SettingsWindow::loadSettings()
 void SettingsWindow::saveSettings()
 {
 	SettingsManager::instance()->setShowStartupEffect(startupEffectCheck->isChecked());
+	SettingsManager::instance()->setShowGrid(gridCheck->isChecked());
 	SettingsManager::instance()->setEffectQuality(effectQualityCombo->currentIndex());
 	SettingsManager::instance()->setVolume(volumeSlider->value());
 	SettingsManager::instance()->setFrameRate(frameRateSlider->value());

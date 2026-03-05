@@ -16,6 +16,9 @@ public:
     //是否开启粒子特效
     bool showStartupEffect() const;
     void setShowStartupEffect(bool isShow);
+    //游戏时是否显示网格
+    bool showGrid() const;
+    void setShowGrid(bool isShow);
     //特效质量
     int effectQuality() const;           // 0低 1中 2高
     void setEffectQuality(int q);
