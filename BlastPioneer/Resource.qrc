@@ -2,5 +2,6 @@
     <qresource prefix="/">
         <file>Data/itemInfo.json</file>
         <file>startupEffect.qml</file>
+        <file>Data/gamerules.txt</file>
     </qresource>
 </RCC>

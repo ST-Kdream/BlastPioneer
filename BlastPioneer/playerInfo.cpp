@@ -132,3 +132,11 @@ void PlayerInfo::removeItem(const QString& itemName, int count)
 		inventory[itemName] = newCount;
 	}
 }
+
+//设置段位
+void PlayerInfo::setEP(int EP)
+{
+	this->EP = EP;
+	Rank newRank;
+	rank = newRank.updateRankName(EP);
+}

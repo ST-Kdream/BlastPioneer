@@ -1,4 +1,5 @@
 #pragma once
+#include "Rank.h"
 #include <QString>
 #include <QMap>
 #include <QDateTime>
@@ -37,7 +38,7 @@ public:
 
 	//设置玩家信息的函数
 	void setUserName(const QString& name) { userName = name; }
-	void setRank(const QString& rk) { rank = rk; }    //段位系统类返回玩家段位
+	void setRank(const int EP);
 	void setCoins(int gold) { coins = gold; }
 	void setEP(int ep) { EP = ep; }
 	void setPassedLevels(int passedlev) { passedLevels = passedlev; }

@@ -247,10 +247,14 @@ void GameWindow::updateEnemies()
 	}
 }
 
-//尝试放置敌人炸弹（每一帧有5%概率触发）
+//尝试放置敌人炸弹（每一秒有40%概率触发）
 void GameWindow::tryPlaceEnemyBomb(Enemy& enemy)
 {
-	if (QRandomGenerator::global()->bounded(100) < 5)
+	int p;
+	if (frameRate == 30) { p = 17; }
+	else if (frameRate == 60) { p = 8; }
+	else { p = 4; }
+	if (QRandomGenerator::global()->bounded(10000) < p)
 	{
 		QPoint grid = pixelToGrid(enemy.pos);
 		for (const Bomb& bomb : bombList)
