@@ -7,6 +7,8 @@
 #include <QTextEdit>
 #include <QMessageBox>
 #include <QSettings>
+#include <QFile>
+#include <QCoreApplication>
 #include <string>
 #include <sstream>
 #include <fstream>

@@ -3,36 +3,48 @@
     "name": "生命药水",
     "description": "回复2点生命值",
     "price": 50,
-    "iconPath": ""
+    "iconPath": "Assets/picture/lifeBottle.png"
   },
   {
     "name": "迅猛之靴",
-    "description": "移动速度提升15%，原地起飞",
+    "description": "移动速度提升15%",
     "price": 50,
-    "iconPath": ""
+    "iconPath": "Assets/picture/quickBoot.png"
   },
   {
     "name": "改造扳手",
-    "description": "4级钳工，似乎能手搓炸弹，制造出比普通炸弹爆炸范围增加一格的进阶炸弹",
-    "price": 45,
-    "iconPath": ""
+    "description": "炸弹爆炸增加1格",
+    "price": 55,
+    "iconPath": "Assets/picture/bombUpper.png"
   },
   {
-    "name": "黑锅",
-    "description": "嗯...能帮你抵挡一次伤害",
-    "price": 60,
-    "iconPath": ""
+    "name": "超级背包",
+    "description": "玩家可同时放置的炸弹数量加一",
+    "price": 55,
+    "iconPath": "Assets/picture/superBag.png"
+  },
+  {
+    "name": "解弦之眼（破损版）",
+    "description": "生命上限加2，随机获得一个可掉落物品，敌人移速降低5%",
+    "price": 152,
+    "iconPath": "Assets/picture/stringUnravelEye_broken.png"
+  },
+  {
+    "name": "远航星（破损版）",
+    "description": "全体生命强制变为1点（包括玩家）,进入电子幽灵态8秒（可穿墙）",
+    "price": 152,
+    "iconPath": "Assets/picture/bonVoyagingStar_broken.png"
   },
   {
     "name": "解弦之眼",
-    "description": "对敌人造成1点伤害，拾取场上剩余道具,貌似是作者夹带私货",
-    "price": 152,
-    "iconPath": ""
+    "description": "对所有敌人造成1点伤害，回复2点生命，生命上限加2，随机获得一个可掉落物品（放入背包）,敌人移速降低15%...穗波的夏夜里,我许下了心愿——希望与朋友相伴的时光，可以化为永恒",
+    "price": 520,
+    "iconPath": "Assets/picture/stringUnravelEye.png"
   },
   {
     "name": "远航星",
-    "description": "对敌人造成3点伤害，并找到出口，嗯...应该也是作者私货",
-    "price": 152,
-    "iconPath": ""
+    "description": "所有敌人的生命变为1点，进入电子幽灵态15秒（可穿墙）...但愿我能让你骄傲，但愿我没有让你失望。希望你在接下来的日子里，仍能感受悲伤，也时常觉得幸福",
+    "price": 520,
+    "iconPath": "Assets/picture/bonVoyagingStar.png"
   }
 ]

@@ -3,8 +3,8 @@
 SettingsManager* SettingsManager::m_instance = nullptr;
 
 //构造函数
-SettingsManager::SettingsManager() :settings(QSettings::IniFormat, QSettings::UserScope, 
-	"ST-Kdream", "BlastPioneer"){ }
+SettingsManager::SettingsManager() :settings(QDir(QCoreApplication::applicationDirPath()).
+    filePath("Data/settings.ini"),QSettings::IniFormat) { }
 
 //单例模式设置
 SettingsManager* SettingsManager::instance()

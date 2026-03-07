@@ -51,25 +51,18 @@ RulesWindow::~RulesWindow()
 //读取规则函数
 void RulesWindow::getRules()
 {
-	std::string ruleLine;
-	std::stringstream ssrules;
-
-	std::ifstream rulesText("gamerules.txt");
-	if (rulesText.is_open())
+	QFile file(":/gamerules.txt");
+	QString content;
+	if (file.open(QIODevice::ReadOnly) | QIODevice::Text)
 	{
-		while (getline(rulesText, ruleLine))
-		{
-			ssrules << ruleLine << std::endl;
-		}
-		rulesText.close();
+		content = QString::fromUtf8(file.readAll());
+		file.close();
+		Qrules->setText(content);
 	}
 	else
 	{
-		ssrules << "wrong!"<<std::endl;
-		QMessageBox::critical(this, "游戏规则文件读取错误","无法打开游戏规则文件，请保证其与可执行程序在同一个文件夹下！");
+		QMessageBox::critical(this, "错误", "游戏规则读取失败");
 	}
-
-	Qrules->setText(QString::fromStdString(ssrules.str()));
 }
 
 //返回函数

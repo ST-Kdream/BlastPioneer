@@ -13,6 +13,9 @@
 #include <QMessageBox>
 #include <QPointF>
 #include <QtMath>
+#include <QCoreApplication>
+#include <QDir>
+#include <QPixmap>
 #include <algorithm>
 
 //地图元素枚举
@@ -90,6 +93,7 @@ private:
 	const double playerSpeed = 1.5;
 	const double enemySpeed = 1.0;
 	double speedFactor; //速度因子
+	double enemySpeedFactor;
 
 	//其他数据
 	int frameRate;
@@ -101,6 +105,21 @@ private:
 	QList<Enemy> enemyList;
 	QList<Bomb> bombList;
 	QList<DropItem> dropItemList;
+	QStringList dropItems = { "生命药水","迅猛之靴","改造扳手","超级背包"}; //可掉落物品
+
+	//电子幽灵计时器
+	bool isGhost;
+	QTimer* ghostTimer;
+
+	//图片资源
+	QPixmap playerImg;
+	QPixmap enemyImg;
+	QPixmap bombImg;
+	QPixmap liveBottleImg;
+	QPixmap quickBootImg;
+	QPixmap bombUpperImg;
+	bool useImages;
+	void loadImages();
 
 	//游戏函数
 	void initMap(int level);
@@ -130,9 +149,14 @@ public:
 	void setLevel(int level);
 
 	//道具实现接口
-	void addPlayerLives();
-	void increaseSpeed();
-	void upBombRange();
+	inline void addPlayerLives();
+	inline void increaseSpeed();
+	inline void upBombRange();
+	inline void increaseMaxPlace();
+	void stringUnraveEye_broken();
+	void stringUnraveEye();
+	void bonVoyagingStar_broken();
+	void bonVoyagingStar();
 
 protected:
 	//重写事件相关函数
@@ -146,4 +170,5 @@ protected:
 private slots:
 	void updateGame();
 	void closeBag();
+	void disableGhost();
 };

@@ -2,9 +2,9 @@
 
 //构造函数
 GameWindow::GameWindow(int level, PlayerInfo& playerInfo, QWidget* parent)
-	: level(level), QWidget(parent), playerInfo(playerInfo), maxLives(3), bombRange(2), maxBombPlace(1),
+	: level(level), QWidget(parent), playerInfo(playerInfo), maxLives(3), bombRange(2), maxBombPlace(3),
 	isMoveup(false), isMovedown(false), isMoveleft(false), isMoveright(false), cellSize(0),
-	bagWin(nullptr),state(paused),speedFactor(1.0)
+	bagWin(nullptr), state(paused), speedFactor(1.0), enemySpeedFactor(1.0), ghostTimer(nullptr),isGhost(false)
 {
 	setWindowTitle(QString("关卡-%1").arg(level));
 
@@ -24,10 +24,17 @@ GameWindow::GameWindow(int level, PlayerInfo& playerInfo, QWidget* parent)
 	frameTime = 1.0 / frameRate;
 	showGrid = SettingsManager::instance()->showGrid();
 
+	//加载图片资源
+	loadImages();
+
 	//初始化游戏，使用计时器构建游戏主循环
 	gameTimer = new QTimer(this);
 	connect(gameTimer, &QTimer::timeout, this, &GameWindow::updateGame);
 	gameTimer->setInterval(1000/frameRate);
+
+	//电子幽灵计时器
+	ghostTimer = new QTimer(this);
+	connect(ghostTimer, &QTimer::timeout, this, &GameWindow::disableGhost);
 }
 
 //析构窗口（防止在游戏结束时打开背包导致内存泄露）
@@ -50,6 +57,31 @@ void GameWindow::setLevel(int level)
 	state = running;
 	gameTimer->start();
 	update();
+}
+
+//加载图片资源
+void GameWindow::loadImages()
+{
+	QString appDir = QCoreApplication::applicationDirPath();
+	QString basePath = appDir + "/Assets/picture/";
+
+	auto loadPixmap = [&](const QString& fileName)->QPixmap
+		{
+			QString fullPath = basePath + fileName;
+			QPixmap pix;
+			if (QFile::exists(fullPath)) { pix.load(fullPath); }
+			else { QMessageBox::critical(this, "错误", "图片加载失败"); }
+			return pix;
+		};
+	playerImg = loadPixmap("player.png");
+	enemyImg = loadPixmap("enemy.png");
+	bombImg = loadPixmap("bomb.png");
+	liveBottleImg = loadPixmap("liveBottle.png");
+	quickBootImg = loadPixmap("quickBoot.png");
+	bombUpperImg = loadPixmap("bombUpper.png");
+
+	useImages = !playerImg.isNull() && !enemyImg.isNull() && !bombImg.isNull() &&
+		!liveBottleImg.isNull() && !quickBootImg.isNull() && !bombUpperImg.isNull();
 }
 
 //格子中心像素坐标
@@ -173,13 +205,13 @@ void GameWindow::handMovement()
 	QPointF newPosX(playerPos.x() + delta.x(), playerPos.y());
 	int gridXRow = qFloor(newPosX.y() / cellSize);
 	int gridXCol = qFloor(newPosX.x() / cellSize);
-	if (isWalkable(gridXRow, gridXCol)) { playerPos.setX(newPosX.x()); }
+	if (isWalkable(gridXRow, gridXCol, isGhost)) { playerPos.setX(newPosX.x()); }
 
 	//尝试在y轴方向上移动
 	QPointF newPosY(playerPos.x(), playerPos.y() + delta.y());
 	int gridYRow = qFloor(newPosY.y() / cellSize);
 	int gridYCol = qFloor(newPosY.x() / cellSize);
-	if (isWalkable(gridYRow, gridYCol)) { playerPos.setY(newPosY.y()); }
+	if (isWalkable(gridYRow, gridYCol, isGhost)) { playerPos.setY(newPosY.y()); }
 
 	//在地图更新玩家标记
 	QPoint oldGrid = pixelToGrid(playerPos - delta);
@@ -194,7 +226,7 @@ void GameWindow::handMovement()
 //更新敌人
 void GameWindow::updateEnemies()
 {
-	double enemyPixelSpeed = enemySpeed * cellSize;
+	double enemyPixelSpeed = enemySpeed * cellSize * enemySpeedFactor;
 
 	for (Enemy& enemy : enemyList)
 	{
@@ -354,8 +386,8 @@ void GameWindow::explodeBomb(const Bomb& bomb)
 			if (tile == brickTile)
 			{
 				tile = emptyTile;
-				//20%概率生成掉落物
-				if (QRandomGenerator::global()->bounded(100) < 20)
+				//15%概率生成掉落物
+				if (QRandomGenerator::global()->bounded(100) < 15)
 				{
 					spawnDropItem(gridToPixel(row, col));
 				}
@@ -371,8 +403,7 @@ void GameWindow::explodeBomb(const Bomb& bomb)
 //生成掉落物
 void GameWindow::spawnDropItem(const QPointF& pos)
 {
-	QStringList dropItems = { "生命药水","迅猛之靴","改造扳手" };
-	int index = QRandomGenerator::global()->bounded(dropItemList.size());
+	int index = QRandomGenerator::global()->bounded(dropItems.size());
 	DropItem dropItem;
 	dropItem.pos = pos;
 	dropItem.name = dropItems[index];
@@ -411,22 +442,6 @@ void GameWindow::applyItemEffect(const QString& itemName)
 	else if (itemName == "改造扳手")
 	{
 		upBombRange();
-	}
-}
-
-//检查及收集掉落物
-void GameWindow::checkDropCollection()
-{
-	QPoint playerGrid = pixelToGrid(playerPos);
-	for (auto it = dropItemList.begin(); it != dropItemList.end(); ) {
-		QPoint itemGrid = pixelToGrid(it->pos);
-		if (itemGrid == playerGrid && !it->collected) {
-			applyItemEffect(it->name);
-			it = dropItemList.erase(it);
-		}
-		else {
-			++it;
-		}
 	}
 }
 
@@ -481,7 +496,7 @@ void GameWindow::recenterAll()
 void GameWindow::paintEvent(QPaintEvent* event)
 {
 	QPainter painter(this);
-	painter.fillRect(rect(), Qt::white);  //临时
+	painter.fillRect(rect(), Qt::white);
 	if (cellSize <= 0) { updateCellSize(); }
 
 	//绘制地图（颜色临时）
@@ -519,23 +534,44 @@ void GameWindow::paintEvent(QPaintEvent* event)
 		}
 	}
 
-	//绘制炸弹（临时）
-	painter.setBrush(Qt::darkCyan);
-	double bombRadius = cellSize * 0.2;
-	for (const Bomb& bomb : bombList)
+	//绘制炸弹（图片或图形）
+	if (useImages)
 	{
-		painter.drawEllipse(bomb.pos, bombRadius, bombRadius);
+		double imgSize = cellSize * 0.6;
+		for (const Bomb& bomb : bombList)
+		{
+			QRectF target(bomb.pos.x() - imgSize / 2.0, bomb.pos.y() - imgSize / 2.0, imgSize, imgSize);
+			painter.drawPixmap(target, bombImg,QRectF(bombImg.rect()));
+		}
+	}
+	else
+	{
+		painter.setBrush(Qt::darkCyan);
+		double bombRadius = cellSize * 0.3;
+		for (const Bomb& bomb : bombList)
+		{
+			painter.drawEllipse(bomb.pos, bombRadius, bombRadius);
+		}
 	}
 
-	//绘制玩家及血条（临时）
-	painter.setBrush(Qt::blue);
-	painter.setPen(Qt::NoPen);
-	double playerRadius = cellSize * 0.3;
-	painter.drawEllipse(playerPos, playerRadius, playerRadius);
+	//绘制玩家及血条
+	if (useImages)
+	{
+		double imgSize = cellSize * 0.6;
+		QRectF target(playerPos.x() - imgSize / 2.0, playerPos.y() - imgSize / 2.0, imgSize, imgSize);
+		painter.drawPixmap(target, playerImg, QRectF(playerImg.rect()));
+	}
+	else
+	{
+		painter.setBrush(Qt::blue);
+		painter.setPen(Qt::NoPen);
+		double playerRadius = cellSize * 0.3;
+		painter.drawEllipse(playerPos, playerRadius, playerRadius);
+	}
 
 	double barWidth = cellSize * 0.6;
 	double barHeight = cellSize * 0.1;
-	double barX = playerPos.x() - barWidth / 2;
+	double barX = playerPos.x() - barWidth / 2.0;
 	double barY = playerPos.y() - cellSize * 0.4;
 	painter.setBrush(Qt::red);
 	painter.drawRect(QRectF(barX, barY, barWidth, barHeight));
@@ -543,29 +579,66 @@ void GameWindow::paintEvent(QPaintEvent* event)
 	double width = barWidth * playerLives / maxLives;
 	painter.drawRect(QRectF(barX, barY, width, barHeight));
 
-	//绘制敌人及敌人血条（临时）
-	painter.setBrush(Qt::darkMagenta);
-	painter.setPen(Qt::NoPen);
-	double enemyRadius = cellSize * 0.3;
-	for (const Enemy& enemy : enemyList)
+	//绘制敌人及敌人血条
+	if (useImages)
 	{
-		painter.drawEllipse(enemy.pos, enemyRadius, enemyRadius);
+		double imgSize = cellSize * 0.6;
+		for (const Enemy& enemy : enemyList)
+		{
+			QRectF target(enemy.pos.x() - imgSize / 2.0, enemy.pos.y() - imgSize / 2.0, imgSize, imgSize);
+			painter.drawPixmap(target, enemyImg, QRect(enemyImg.rect()));
 
-		barX = enemy.pos.x() - barWidth / 2;
-		barY = enemy.pos.y() - cellSize * 0.4;
-		painter.setBrush(Qt::black);
-		painter.drawRect(QRectF(barX, barY, barWidth, barHeight));
-		painter.setBrush(Qt::red);
-		double width = barWidth * playerLives / maxLives;
-		painter.drawRect(QRectF(barX, barY, width, barHeight));
+			barX = enemy.pos.x() - barWidth / 2;
+			barY = enemy.pos.y() - cellSize * 0.4;
+			painter.setBrush(Qt::black);
+			painter.drawRect(QRectF(barX, barY, barWidth, barHeight));
+			painter.setBrush(Qt::red);
+			double width = barWidth * playerLives / maxLives;
+			painter.drawRect(QRectF(barX, barY, width, barHeight));
+		}
+	}
+	else
+	{
+		painter.setBrush(Qt::darkMagenta);
+		painter.setPen(Qt::NoPen);
+		double enemyRadius = cellSize * 0.3;
+		for (const Enemy& enemy : enemyList)
+		{
+			painter.drawEllipse(enemy.pos, enemyRadius, enemyRadius);
+
+			barX = enemy.pos.x() - barWidth / 2;
+			barY = enemy.pos.y() - cellSize * 0.4;
+			painter.setBrush(Qt::black);
+			painter.drawRect(QRectF(barX, barY, barWidth, barHeight));
+			painter.setBrush(Qt::red);
+			double width = barWidth * playerLives / maxLives;
+			painter.drawRect(QRectF(barX, barY, width, barHeight));
+		}
 	}
 
-	//绘制掉落物（临时）
-	painter.setBrush(Qt::yellow);
-	double itemRadius = cellSize * 0.15;
-	for (const DropItem& item : dropItemList)
+	//绘制掉落物
+	if (useImages)
 	{
-		painter.drawEllipse(item.pos, itemRadius, itemRadius);
+		double imgSize = cellSize * 0.4;
+		for (const DropItem& item : dropItemList)
+		{
+			QPixmap targetImg;
+			if (item.name == "生命药水") { targetImg = liveBottleImg; }
+			else if (item.name == "迅猛之靴") { targetImg = quickBootImg; }
+			else { targetImg = bombUpperImg; }
+
+			QRectF target(item.pos.x() - imgSize / 2.0, item.pos.y() - imgSize / 2.0, imgSize, imgSize);
+			painter.drawPixmap(target, targetImg, QRect(targetImg.rect()));
+		}
+	}
+	else
+	{
+		painter.setBrush(Qt::yellow);
+		double itemRadius = cellSize * 0.15;
+		for (const DropItem& item : dropItemList)
+		{
+			painter.drawEllipse(item.pos, itemRadius, itemRadius);
+		}
 	}
 }
 
@@ -586,9 +659,12 @@ void GameWindow::keyPressEvent(QKeyEvent* event)
 		isMoveright = true; break;
 	case Qt::Key_Space:
 		QPoint playerGrid = pixelToGrid(playerPos);
+		int playerBombcnt = 0;
 		for (const Bomb& bomb : bombList)
 		{
 			if (pixelToGrid(bomb.pos) == playerGrid) { return; }
+			if (bomb.ower == playerBomb) { playerBombcnt++; }
+			if (playerBombcnt >= maxBombPlace) { return; }
 		}
 		Bomb bomb;
 		bomb.pos = gridToPixel(playerGrid.x(), playerGrid.y());
@@ -604,7 +680,7 @@ void GameWindow::keyPressEvent(QKeyEvent* event)
 	}
 }
 
-//处理键盘事件（放松）
+//处理键盘事件（放下）
 void GameWindow::keyReleaseEvent(QKeyEvent* event)
 {
 	switch (event->key())
@@ -627,6 +703,12 @@ void GameWindow::resizeEvent(QResizeEvent* event)
 	updateCellSize();
 	recenterAll();
 	update();
+}
+
+//关闭电子幽灵态
+void GameWindow::disableGhost()
+{
+	isGhost = false;
 }
 
 //游戏胜利
@@ -696,10 +778,11 @@ void GameWindow::closeEvent(QCloseEvent* event)
 	SettingsManager::instance()->saveWindowGeometry(saveGeometry());
 	gameTimer->stop();
 	if (bagWin) { bagWin->close(); }
+	if (ghostTimer->isActive()) { ghostTimer->stop(); isGhost = false(); }
 	QWidget::closeEvent(event);
 }
 
-//========== 道具实现接口 ===========
+//============== 道具实现接口 ===============
 void GameWindow::addPlayerLives()
 {
 	playerLives = qMin(playerLives + 2, maxLives);
@@ -713,4 +796,60 @@ void GameWindow::increaseSpeed()
 void GameWindow::upBombRange()
 {
 	bombRange++;
+}
+
+void GameWindow::increaseMaxPlace()
+{
+	maxBombPlace++;
+}
+
+void GameWindow::stringUnraveEye_broken()
+{
+	maxLives += 2;
+	enemySpeedFactor *= 0.95;
+	int index = QRandomGenerator::global()->bounded(dropItems.size());
+	QString itemName = dropItems[index];
+	playerInfo.addItem(itemName);
+}
+
+void GameWindow::stringUnraveEye()
+{
+	maxLives += 2;
+	playerLives = qMin(playerLives + 2, maxLives);
+
+	for (Enemy& enemy : enemyList)
+	{
+		enemy.hp--;
+	}
+	enemyList.erase(std::remove_if(enemyList.begin(), enemyList.end(),
+		[](const Enemy& enemy) {return enemy.hp < 0; }), enemyList.end());
+
+	int index = QRandomGenerator::global()->bounded(dropItems.size());
+	QString itemName = dropItems[index];
+
+	playerInfo.addItem(itemName);
+	enemySpeedFactor *= 0.85;
+}
+
+void GameWindow::bonVoyagingStar_broken()
+{
+	playerLives = 1;
+	for (Enemy& enemy : enemyList)
+	{
+		enemy.hp = 1;
+	}
+	if (ghostTimer->isActive()) { ghostTimer->stop(); }
+	isGhost = true;
+	ghostTimer->start(8000);
+}
+
+void GameWindow::bonVoyagingStar()
+{
+	for (Enemy& enemy : enemyList)
+	{
+		enemy.hp = 1;
+	}
+	if (ghostTimer->isActive()) ghostTimer->stop();
+	isGhost = true;
+	ghostTimer->start(15000);
 }

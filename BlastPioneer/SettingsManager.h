@@ -1,6 +1,8 @@
 #pragma once
 #include <QSettings>
 #include <QString>
+#include <QDir>
+#include <QCoreApplication>
 
 class SettingsManager
 {

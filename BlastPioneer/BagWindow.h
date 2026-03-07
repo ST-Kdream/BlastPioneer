@@ -46,6 +46,4 @@ public:
 private slots:
 	void goBack();
 	void useItem();
-	void runningGame() { isGameRunning = true; }
-	void pauseGame() { isGameRunning = true; }
 };

@@ -8,7 +8,8 @@ void DataLoader::load()
 {
 	//加载玩家信息
 	PlayerInfo playerInfo;
-	QFile playerFile("playerData.json");
+	QString filePath = QCoreApplication::applicationDirPath() + "/Data/playerData.json";
+	QFile playerFile(filePath);
 	if (playerFile.exists() && playerFile.open(QIODevice::ReadOnly))
 	{
 		QByteArray data = playerFile.readAll();

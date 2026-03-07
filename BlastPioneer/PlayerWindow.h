@@ -10,6 +10,7 @@
 #include <QDialog>
 #include <QLineEdit>
 #include <QFile>
+#include <QDir>
 #include <QByteArray>
 #include <QShowEvent>
 #include <QCloseEvent>

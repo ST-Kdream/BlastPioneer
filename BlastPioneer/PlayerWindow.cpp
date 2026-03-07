@@ -120,7 +120,8 @@ void PlayerWindow::connectBtn()
 //保存玩家信息函数
 void PlayerWindow::savePlayerInfo()
 {
-	QFile file("playerData.json");
+	QString filePath = QCoreApplication::applicationDirPath() + "/Data/playerData.json";
+	QFile file(filePath);
 	if (file.open(QIODevice::WriteOnly))
 	{
 		QJsonDocument doc(playerInfo.toJson());
