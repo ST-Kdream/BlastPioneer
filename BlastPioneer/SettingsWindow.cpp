@@ -48,7 +48,7 @@ void SettingsWindow::setupUI()
 	cancelBtn = new QPushButton("取消");
 
 	//布局
-	QVBoxLayout* mainLayout = new QVBoxLayout();
+	QVBoxLayout* mainLayout = new QVBoxLayout(this);
 	mainLayout->addWidget(startupEffectCheck);
 	mainLayout->addWidget(gridCheck);
 

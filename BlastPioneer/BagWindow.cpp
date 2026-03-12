@@ -1,9 +1,14 @@
 #include "BagWindow.h"
+#include "SettingsManager.h"
+#include "PlayerWindow.h"
+#include "MainWindow.h"
+#include "GameWindow.h"
 
 //构造函数
 BagWindow::BagWindow(PlayerInfo& playerInfo, QWidget* parent, PlayerWindow* playerWin) :QWidget(parent), playerInfo(playerInfo), 
 	playerWin(playerWin),gameWin(nullptr)
 {
+	setWindowFlags(Qt::Window);
 	isGameRunning = false;
 
 	//遍历父窗口链找到主窗口
@@ -57,7 +62,7 @@ void BagWindow::setupUI()
 	itemList = new QListWidget(this);
 
 	//布局
-	QVBoxLayout* mainLayout = new QVBoxLayout();
+	QVBoxLayout* mainLayout = new QVBoxLayout(this);
 	mainLayout->addWidget(title, Qt::AlignLeft);
 	mainLayout->addWidget(itemList);
 
@@ -71,7 +76,7 @@ void BagWindow::setupUI()
 //加载资源图标
 void BagWindow::loadItemMap()
 {
-	QFile file(":/itemInfo.json");
+	QFile file(":/Data/itemInfo.json");
 	if (!file.open(QIODevice::ReadOnly))
 	{
 		QMessageBox::critical(this, "错误", "加载道具资源失败");
@@ -83,7 +88,8 @@ void BagWindow::loadItemMap()
 	QJsonDocument doc = QJsonDocument::fromJson(itemData);
 	if (!doc.isArray()) { return; }
 
-	for (auto val : doc.array())
+	QJsonArray array = doc.array();
+	for (const auto& val : array)
 	{
 		QJsonObject obj = val.toObject();
 		QString name = obj["name"].toString();
@@ -161,19 +167,30 @@ void BagWindow::setGameWindow(GameWindow* gameWin)
 	isGameRunning = (gameWin != nullptr);
 }
 
-//返回
 void BagWindow::goBack()
 {
-	this->hide();
 	// 保存窗口设置
 	SettingsManager::instance()->saveWindowGeometry(saveGeometry());
 
-	if (playerWin)
+	// 确定返回目标
+	QWidget* target = nullptr;
+	if (gameWin) 
 	{
-		playerWin->show();
-		playerWin->raise();
-		playerWin->activateWindow();
+		target = gameWin;
 	}
+	else if (playerWin) 
+	{
+		target = playerWin;
+	}
+
+	if (target) 
+	{
+		target->show();
+		target->raise();
+		target->activateWindow();
+	}
+
+	hide();
 }
 
 //关闭窗口保存大小

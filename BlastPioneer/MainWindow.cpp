@@ -1,19 +1,12 @@
 #include "MainWindow.h"
-
-//构造函数（不初始化）
-MainWindow::MainWindow(QWidget* parent)
-{
-	playerInfo.setDefaults();
-	playerWin = nullptr;
-	levelSelectWin = nullptr;
-	rulesWin = nullptr;
-	bagWin = nullptr;
-	shopWin = nullptr;
-	settingsWin = nullptr;
-
-	btnConnect();
-	setupUI();
-}
+#include "RulesWindow.h"
+#include "PlayerWindow.h"
+#include "LevelSelectWindow.h"
+#include "SettingsManager.h"
+#include "SettingsWindow.h"
+#include "BagWindow.h"
+#include "ShopWindow.h"
+#include <QApplication>
 
 //构造函数（初始化）
 MainWindow::MainWindow(const PlayerInfo& playerInfo, const QList<Item>& items, QWidget* parent) :
@@ -25,7 +18,6 @@ MainWindow::MainWindow(const PlayerInfo& playerInfo, const QList<Item>& items, Q
 	bagWin = nullptr;
 	shopWin = nullptr;
 	settingsWin = nullptr;
-
 	setupUI();
 	btnConnect();
 	createWindows();
@@ -35,14 +27,23 @@ MainWindow::MainWindow(const PlayerInfo& playerInfo, const QList<Item>& items, Q
 void MainWindow::setupUI()
 {
 	setWindowTitle("爆破先锋-首页");
-	setFixedSize(800, 600);
+	QByteArray savedGeo = SettingsManager::instance()->loadWindowGeometry();
+	if (!savedGeo.isEmpty())
+	{
+		restoreGeometry(savedGeo);
+	}
+	else
+	{
+		resize(800, 600);
+		move(100, 100);
+	}
 
 	//创建控件
 	btn1 = new QPushButton("玩家信息", this);
 	btn2 = new QPushButton("单人游戏", this);
 	btn3 = new QPushButton("多人游戏", this);
 	btn4 = new QPushButton("游戏规则", this);
-	btn5 = new QPushButton("⚙", this);
+	btn5 = new QPushButton("设置", this);
 	mainTitle = new QLabel("爆破先锋", this);
 
 	//样式设置
@@ -60,6 +61,7 @@ void MainWindow::setupUI()
 	btn3->setObjectName("startBtn2");
 	btn4->setObjectName("rulesBtn");
 
+	
 	QString mainStyle = R"(
 								QPushButton{color: #000000; border-radius: 3px;}
 								#playerBtn{background-color: #33CCFF;}
@@ -79,26 +81,31 @@ void MainWindow::setupUI()
 	btn1->setStyleSheet(mainStyle);
 	btn2->setStyleSheet(mainStyle);
 	btn3->setStyleSheet(mainStyle);
+	
 
 	btn4->setFixedSize(60, 60);
+	
 	btn4->setStyleSheet(R"(
 								QPushButton{color:#000000; border-radius: 30px; background-color: #CC66FF;}
 								QPushButton:hover{background-color: #D999FF;}
 								QPushButton:pressed{background-color: #994DCC;}
 						   )");
+	
 
 	//布局（标题最上面，3行按钮垂直排布（按钮二、三在同一行），btn5在右下角）
-	QHBoxLayout* startLayout = new QHBoxLayout(this);
+	
+	QHBoxLayout* startLayout = new QHBoxLayout();
 	startLayout->addWidget(btn2);
 	startLayout->addWidget(btn3);
 
 	QVBoxLayout* mainLayout = new QVBoxLayout(this);
-	mainLayout->addWidget(mainTitle, 2);
-	mainLayout->addWidget(btn1, 1);
-	mainLayout->addLayout(startLayout, 2);
-	mainLayout->addWidget(btn4, 1);
-	mainLayout->addWidget(btn5,Qt::AlignRight);
+	mainLayout->addWidget(mainTitle);
+	mainLayout->addWidget(btn1);
+	mainLayout->addLayout(startLayout);
+	mainLayout->addWidget(btn4);
+	mainLayout->addWidget(btn5);
 	setLayout(mainLayout);
+	
 }
 
 //信号槽链接函数
@@ -149,15 +156,17 @@ Item* MainWindow::getItem(const QString& name)
 void MainWindow::GoPlayerWindow()
 {
 	this->hide();
-	if (!playerWin)
-	{
-		playerWin = new PlayerWindow(playerInfo,this);
-		playerWin->setAttribute(Qt::WA_DeleteOnClose);
-		connect(playerWin, &QObject::destroyed, this, [this]() { playerWin = nullptr; });
-	}
+
+	playerWin = new PlayerWindow(playerInfo, nullptr);
+	playerWin->setAttribute(Qt::WA_DeleteOnClose);
+	playerWin->setMainWin(this); // 关键：传入主窗口指针
+
+	connect(playerWin, &QObject::destroyed, this, [this]() {playerWin = nullptr;});
+
 	playerWin->show();
 	playerWin->raise();
 	playerWin->activateWindow();
+
 }
 
 void MainWindow::GoSingleGame()
@@ -167,7 +176,7 @@ void MainWindow::GoSingleGame()
 	{
 		levelSelectWin = new LevelSelectWindow(playerInfo,this);
 		levelSelectWin->setAttribute(Qt::WA_DeleteOnClose);
-		connect(levelSelectWin, &QObject::destroyed, this, [this]() {levelSelectWin = nullptr; });
+		connect(levelSelectWin, &QObject::destroyed, this, [this]() {levelSelectWin = nullptr; this->show(); });
 	}
 	levelSelectWin->show();
 	levelSelectWin->raise();
@@ -176,7 +185,7 @@ void MainWindow::GoSingleGame()
 
 void MainWindow::GoInternetGame()
 {
-	//未实现
+	QMessageBox::information(this, "提示", "暂未实现");
 }
 
 void MainWindow::GoRulesWindow()
@@ -186,7 +195,7 @@ void MainWindow::GoRulesWindow()
 	{
 		rulesWin = new RulesWindow(this, this);
 		rulesWin->setAttribute(Qt::WA_DeleteOnClose);
-		connect(rulesWin, &QObject::destroyed, this, [this]() {rulesWin = nullptr; });
+		connect(rulesWin, &QObject::destroyed, this, [this]() {rulesWin = nullptr; this->show(); });
 	}
 	rulesWin->show();
 	rulesWin->raise();
@@ -204,4 +213,20 @@ void MainWindow::GoSettingsWindow()
 	settingsWin->show();
 	settingsWin->raise();
 	settingsWin->activateWindow();
+}
+
+
+void MainWindow::showEvent(QShowEvent* event)
+{
+	QByteArray savedGeo = SettingsManager::instance()->loadWindowGeometry();
+	if (!savedGeo.isEmpty())
+	{
+		restoreGeometry(savedGeo);
+	}
+	else
+	{
+		resize(800, 600);
+		move(100, 100);
+	}
+	QWidget::showEvent(event);
 }

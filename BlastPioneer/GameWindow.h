@@ -1,8 +1,5 @@
 #pragma once
-#include "levelSelectWindow.h"
 #include "PlayerInfo.h"
-#include "BagWindow.h"
-#include "SettingsManager.h"
 #include <QWidget>
 #include <QTimer>
 #include <QKeyEvent>
@@ -17,6 +14,8 @@
 #include <QDir>
 #include <QPixmap>
 #include <algorithm>
+
+class BagWindow;
 
 //地图元素枚举
 enum TileType
@@ -90,8 +89,8 @@ private:
 	bool isMoveup, isMovedown, isMoveleft, isMoveright;
 
 	//速度常量
-	const double playerSpeed = 1.5;
-	const double enemySpeed = 1.0;
+	const double playerSpeed = 3.5;
+	const double enemySpeed = 3.5;
 	double speedFactor; //速度因子
 	double enemySpeedFactor;
 
@@ -144,15 +143,15 @@ private:
 	void recenterAll();
 
 public:
-	GameWindow(int level, PlayerInfo& playerInfo, QWidget* parent = nullptr);
+	GameWindow(int level, PlayerInfo& info, QWidget* parent = nullptr);
 	~GameWindow();
 	void setLevel(int level);
 
 	//道具实现接口
-	inline void addPlayerLives();
-	inline void increaseSpeed();
-	inline void upBombRange();
-	inline void increaseMaxPlace();
+	void addPlayerLives();
+	void increaseSpeed();
+	void upBombRange();
+	void increaseMaxPlace();
 	void stringUnraveEye_broken();
 	void stringUnraveEye();
 	void bonVoyagingStar_broken();

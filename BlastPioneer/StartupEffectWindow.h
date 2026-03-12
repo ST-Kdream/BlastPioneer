@@ -18,6 +18,7 @@ private:
 	DataLoader* dataLoader;
 	bool isDataLoaded;
 	bool isMinTimePassed;
+	bool isClosed = false;
 
 public:
 	explicit StartupEffectWindow(QWidget* parent = nullptr);

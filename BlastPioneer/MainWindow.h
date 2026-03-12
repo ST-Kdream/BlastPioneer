@@ -1,14 +1,19 @@
 #pragma once
-#include "RulesWindow.h"
-#include "PlayerWindow.h"
-#include "LevelSelectWindow.h"
-#include "SettingsManager.h"
-#include "SettingsWindow.h"
+#include "Item.h"
+#include "PlayerInfo.h"
 #include <QWidget>
 #include <QLabel>
 #include <QPushButton>
 #include <QHBoxLayout>
 #include <QVBoxLayout>
+
+class PlayerWindow;
+class RulesWindow;
+class LevelSelectWindow;
+class BagWindow;
+class ShopWindow;
+class SettingsWindow;
+class PlayerInfo;
 
 class MainWindow :public QWidget
 {
@@ -37,9 +42,10 @@ private:
 	ShopWindow* shopWin;
 	SettingsWindow* settingsWin;
 
+	void showEvent(QShowEvent* event) override;
+
 public:
-	explicit MainWindow(QWidget* parent = nullptr);
-	MainWindow(const PlayerInfo& playerInfo, const QList<Item>& items, QWidget* parent = nullptr);
+	explicit MainWindow(const PlayerInfo& playerInfo, const QList<Item>& items, QWidget* parent = nullptr);
 	void btnConnect();
 	void createWindows(); //预创建常用窗口
 	//返回预创建窗口

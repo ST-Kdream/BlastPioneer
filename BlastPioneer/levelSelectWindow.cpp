@@ -1,8 +1,12 @@
 #include "LevelSelectWindow.h"
+#include "MainWindow.h"
+#include "GameWindow.h"
+#include "SettingsManager.h"
 
 //构造函数
 LevelSelectWindow::LevelSelectWindow(PlayerInfo& playerInfo, QWidget* parent) :playerInfo(playerInfo), QWidget(parent)
 {
+	setWindowFlags(Qt::Window);
 	gameWin = nullptr;
 	mainWin = qobject_cast<MainWindow*>(parent);
 	setupUI();
@@ -95,16 +99,15 @@ void LevelSelectWindow::showEvent(QShowEvent* event)
 //两个窗口跳转函数
 void LevelSelectWindow::goBack()
 {
-	this->hide();
-	// 保存窗口设置
 	SettingsManager::instance()->saveWindowGeometry(saveGeometry());
 
-	if (mainWin)
-	{
+	if (mainWin) {
 		mainWin->show();
 		mainWin->raise();
 		mainWin->activateWindow();
 	}
+
+	hide();
 }
 
 void LevelSelectWindow::goGameWindow(int level)
@@ -115,7 +118,7 @@ void LevelSelectWindow::goGameWindow(int level)
 	}
 	else
 	{
-		gameWin = new GameWindow(level, playerInfo, this);   //这里有bug，记得修
+		gameWin = new GameWindow(level, playerInfo, this);
 		gameWin->setAttribute(Qt::WA_DeleteOnClose);
 		connect(gameWin, &QObject::destroyed, this, [this]() 
 			{

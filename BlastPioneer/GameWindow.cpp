@@ -1,11 +1,17 @@
 #include "GameWindow.h"
+#include "levelSelectWindow.h"
+#include "PlayerInfo.h"
+#include "BagWindow.h"
+#include "SettingsManager.h"
+#include "MainWindow.h"
 
 //构造函数
-GameWindow::GameWindow(int level, PlayerInfo& playerInfo, QWidget* parent)
-	: level(level), QWidget(parent), playerInfo(playerInfo), maxLives(3), bombRange(2), maxBombPlace(3),
+GameWindow::GameWindow(int level, PlayerInfo& info, QWidget* parent)
+	: level(level), QWidget(parent), playerInfo(info), maxLives(3), bombRange(2), maxBombPlace(3),
 	isMoveup(false), isMovedown(false), isMoveleft(false), isMoveright(false), cellSize(0),
 	bagWin(nullptr), state(paused), speedFactor(1.0), enemySpeedFactor(1.0), ghostTimer(nullptr),isGhost(false)
 {
+	setWindowFlags(Qt::Window);
 	setWindowTitle(QString("关卡-%1").arg(level));
 
 	QByteArray savedGeo = SettingsManager::instance()->loadWindowGeometry();
@@ -77,7 +83,7 @@ void GameWindow::loadImages()
 	enemyImg = loadPixmap("enemy.png");
 	bombImg = loadPixmap("bomb.png");
 	liveBottleImg = loadPixmap("liveBottle.png");
-	quickBootImg = loadPixmap("quickBoot.png");
+	quickBootImg = loadPixmap("quickBoots.png");
 	bombUpperImg = loadPixmap("bombUpper.png");
 
 	useImages = !playerImg.isNull() && !enemyImg.isNull() && !bombImg.isNull() &&
@@ -176,7 +182,7 @@ void GameWindow::spawnEnemies(int count)
 			{
 				Enemy enemy;
 				enemy.pos = gridToPixel(row, col);
-				enemy.maxHp = 2 + level / 2;
+				enemy.maxHp = 3 + level / 2;
 				enemy.hp = enemy.maxHp;
 				enemy.velocity = QPointF(0, 0);
 				enemy.bombCooldown = 0;
@@ -230,8 +236,8 @@ void GameWindow::updateEnemies()
 
 	for (Enemy& enemy : enemyList)
 	{
-		//移动敌人（5%概率改变方向）
-		if (QRandomGenerator::global()->bounded(100) < 5)
+		//移动敌人（1%概率改变方向）
+		if (QRandomGenerator::global()->bounded(100) < 1)
 		{
 			int direction = QRandomGenerator::global()->bounded(4);
 			enemy.velocity = QPointF(0,0);
@@ -286,7 +292,7 @@ void GameWindow::tryPlaceEnemyBomb(Enemy& enemy)
 	if (frameRate == 30) { p = 17; }
 	else if (frameRate == 60) { p = 8; }
 	else { p = 4; }
-	if (QRandomGenerator::global()->bounded(10000) < p)
+	if (QRandomGenerator::global()->bounded(100) < 100) //调试用
 	{
 		QPoint grid = pixelToGrid(enemy.pos);
 		for (const Bomb& bomb : bombList)
@@ -346,10 +352,10 @@ void GameWindow::explodeBomb(const Bomb& bomb)
 		}
 	}
 
-	for (const QPoint& cell : explosionCells)
+	for (const QPoint& explosionCell : explosionCells)
 	{
-		int row = cell.x();
-		int col = cell.y();
+		int row = explosionCell.x();
+		int col = explosionCell.y();
 		TileType& tile = map[row][col];
 
 		for (const QPoint& cell : explosionCells)
@@ -658,6 +664,7 @@ void GameWindow::keyPressEvent(QKeyEvent* event)
 	case Qt::Key_D:
 		isMoveright = true; break;
 	case Qt::Key_Space:
+	{
 		QPoint playerGrid = pixelToGrid(playerPos);
 		int playerBombcnt = 0;
 		for (const Bomb& bomb : bombList)
@@ -674,6 +681,7 @@ void GameWindow::keyPressEvent(QKeyEvent* event)
 		bombList.append(bomb);
 		map[playerGrid.x()][playerGrid.y()] = bombTile;
 		break;
+	}
 	case Qt::Key_B:
 		openBag();
 		break;
@@ -739,11 +747,14 @@ void GameWindow::loseGame()
 //打开背包
 void GameWindow::openBag()
 {
-	if (!bagWin)
-	{
-		bagWin = new BagWindow(playerInfo, this, nullptr);
+	if (!bagWin) {
+		bagWin = new BagWindow(playerInfo, nullptr, nullptr); // 独立窗口
 		bagWin->setAttribute(Qt::WA_DeleteOnClose);
-		connect(bagWin, &QObject::destroyed, this, [this]() {bagWin = nullptr; });
+		bagWin->setGameWin(this);   // 设置游戏窗口指针
+		// 查找并设置主窗口指针（可选）
+		MainWindow* mainWin = qobject_cast<MainWindow*>(parent()->parent()); // 根据实际层级调整
+		if (mainWin) bagWin->setMainWin(mainWin);
+		connect(bagWin, &QObject::destroyed, this, [this]() { bagWin = nullptr; });
 		connect(bagWin, &QObject::destroyed, this, &GameWindow::closeBag);
 	}
 	state = paused;
@@ -778,7 +789,7 @@ void GameWindow::closeEvent(QCloseEvent* event)
 	SettingsManager::instance()->saveWindowGeometry(saveGeometry());
 	gameTimer->stop();
 	if (bagWin) { bagWin->close(); }
-	if (ghostTimer->isActive()) { ghostTimer->stop(); isGhost = false(); }
+	if (ghostTimer->isActive()) { ghostTimer->stop(); isGhost = false; }
 	QWidget::closeEvent(event);
 }
 

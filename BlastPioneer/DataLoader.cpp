@@ -31,7 +31,7 @@ void DataLoader::load()
 
 	//加载商店物品
 	QList<Item> items;
-	QFile itemFile(":/itemInfo.json");
+	QFile itemFile(":/Data/itemInfo.json");
 	if (itemFile.open(QIODevice::ReadOnly))
 	{
 		QByteArray data = itemFile.readAll();

@@ -1,4 +1,5 @@
 #include "Item.h"
+QMap<QString, std::function<bool(GameWindow*)>> Item::usageMap;
 
 //构造函数
 Item::Item(const QString& name, const QString& description, int price, const QString& iconPath)

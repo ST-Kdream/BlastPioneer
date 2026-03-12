@@ -3,13 +3,13 @@
     "name": "生命药水",
     "description": "回复2点生命值",
     "price": 50,
-    "iconPath": "Assets/picture/lifeBottle.png"
+    "iconPath": "Assets/picture/liveBottle.png"
   },
   {
     "name": "迅猛之靴",
     "description": "移动速度提升15%",
     "price": 50,
-    "iconPath": "Assets/picture/quickBoot.png"
+    "iconPath": "Assets/picture/quickBoots.png"
   },
   {
     "name": "改造扳手",

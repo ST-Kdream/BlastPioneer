@@ -1,8 +1,11 @@
 #include "RulesWindow.h"
+#include "MainWindow.h"
+#include "SettingsManager.h"
 
 //构造函数
 RulesWindow::RulesWindow(MainWindow* mainWin, QWidget* parent) :QWidget(parent),mainWin(mainWin)
 {
+	setWindowFlags(Qt::Window);
 	setupUI();
 }
 
@@ -35,7 +38,7 @@ void RulesWindow::setupUI()
 	getRules();
 
 	//布局
-	QVBoxLayout* mainLayout = new QVBoxLayout();
+	QVBoxLayout* mainLayout = new QVBoxLayout(this);
 	mainLayout->addWidget(Qrules);
 	mainLayout->addWidget(backBtn);
 	setLayout(mainLayout);
@@ -51,7 +54,7 @@ RulesWindow::~RulesWindow()
 //读取规则函数
 void RulesWindow::getRules()
 {
-	QFile file(":/gamerules.txt");
+	QFile file(":/Data/gamerules.txt");
 	QString content;
 	if (file.open(QIODevice::ReadOnly) | QIODevice::Text)
 	{
@@ -68,12 +71,15 @@ void RulesWindow::getRules()
 //返回函数
 void RulesWindow::goBack()
 {
-	// 保存窗口设置
 	SettingsManager::instance()->saveWindowGeometry(saveGeometry());
 
-	// 显示主窗口，关闭规则窗口
-	mainWin->show();
-	this->hide();
+	if (mainWin) {
+		mainWin->show();
+		mainWin->raise();
+		mainWin->activateWindow();
+	}
+
+	close();
 }
 
 //重写关闭函数

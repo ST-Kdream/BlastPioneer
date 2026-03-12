@@ -1,6 +1,4 @@
 #pragma once
-#include "MainWindow.h"
-#include "SettingsManager.h"
 #include <QWidget>
 #include <QPushButton>
 #include <QVBoxLayout>
@@ -12,6 +10,8 @@
 #include <string>
 #include <sstream>
 #include <fstream>
+
+class MainWindow;
 
 class RulesWindow :public QWidget
 {

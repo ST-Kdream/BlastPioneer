@@ -1,6 +1,4 @@
 #pragma once
-#include "MainWindow.h";
-#include "GameWindow.h"
 #include <QWidget>
 #include <QPushButton>
 #include <QVBoxLayout>
@@ -9,6 +7,10 @@
 #include <QGridLayout>
 #include <QMessageBox>
 #include <QShowEvent>
+
+class MainWindow;
+class GameWindow;
+class PlayerInfo;
 
 class LevelSelectWindow :public QWidget
 {

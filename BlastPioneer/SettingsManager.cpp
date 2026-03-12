@@ -4,7 +4,15 @@ SettingsManager* SettingsManager::m_instance = nullptr;
 
 //构造函数
 SettingsManager::SettingsManager() :settings(QDir(QCoreApplication::applicationDirPath()).
-    filePath("Data/settings.ini"),QSettings::IniFormat) { }
+    filePath("Data/settings.ini"),QSettings::IniFormat)
+{
+    qDebug() << "Settings file path:" << settings.fileName();
+    QDir dir(QCoreApplication::applicationDirPath() + "/Data");
+    if (!dir.exists())
+    {
+        dir.mkpath(".");
+    }
+}
 
 //单例模式设置
 SettingsManager* SettingsManager::instance()

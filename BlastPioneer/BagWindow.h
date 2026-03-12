@@ -1,13 +1,10 @@
 #pragma once
 #include "PlayerInfo.h"
-#include "SettingsManager.h"
-#include "PlayerWindow.h"
-#include "MainWindow.h"
-#include "GameWindow.h"
 #include <QWidget>
 #include <QMap>
 #include <QListWidget>
 #include <QPushButton>
+#include <QJsonArray>
 #include <QLabel>
 #include <QHBoxLayout>
 #include <QVBoxLayout>
@@ -15,6 +12,11 @@
 #include <QCoreApplication>
 #include <QIcon>
 #include <QDir>
+
+class MainWindow;
+class PlayerWindow;
+class GameWindow;
+class PlayerInfo;
 
 class BagWindow :public QWidget
 {
@@ -40,8 +42,10 @@ private:
 	void closeEvent(QCloseEvent* event) override;
 
 public:
-	explicit BagWindow(PlayerInfo& playerInfo, QWidget* parent = nullptr, PlayerWindow* playerWin);
+	explicit BagWindow(PlayerInfo& playerInfo, QWidget* parent = nullptr, PlayerWindow* playerWin = nullptr);
 	void setGameWindow(GameWindow* gameWin);
+	void setGameWin(GameWindow* gameWin) { this->gameWin = gameWin; }
+	void setMainWin(MainWindow* mainWin) { this->mainWin = mainWin; }
 
 private slots:
 	void goBack();

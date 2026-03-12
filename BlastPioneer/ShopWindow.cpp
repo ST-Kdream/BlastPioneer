@@ -1,11 +1,15 @@
 #include "ShopWindow.h"
+#include "PlayerInfo.h"
+#include "SettingsManager.h"
+#include "PlayerWindow.h"
 
 //构造函数
 ShopWindow::ShopWindow(PlayerInfo& playerInfo, QWidget* parent, PlayerWindow* playerWin) :QWidget(parent), playerInfo(playerInfo), playerWin(playerWin)
 {
+	setWindowFlags(Qt::Window);
 	loadShopItems();
-	refreshShopList();
 	setupUI();
+	refreshShopList();
 }
 
 //UI设置
@@ -92,7 +96,7 @@ void ShopWindow::refreshShopList()
 //从json文件读取道具
 void ShopWindow::loadShopItems()
 {
-	QFile file(":/itemInfo.json");
+	QFile file(":/Data/itemInfo.json");
 	if (!file.open(QIODevice::ReadOnly))
 	{
 		QMessageBox::critical(this, "错误", "加载道具资源失败");
@@ -153,13 +157,18 @@ void ShopWindow::updateCoins()
 //返回
 void ShopWindow::goBack()
 {
-	this->hide();
-	if (playerWin)
-	{
+	SettingsManager::instance()->saveWindowGeometry(saveGeometry());
+
+	if (playerWin) {
 		playerWin->show();
 		playerWin->raise();
 		playerWin->activateWindow();
 	}
-	// 保存窗口设置
-	SettingsManager::instance()->saveWindowGeometry(saveGeometry());
+	else if (mainWin) {
+		mainWin->show();
+		mainWin->raise();
+		mainWin->activateWindow();
+	}
+
+	close();
 }

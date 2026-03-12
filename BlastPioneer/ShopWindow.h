@@ -1,8 +1,6 @@
 #pragma once
 #include "Item.h"
-#include "PlayerInfo.h"
-#include "SettingsManager.h"
-#include "PlayerWindow.h"
+#include "MainWindow.h"
 #include <QWidget>
 #include <QList>
 #include <QListWidget>
@@ -16,6 +14,9 @@
 #include <QDir>
 #include <QJsonArray>
 
+class PlayerWindow;
+class PlayerInfo;
+
 class ShopWindow :public QWidget
 {
 	Q_OBJECT
@@ -23,6 +24,7 @@ class ShopWindow :public QWidget
 private:
 	PlayerWindow* playerWin;
 	PlayerInfo& playerInfo;
+	MainWindow* mainWin;
 	QList<Item> shopItems;
 	QListWidget* shopList;
 	QLabel* coinsLabel;
@@ -36,7 +38,8 @@ private:
 	void setupUI();
 
 public:
-	explicit ShopWindow(PlayerInfo& playerInfo, QWidget* parent = nullptr, PlayerWindow* playerWin);;
+	explicit ShopWindow(PlayerInfo& playerInfo, QWidget* parent = nullptr, PlayerWindow* playerWin = nullptr);
+	void setMainWin(MainWindow* mainWin) { this->mainWin = mainWin; }
 
 private slots:
 	void buyItem();

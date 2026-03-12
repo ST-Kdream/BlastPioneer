@@ -27,7 +27,14 @@ StartupEffectWindow::StartupEffectWindow(QWidget* parent) :
 	dataLoader = new DataLoader();
 	dataLoader->moveToThread(loaderThread);
 	connect(loaderThread, &QThread::started, dataLoader, &DataLoader::load);
-	connect(dataLoader, &DataLoader::finished, &StartupEffectWindow::onDataLoaded);
+	connect(dataLoader, &DataLoader::finished, this, &StartupEffectWindow::onDataLoaded);
+
+	connect(this, &QQuickWidget::statusChanged, [this](QQuickWidget::Status status) {
+		qDebug() << "QML status:" << status;
+		if (status == QQuickWidget::Error) {
+			qDebug() << "QML errors:" << this->errors();
+		}
+		});
 }
 
 //析构函数
@@ -74,6 +81,8 @@ void StartupEffectWindow::maxTimeout()
 //关闭窗口
 void StartupEffectWindow::closeWindow()
 {
+	if (isClosed) { return; }
+	isClosed = true;
 	if (loaderThread->isRunning())
 	{
 		loaderThread->quit();

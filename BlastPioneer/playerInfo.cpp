@@ -134,7 +134,7 @@ void PlayerInfo::removeItem(const QString& itemName, int count)
 }
 
 //设置段位
-void PlayerInfo::setEP(int EP)
+void PlayerInfo::setRank(int EP)
 {
 	this->EP = EP;
 	Rank newRank;
