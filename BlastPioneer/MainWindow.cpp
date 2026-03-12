@@ -123,6 +123,7 @@ void MainWindow::createWindows()
 {
 	//玩家窗口
 	playerWin = new PlayerWindow(playerInfo, this);
+	playerWin->setMainWin(this);
 	playerWin->hide();
 	playerWin->setAttribute(Qt::WA_DeleteOnClose);
 	//关卡选择窗口
@@ -131,10 +132,12 @@ void MainWindow::createWindows()
 	levelSelectWin->setAttribute(Qt::WA_DeleteOnClose);
 	//背包窗口
 	bagWin = new BagWindow(playerInfo, this, playerWin);
+	bagWin->setMainWin(this);
 	bagWin->hide();
 	bagWin->setAttribute(Qt::WA_DeleteOnClose);
 	//商店窗口
 	shopWin = new ShopWindow(playerInfo, this, playerWin);
+	shopWin->setMainWin(this);
 	shopWin->hide();
 	shopWin->setAttribute(Qt::WA_DeleteOnClose);
 }
@@ -152,16 +155,31 @@ Item* MainWindow::getItem(const QString& name)
 	return nullptr;
 }
 
+void MainWindow::savePlayerData()
+{
+	QString filePath = QCoreApplication::applicationDirPath() + "/Data/playerData.json";
+	QFile file(filePath);
+	if (file.open(QIODevice::WriteOnly))
+	{
+		QJsonDocument doc(playerInfo.toJson());
+		file.write(doc.toJson());
+		file.close();
+	}
+}
+
 //5个切换窗口的函数
 void MainWindow::GoPlayerWindow()
 {
 	this->hide();
 
-	playerWin = new PlayerWindow(playerInfo, nullptr);
-	playerWin->setAttribute(Qt::WA_DeleteOnClose);
-	playerWin->setMainWin(this); // 关键：传入主窗口指针
+	if (!playerWin)
+	{
+		playerWin = new PlayerWindow(playerInfo, nullptr);
+		playerWin->setAttribute(Qt::WA_DeleteOnClose);
+		playerWin->setMainWin(this); 
 
-	connect(playerWin, &QObject::destroyed, this, [this]() {playerWin = nullptr;});
+		connect(playerWin, &QObject::destroyed, this, [this]() {playerWin = nullptr; });
+	}
 
 	playerWin->show();
 	playerWin->raise();

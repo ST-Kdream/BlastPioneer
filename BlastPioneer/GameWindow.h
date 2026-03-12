@@ -16,6 +16,7 @@
 #include <algorithm>
 
 class BagWindow;
+class MainWindow;
 
 //地图元素枚举
 enum TileType
@@ -68,6 +69,7 @@ private:
 	PlayerInfo playerInfo;
 	QTimer* gameTimer;
 	BagWindow* bagWin;
+	MainWindow* mainWin;
 
 	//游戏状态枚举
 	enum GameState { running, paused, victory, defeat };
@@ -143,7 +145,7 @@ private:
 	void recenterAll();
 
 public:
-	GameWindow(int level, PlayerInfo& info, QWidget* parent = nullptr);
+	GameWindow(int level, PlayerInfo& info, MainWindow* mainWin, QWidget* parent = nullptr);
 	~GameWindow();
 	void setLevel(int level);
 

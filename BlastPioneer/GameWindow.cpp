@@ -6,8 +6,8 @@
 #include "MainWindow.h"
 
 //构造函数
-GameWindow::GameWindow(int level, PlayerInfo& info, QWidget* parent)
-	: level(level), QWidget(parent), playerInfo(info), maxLives(3), bombRange(2), maxBombPlace(3),
+GameWindow::GameWindow(int level, PlayerInfo& info,MainWindow* mainWin,QWidget* parent)
+	: level(level), QWidget(parent),mainWin(mainWin), playerInfo(info), maxLives(3), bombRange(2), maxBombPlace(3),
 	isMoveup(false), isMovedown(false), isMoveleft(false), isMoveright(false), cellSize(0),
 	bagWin(nullptr), state(paused), speedFactor(1.0), enemySpeedFactor(1.0), ghostTimer(nullptr),isGhost(false)
 {
@@ -236,30 +236,29 @@ void GameWindow::updateEnemies()
 
 	for (Enemy& enemy : enemyList)
 	{
-		//移动敌人（1%概率改变方向）
-		if (QRandomGenerator::global()->bounded(100) < 1)
+		//移动敌人（5%概率改变方向）
+		if (QRandomGenerator::global()->bounded(100) < 5)
 		{
 			int direction = QRandomGenerator::global()->bounded(4);
-			enemy.velocity = QPointF(0,0);
 			switch (direction)
 			{
 			case 0:
-				enemy.velocity = QPointF(0, -enemyPixelSpeed * frameTime);
+				enemy.velocity = QPointF(0, -enemyPixelSpeed);
 				break;
 			case 1: 
-				enemy.velocity = QPointF(0, enemyPixelSpeed * frameTime);
+				enemy.velocity = QPointF(0, enemyPixelSpeed);
 				break;
 			case 2: 
-				enemy.velocity = QPointF(-enemyPixelSpeed * frameTime, 0); 
+				enemy.velocity = QPointF(-enemyPixelSpeed, 0); 
 				break;
 			case 3: 
-				enemy.velocity = QPointF(enemyPixelSpeed * frameTime, 0); 
+				enemy.velocity = QPointF(enemyPixelSpeed, 0); 
 				break;
 			}
 		}
 
 		//尝试更新敌人位置和地图标记
-		QPointF newPos = enemy.pos + enemy.velocity;
+		QPointF newPos = enemy.pos + enemy.velocity * frameTime;
 		QPoint newGrid = pixelToGrid(newPos);
 		if (isWalkable(newGrid.x(), newGrid.y()))
 		{
@@ -271,12 +270,12 @@ void GameWindow::updateEnemies()
 			}
 			enemy.pos = newPos;
 		}
-		enemy.velocity = QPointF(0, 0);
+		else { enemy.velocity = QPointF(0, 0); }
 
 		//修改冷却时间并尝试放置炸弹
 		if (enemy.bombCooldown > 0)
 		{
-			enemy.bombCooldown--;
+			enemy.bombCooldown-=frameTime;
 		}
 		else
 		{
@@ -292,7 +291,7 @@ void GameWindow::tryPlaceEnemyBomb(Enemy& enemy)
 	if (frameRate == 30) { p = 17; }
 	else if (frameRate == 60) { p = 8; }
 	else { p = 4; }
-	if (QRandomGenerator::global()->bounded(100) < 100) //调试用
+	if (QRandomGenerator::global()->bounded(100) < p)
 	{
 		QPoint grid = pixelToGrid(enemy.pos);
 		for (const Bomb& bomb : bombList)
@@ -302,9 +301,9 @@ void GameWindow::tryPlaceEnemyBomb(Enemy& enemy)
 		}
 		Bomb bomb;
 		bomb.bombRange = 2;
-		bomb.pos = grid;
+		bomb.pos = gridToPixel(grid.x(), grid.y());
 		bomb.ower = EnemyBomb;
-		bomb.timer = 1.5f;
+		bomb.timer = 3.0f;
 		bombList.append(bomb);
 		map[grid.x()][grid.y()] = bombTile;
 		enemy.bombCooldown = 3.0f;
@@ -358,49 +357,43 @@ void GameWindow::explodeBomb(const Bomb& bomb)
 		int col = explosionCell.y();
 		TileType& tile = map[row][col];
 
-		for (const QPoint& cell : explosionCells)
+		//伤害敌人逻辑
+		if (bomb.ower == playerBomb)
 		{
-			int row = cell.x();
-			int col = cell.y();
-
-			//伤害敌人逻辑
-			if (bomb.ower == playerBomb)
+			for (Enemy& enemy : enemyList)
 			{
-				for (Enemy& enemy : enemyList)
+				if (pixelToGrid(enemy.pos) == explosionCell)
 				{
-					if (pixelToGrid(enemy.pos) == cell)
-					{
-						enemy.hp--;
-						if (enemy.hp <= 0) { spawnDropItem(enemy.pos); }
-					}
-				}
-				enemyList.erase(std::remove_if(enemyList.begin(), enemyList.end(),
-					[](const Enemy& e) {return e.hp <= 0; }), enemyList.end());
-			}
-			//伤害玩家逻辑
-			else
-			{
-				QPoint playerGrid = pixelToGrid(playerPos);
-				if (playerGrid == cell)
-				{
-					playerLives--;
-					if (playerLives <= 0) { loseGame(); }
+					enemy.hp--;
+					if (enemy.hp <= 0) { spawnDropItem(enemy.pos); }
 				}
 			}
-
-			//砖块更新逻辑
-			if (tile == brickTile)
+			enemyList.erase(std::remove_if(enemyList.begin(), enemyList.end(),
+				[](const Enemy& e) {return e.hp <= 0; }), enemyList.end());
+		}
+		//伤害玩家逻辑
+		else
+		{
+			QPoint playerGrid = pixelToGrid(playerPos);
+			if (playerGrid == explosionCell)
 			{
-				tile = emptyTile;
-				//15%概率生成掉落物
-				if (QRandomGenerator::global()->bounded(100) < 15)
-				{
-					spawnDropItem(gridToPixel(row, col));
-				}
-				else if (tile != wallTile)
-				{
-					tile = explosionTile;
-				}
+				playerLives--;
+				if (playerLives <= 0) { loseGame(); }
+			}
+		}
+
+		//砖块更新逻辑
+		if (tile == brickTile)
+		{
+			tile = emptyTile;
+			//15%概率生成掉落物
+			if (QRandomGenerator::global()->bounded(100) < 15)
+			{
+				spawnDropItem(gridToPixel(row, col));
+			}
+			else if (tile != wallTile)
+			{
+				tile = explosionTile;
 			}
 		}
 	}
@@ -579,7 +572,7 @@ void GameWindow::paintEvent(QPaintEvent* event)
 	double barHeight = cellSize * 0.1;
 	double barX = playerPos.x() - barWidth / 2.0;
 	double barY = playerPos.y() - cellSize * 0.4;
-	painter.setBrush(Qt::red);
+	painter.setBrush(Qt::white);
 	painter.drawRect(QRectF(barX, barY, barWidth, barHeight));
 	painter.setBrush(Qt::green);
 	double width = barWidth * playerLives / maxLives;
@@ -596,10 +589,10 @@ void GameWindow::paintEvent(QPaintEvent* event)
 
 			barX = enemy.pos.x() - barWidth / 2;
 			barY = enemy.pos.y() - cellSize * 0.4;
-			painter.setBrush(Qt::black);
+			painter.setBrush(Qt::white);
 			painter.drawRect(QRectF(barX, barY, barWidth, barHeight));
 			painter.setBrush(Qt::red);
-			double width = barWidth * playerLives / maxLives;
+			double width = barWidth * static_cast<double>(enemy.hp) / enemy.maxHp;
 			painter.drawRect(QRectF(barX, barY, width, barHeight));
 		}
 	}
@@ -614,10 +607,10 @@ void GameWindow::paintEvent(QPaintEvent* event)
 
 			barX = enemy.pos.x() - barWidth / 2;
 			barY = enemy.pos.y() - cellSize * 0.4;
-			painter.setBrush(Qt::black);
+			painter.setBrush(Qt::red);
 			painter.drawRect(QRectF(barX, barY, barWidth, barHeight));
 			painter.setBrush(Qt::red);
-			double width = barWidth * playerLives / maxLives;
+			double width = barWidth * static_cast<double>(enemy.hp) / enemy.maxHp;
 			painter.drawRect(QRectF(barX, barY, width, barHeight));
 		}
 	}
@@ -730,6 +723,7 @@ void GameWindow::winGame()
 	}
 	playerInfo.setCoins(playerInfo.getCoins() + 50 + 5 * level);
 	playerInfo.setEP(playerInfo.getEP() + 10 * level);
+	if (mainWin) mainWin->savePlayerData();
 	QMessageBox::information(this, "胜利",
 		QString("恭喜通过关卡 %1！\n获得 %2 金币").arg(level).arg(50 * level));
 	close();
@@ -747,13 +741,12 @@ void GameWindow::loseGame()
 //打开背包
 void GameWindow::openBag()
 {
-	if (!bagWin) {
-		bagWin = new BagWindow(playerInfo, nullptr, nullptr); // 独立窗口
+	if (!bagWin) 
+	{
+		bagWin = new BagWindow(playerInfo, nullptr, nullptr);
 		bagWin->setAttribute(Qt::WA_DeleteOnClose);
-		bagWin->setGameWin(this);   // 设置游戏窗口指针
-		// 查找并设置主窗口指针（可选）
-		MainWindow* mainWin = qobject_cast<MainWindow*>(parent()->parent()); // 根据实际层级调整
-		if (mainWin) bagWin->setMainWin(mainWin);
+		bagWin->setGameWin(this); 
+		bagWin->setMainWin(mainWin);
 		connect(bagWin, &QObject::destroyed, this, [this]() { bagWin = nullptr; });
 		connect(bagWin, &QObject::destroyed, this, &GameWindow::closeBag);
 	}

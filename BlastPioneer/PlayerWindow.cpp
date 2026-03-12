@@ -9,22 +9,10 @@
 //构造函数
 PlayerWindow::PlayerWindow(PlayerInfo& playerInfo, QWidget* parent) : QWidget(parent), playerInfo(playerInfo)
 {
-	qDebug() << "PlayerWindow constructor start";
-	try {
-		setupUI();
-		connectBtn();
-		qDebug() << "PlayerWindow constructor end";
-	}
-	catch (const std::exception& e) {
-		qDebug() << "PlayerWindow constructor exception:" << e.what();
-		throw;
-	}
-	catch (...) {
-		qDebug() << "PlayerWindow constructor unknown exception";
-		throw;
-	}
-	setWindowFlags(Qt::Window); // 确保是顶级窗口
-	setAttribute(Qt::WA_ShowWithoutActivating, false); // 允许激活
+	setupUI();
+	connectBtn();
+	setWindowFlags(Qt::Window);
+	setAttribute(Qt::WA_ShowWithoutActivating, false);
 }
 
 //UI设置
@@ -158,25 +146,13 @@ void PlayerWindow::savePlayerInfo()
 //展示窗口时更新数据
 void PlayerWindow::showEvent(QShowEvent* event)
 {
-	qDebug() << "PlayerWindow showEvent start";
 	QWidget::showEvent(event);
-	try {
-		updateUI();
-		qDebug() << "PlayerWindow updateUI done";
-	}
-	catch (const std::exception& e) {
-		qDebug() << "PlayerWindow showEvent exception:" << e.what();
-	}
-	catch (...) {
-		qDebug() << "PlayerWindow showEvent unknown exception";
-	}
-	qDebug() << "PlayerWindow showEvent end";
+	updateUI();
 }
 
 //关闭窗口时保存玩家信息
 void PlayerWindow::closeEvent(QCloseEvent* event)
 {
-	qDebug() << "closeEvent: entered";
 	SettingsManager::instance()->saveWindowGeometry(saveGeometry());
 	savePlayerInfo();
 	QWidget::closeEvent(event);
@@ -185,15 +161,10 @@ void PlayerWindow::closeEvent(QCloseEvent* event)
 //UI更新函数
 void PlayerWindow::updateUI()
 {
-	qDebug() << "PlayerWindow updateUI: userName =" << playerInfo.getUserName();
 	userName->setText(playerInfo.getUserName());
-	qDebug() << "PlayerWindow updateUI: coins =" << playerInfo.getCoins();
 	coins->setText(QString::number(playerInfo.getCoins()));
-	qDebug() << "PlayerWindow updateUI: rank =" << playerInfo.getRank();
 	rank->setText(playerInfo.getRank());
-	qDebug() << "PlayerWindow updateUI: EP =" << playerInfo.getEP();
 	EP->setText(QString::number(playerInfo.getEP()));
-	qDebug() << "PlayerWindow updateUI: passedLevels =" << playerInfo.getPassedLevels();
 	passedLevels->setText(QString::number(playerInfo.getPassedLevels()));
 }
 
@@ -201,72 +172,54 @@ void PlayerWindow::updateUI()
 //更改玩家姓名函数
 void PlayerWindow::changeName()
 {
-	qDebug() << "changeName start";
-	try {
-		QDialog newNameInput(this);
-		newNameInput.setWindowTitle("更改姓名");
-		newNameInput.setFixedSize(300, 150);  // 增大尺寸，避免窗口管理器问题
+	QDialog newNameInput(this);
+	newNameInput.setWindowTitle("更改姓名");
+	newNameInput.setFixedSize(300, 150);
 
-		QVBoxLayout* mainLayout = new QVBoxLayout(&newNameInput);
-		QLineEdit* nameInput = new QLineEdit(&newNameInput);
-		nameInput->setPlaceholderText("输入新姓名");
-		QDialogButtonBox* btnBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, &newNameInput);
+	QVBoxLayout* mainLayout = new QVBoxLayout(&newNameInput);
+	QLineEdit* nameInput = new QLineEdit(&newNameInput);
+	nameInput->setPlaceholderText("输入新姓名");
+	QDialogButtonBox* btnBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, &newNameInput);
 
-		connect(btnBox, &QDialogButtonBox::accepted, &newNameInput, &QDialog::accept);
-		connect(btnBox, &QDialogButtonBox::rejected, &newNameInput, &QDialog::reject);
+	connect(btnBox, &QDialogButtonBox::accepted, &newNameInput, &QDialog::accept);
+	connect(btnBox, &QDialogButtonBox::rejected, &newNameInput, &QDialog::reject);
 
-		mainLayout->addWidget(nameInput);
-		mainLayout->addWidget(btnBox);
-		newNameInput.setLayout(mainLayout);
+	mainLayout->addWidget(nameInput);
+	mainLayout->addWidget(btnBox);
+	newNameInput.setLayout(mainLayout);
 
-		if (newNameInput.exec() == QDialog::Accepted) {
-			QString newName = nameInput->text().trimmed();
-			if (newName.isEmpty()) {
-				QMessageBox::warning(this, "不合法的姓名", "姓名不能为空");
-			}
-			else {
-				playerInfo.setUserName(newName);  // 直接修改，无需 toJson()
-				userName->setText(newName);
-				savePlayerInfo();
-			}
+	if (newNameInput.exec() == QDialog::Accepted) 
+	{
+		QString newName = nameInput->text().trimmed();
+		if (newName.isEmpty()) 
+		{
+			QMessageBox::warning(this, "不合法的姓名", "姓名不能为空");
+		}
+		else 
+		{
+			playerInfo.setUserName(newName);
+			userName->setText(newName);
+			savePlayerInfo();
 		}
 	}
-	catch (const std::exception& e) {
-		qDebug() << "changeName exception:" << e.what();
-		QMessageBox::critical(this, "错误", QString("更改姓名时发生异常: %1").arg(e.what()));
-	}
-	catch (...) {
-		qDebug() << "changeName unknown exception";
-		QMessageBox::critical(this, "错误", "更改姓名时发生未知异常");
-	}
-	qDebug() << "changeName end";
 }
+
 
 
 //3个窗口跳转函数
 void PlayerWindow::goBack()
 {
-	qDebug() << "goBack: start";
-
 	// 保存数据
 	savePlayerInfo();
 	SettingsManager::instance()->saveWindowGeometry(saveGeometry());
 
-	// 如果 mainWin 存在，立即显示并激活
-	if (mainWin) {
-		qDebug() << "goBack: showing mainWin";
+	if (mainWin) 
+	{
 		mainWin->show();
 		mainWin->raise();
 		mainWin->activateWindow();
-		QApplication::processEvents(); // 确保窗口立即显示
-	}
-	else {
-		qDebug() << "goBack: mainWin is null, cannot return";
-		// 如果 mainWin 为空，尝试通过父窗口链查找（备选方案）
 	}
 
-	// 最后关闭自己
-	qDebug() << "goBack: closing self";
 	hide();
 }
 
@@ -293,10 +246,11 @@ void PlayerWindow::goShopping()
 	this->hide();
 	SettingsManager::instance()->saveWindowGeometry(saveGeometry());
 
-	if (!shopWin) {
-		shopWin = new ShopWindow(playerInfo, nullptr, this); // 独立窗口
+	if (!shopWin) 
+	{
+		shopWin = new ShopWindow(playerInfo, this, this);
 		shopWin->setAttribute(Qt::WA_DeleteOnClose);
-		shopWin->setMainWin(mainWin); // 传入主窗口指针
+		shopWin->setMainWin(mainWin);
 		connect(shopWin, &QObject::destroyed, this, [this]() { shopWin = nullptr; });
 	}
 	shopWin->show();

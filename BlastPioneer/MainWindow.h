@@ -53,6 +53,7 @@ public:
 	ShopWindow* getShopWin() const { return shopWin; }
 	//查找道具
 	Item* getItem(const QString& name);
+	void savePlayerData();
 
 private slots:
 	//窗口跳转函数
