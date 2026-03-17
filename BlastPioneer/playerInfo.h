@@ -40,7 +40,7 @@ public:
 	void setUserName(const QString& name) { userName = name; }
 	void setRank(const int EP);
 	void setCoins(int gold) { coins = gold; }
-	void setEP(int ep) { EP = ep; }
+	void setEP(int ep) { EP = ep; setRank(EP); }
 	void setPassedLevels(int passedlev) { passedLevels = passedlev; }
 	void setCreateDate() { createDate = QDateTime::currentDateTime(); }
 	void setLastLogin() { lastLogin = QDateTime::currentDateTime(); }

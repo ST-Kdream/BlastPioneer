@@ -66,7 +66,7 @@ class GameWindow :public QWidget
 
 private:
 	int level = 0;
-	PlayerInfo playerInfo;
+	PlayerInfo& playerInfo;
 	QTimer* gameTimer;
 	BagWindow* bagWin;
 	MainWindow* mainWin;

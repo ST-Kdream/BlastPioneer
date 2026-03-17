@@ -40,6 +40,7 @@ private:
 	void refreshItemList();
 	void loadItemMap();
 	void closeEvent(QCloseEvent* event) override;
+	void showEvent(QShowEvent* event) override;
 
 public:
 	explicit BagWindow(PlayerInfo& playerInfo, QWidget* parent = nullptr, PlayerWindow* playerWin = nullptr);
@@ -50,4 +51,7 @@ public:
 private slots:
 	void goBack();
 	void useItem();
+
+signals:
+	void backToGame();
 };

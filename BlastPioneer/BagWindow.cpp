@@ -156,6 +156,7 @@ void BagWindow::useItem()
 	{
 		playerInfo.removeItem(itemName);
 		refreshItemList();
+		if (mainWin) mainWin->savePlayerData();
 		QMessageBox::information(this, "提示", QString("使用道具%1成功").arg(itemName));
 	}
 }
@@ -167,23 +168,40 @@ void BagWindow::setGameWindow(GameWindow* gameWin)
 	isGameRunning = (gameWin != nullptr);
 }
 
+//展示窗口时刷新道具和窗口大小
+void BagWindow::showEvent(QShowEvent* event)
+{
+	QWidget::showEvent(event);
+	refreshItemList();
+	QByteArray savedGeo = SettingsManager::instance()->loadWindowGeometry();
+	if (!savedGeo.isEmpty())
+	{
+		restoreGeometry(savedGeo);
+	}
+	else
+	{
+		resize(800, 600);
+		move(100, 100);
+	}
+}
+
 void BagWindow::goBack()
 {
 	// 保存窗口设置
 	SettingsManager::instance()->saveWindowGeometry(saveGeometry());
 
-	// 确定返回目标
 	QWidget* target = nullptr;
-	if (gameWin) 
+	if (gameWin)
 	{
 		target = gameWin;
+		emit backToGame();
 	}
-	else if (playerWin) 
+	else if (playerWin)
 	{
 		target = playerWin;
 	}
 
-	if (target) 
+	if (target)
 	{
 		target->show();
 		target->raise();

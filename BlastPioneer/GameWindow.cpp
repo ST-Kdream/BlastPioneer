@@ -49,7 +49,7 @@ GameWindow::~GameWindow()
 	if (bagWin)
 	{
 		bagWin->close();
-		delete bagWin;
+		bagWin = nullptr;
 	}
 }
 
@@ -734,6 +734,7 @@ void GameWindow::loseGame()
 {
 	state = defeat;
 	gameTimer->stop();
+	if (mainWin) mainWin->savePlayerData();
 	QMessageBox::information(this, "失败", "你被炸死了...");
 	close();
 }
@@ -749,7 +750,10 @@ void GameWindow::openBag()
 		bagWin->setMainWin(mainWin);
 		connect(bagWin, &QObject::destroyed, this, [this]() { bagWin = nullptr; });
 		connect(bagWin, &QObject::destroyed, this, &GameWindow::closeBag);
+		connect(bagWin, &BagWindow::backToGame, this, &GameWindow::closeBag);
 	}
+	bagWin->setGameWindow(this);
+	bagWin->setMainWin(mainWin);
 	state = paused;
 	gameTimer->stop();
 	bagWin->show();
