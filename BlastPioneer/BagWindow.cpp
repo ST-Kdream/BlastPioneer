@@ -39,37 +39,62 @@ void BagWindow::setupUI()
 	setWindowTitle("玩家背包");
 
 	QByteArray savedGeo = SettingsManager::instance()->loadWindowGeometry();
-	if (!savedGeo.isEmpty()) 
-	{
+	if (!savedGeo.isEmpty())
 		restoreGeometry(savedGeo);
-	}
-	else 
-	{
+	else {
 		resize(800, 600);
 		move(100, 100);
 	}
-	//标题
+
 	title = new QLabel("我的背包", this);
 	title->setStyleSheet("font-size: 18px; font-weight: bold; color: #333;");
 
-	//使用按钮、返回按钮(链接信号槽)
 	useBtn = new QPushButton("使用", this);
 	backBtn = new QPushButton("返回", this);
 	connect(useBtn, &QPushButton::clicked, this, &BagWindow::useItem);
 	connect(backBtn, &QPushButton::clicked, this, &BagWindow::goBack);
 
-	//商品列表
 	itemList = new QListWidget(this);
+
+	useBtn->setObjectName("useBtn");
+	backBtn->setObjectName("backBtn");
+
+	//按钮统一样式表
+	QString btnStyle = R"(
+        QPushButton {
+            font-size: 16px;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            color: #000000;
+        }
+        #useBtn { background-color: #3399FF; }
+        #useBtn:hover { background-color: #66B2FF; }
+        #useBtn:pressed { background-color: #2673CC; }
+        #backBtn { background-color: #E65C00; }
+        #backBtn:hover { background-color: #FF7F00; }
+        #backBtn:pressed { background-color: #B34700; }
+    )";
+
+	useBtn->setStyleSheet(btnStyle);
+	backBtn->setStyleSheet(btnStyle);
 
 	//布局
 	QVBoxLayout* mainLayout = new QVBoxLayout(this);
-	mainLayout->addWidget(title, Qt::AlignLeft);
+	mainLayout->setContentsMargins(20, 40, 20, 50);
+	mainLayout->setSpacing(15);
+
+	mainLayout->addWidget(title, 0, Qt::AlignHCenter);
 	mainLayout->addWidget(itemList);
 
 	QHBoxLayout* btnLine = new QHBoxLayout();
-	btnLine->addWidget(useBtn);
-	btnLine->addWidget(backBtn);
+	btnLine->setSpacing(20);
+	for (auto btn : { useBtn, backBtn }) {
+		btn->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+		btnLine->addWidget(btn);
+	}
 	mainLayout->addLayout(btnLine);
+
 	setLayout(mainLayout);
 }
 

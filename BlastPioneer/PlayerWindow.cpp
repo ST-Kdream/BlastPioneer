@@ -18,101 +18,118 @@ PlayerWindow::PlayerWindow(PlayerInfo& playerInfo, QWidget* parent) : QWidget(pa
 //UI设置
 void PlayerWindow::setupUI()
 {
-	setWindowTitle("玩家信息");
+    setWindowTitle("玩家信息");
 
-	QByteArray savedGeo = SettingsManager::instance()->loadWindowGeometry();
-	if (!savedGeo.isEmpty())
-	{
-		restoreGeometry(savedGeo);
-	}
-	else
-	{
-		resize(800, 600);
-		move(100, 100);
-	}
+    QByteArray savedGeo = SettingsManager::instance()->loadWindowGeometry();
+    if (!savedGeo.isEmpty())
+        restoreGeometry(savedGeo);
+    else {
+        resize(800, 600);
+        move(100, 100);
+    }
 
-	//3+1个按钮
-	backBtn = new QPushButton("返回", this);
-	bagBtn = new QPushButton("背包", this);
-	shopBtn = new QPushButton("商店", this);
-	newNameBtn = new QPushButton("更改名字", this);
+    // 控件创建
+    backBtn = new QPushButton("返回", this);
+    bagBtn = new QPushButton("背包", this);
+    shopBtn = new QPushButton("商店", this);
+    newNameBtn = new QPushButton("更改名字", this);
 
-	//玩家信息（标题加数据）
-	QLabel* userNameLabel=new QLabel("id：", this);
-	QLabel* coinsLabel = new QLabel("金币：", this);
-	QLabel* rankLabel = new QLabel("段位：", this);
-	QLabel* EPLabel = new QLabel("经验：", this);
-	QLabel* passedLevelLabel = new QLabel("已通过关卡数：", this);
+    QLabel* userNameLabel = new QLabel("id：", this);
+    QLabel* coinsLabel = new QLabel("金币：", this);
+    QLabel* rankLabel = new QLabel("段位：", this);
+    QLabel* EPLabel = new QLabel("经验：", this);
+    QLabel* passedLevelLabel = new QLabel("已通过关卡数：", this);
 
-	userName = new QLabel(playerInfo.getUserName(), this);
-	coins = new QLabel(QString::number(playerInfo.getCoins()), this);
-	rank = new QLabel(playerInfo.getRank(), this);
-	EP = new QLabel(QString::number(playerInfo.getEP()), this);
-	passedLevels = new QLabel(QString::number(playerInfo.getPassedLevels()), this);
+    userName = new QLabel(playerInfo.getUserName(), this);
+    coins = new QLabel(QString::number(playerInfo.getCoins()), this);
+    rank = new QLabel(playerInfo.getRank(), this);
+    EP = new QLabel(QString::number(playerInfo.getEP()), this);
+    passedLevels = new QLabel(QString::number(playerInfo.getPassedLevels()), this);
 
-	//4个按钮设置样式
-	backBtn->setObjectName("backBtn");
-	bagBtn->setObjectName("bagBtn");
-	shopBtn->setObjectName("shopBtn");
+    // 设置对象名
+    backBtn->setObjectName("backBtn");
+    bagBtn->setObjectName("bagBtn");
+    shopBtn->setObjectName("shopBtn");
+    newNameBtn->setObjectName("newNameBtn");
 
-	QString mainStyle = R"(
-								QPushButton { font-size: 16px; color: #000000;padding: 8px 16px;border: none;
-											  border-radius: 6px; }
-								#backBtn { background-color: #E65C00; }
-								#backBtn:hover { background-color: #FF7F00; }
-								#backBtn:pressed { background-color: #B34700; }
-								#bagBtn { background-color: #FFCC00; }
-								#bagBtn:hover { background-color: #FFF000; }
-								#bagBtn:pressed { background-color: #CC9900; }
-								#shopBtn { background-color: #3399FF; }
-								#shopBtn:hover { background-color: #66B2FF; }
-								#shopBtn:pressed { background-color: #2673CC; }
-						)";   //前3个按钮样式表
+    // 统一样式（使用对象名选择器）
+    QString btnStyle = R"(
+        QPushButton {
+            font-size: 16px;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            color: #000000;
+        }
+        #backBtn { background-color: #E65C00; }
+        #backBtn:hover { background-color: #FF7F00; }
+        #backBtn:pressed { background-color: #B34700; }
+        #bagBtn { background-color: #FFCC00; }
+        #bagBtn:hover { background-color: #FFF000; }
+        #bagBtn:pressed { background-color: #CC9900; }
+        #shopBtn { background-color: #3399FF; }
+        #shopBtn:hover { background-color: #66B2FF; }
+        #shopBtn:pressed { background-color: #2673CC; }
+        #newNameBtn { background-color: #CC66FF; }
+        #newNameBtn:hover { background-color: #D999FF; }
+        #newNameBtn:pressed { background-color: #994DCC; }
+    )";
 
-	backBtn->setStyleSheet(mainStyle);
-	bagBtn->setStyleSheet(mainStyle);
-	shopBtn->setStyleSheet(mainStyle);
-	newNameBtn->setStyleSheet(	R"(QPushButton { font-size: 16px; color: #000000; border-radius: 6px; background-color: #CC66FF; }
-								   QPushButton:hover { background-color: #D999FF; }
-								   QPushButton:pressed { background-color: #994DCC; }
-								)");
+    backBtn->setStyleSheet(btnStyle);
+    bagBtn->setStyleSheet(btnStyle);
+    shopBtn->setStyleSheet(btnStyle);
+    newNameBtn->setStyleSheet(btnStyle);
 
-	//布局
-	QVBoxLayout* mainLayout = new QVBoxLayout(this);
+    // 布局
+    QVBoxLayout* mainLayout = new QVBoxLayout(this);
+    mainLayout->setContentsMargins(20, 40, 20, 50);
+    mainLayout->setSpacing(15);
 
-	QHBoxLayout* userNameLine = new QHBoxLayout();
-	userNameLine->addWidget(userNameLabel);
-	userNameLine->addWidget(userName);
-	userNameLine->addWidget(newNameBtn);
+    QHBoxLayout* userNameLine = new QHBoxLayout();
+    userNameLine->addWidget(userNameLabel);
+    userNameLine->addWidget(userName);
+    userNameLine->addWidget(newNameBtn);
+    userNameLine->setStretch(0, 0);
+    userNameLine->setStretch(1, 1);
+    mainLayout->addLayout(userNameLine);
 
-	QHBoxLayout* coinsLine = new QHBoxLayout();
-	coinsLine->addWidget(coinsLabel);
-	coinsLine->addWidget(coins);
+    QHBoxLayout* coinsLine = new QHBoxLayout();
+    coinsLine->addWidget(coinsLabel);
+    coinsLine->addWidget(coins);
+    coinsLine->setStretch(0, 0);
+    coinsLine->setStretch(1, 1);
+    mainLayout->addLayout(coinsLine);
 
-	QHBoxLayout* rankLine = new QHBoxLayout();
-	rankLine->addWidget(rankLabel);
-	rankLine->addWidget(rank);
+    QHBoxLayout* rankLine = new QHBoxLayout();
+    rankLine->addWidget(rankLabel);
+    rankLine->addWidget(rank);
+    rankLine->setStretch(0, 0);
+    rankLine->setStretch(1, 1);
+    mainLayout->addLayout(rankLine);
 
-	QHBoxLayout* EPLine = new QHBoxLayout();
-	EPLine->addWidget(EPLabel);
-	EPLine->addWidget(EP);
+    QHBoxLayout* EPLine = new QHBoxLayout();
+    EPLine->addWidget(EPLabel);
+    EPLine->addWidget(EP);
+    EPLine->setStretch(0, 0);
+    EPLine->setStretch(1, 1);
+    mainLayout->addLayout(EPLine);
 
-	QHBoxLayout* passedLevelsLine = new QHBoxLayout();
-	passedLevelsLine->addWidget(passedLevelLabel);
-	passedLevelsLine->addWidget(passedLevels);
+    QHBoxLayout* passedLevelsLine = new QHBoxLayout();
+    passedLevelsLine->addWidget(passedLevelLabel);
+    passedLevelsLine->addWidget(passedLevels);
+    passedLevelsLine->setStretch(0, 0);
+    passedLevelsLine->setStretch(1, 1);
+    mainLayout->addLayout(passedLevelsLine);
 
-	QHBoxLayout* btnLine = new QHBoxLayout();
-	btnLine->addWidget(bagBtn);
-	btnLine->addWidget(shopBtn);
-	btnLine->addWidget(backBtn);
+    QHBoxLayout* btnLine = new QHBoxLayout();
+    btnLine->setSpacing(20);
+    for (auto btn : { bagBtn, shopBtn, backBtn }) {
+        btn->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+        btnLine->addWidget(btn);
+    }
+    mainLayout->addLayout(btnLine);
 
-	mainLayout->addLayout(userNameLine);
-	mainLayout->addLayout(coinsLine);
-	mainLayout->addLayout(rankLine);
-	mainLayout->addLayout(EPLine);
-	mainLayout->addLayout(passedLevelsLine);
-	mainLayout->addLayout(btnLine);
-	setLayout(mainLayout);
+    setLayout(mainLayout);
 }
 
 //链接信号槽函数

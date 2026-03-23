@@ -19,40 +19,63 @@ void ShopWindow::setupUI()
 
 	QByteArray savedGeo = SettingsManager::instance()->loadWindowGeometry();
 	if (!savedGeo.isEmpty())
-	{
 		restoreGeometry(savedGeo);
-	}
-	else
-	{
+	else {
 		resize(800, 600);
 		move(100, 100);
 	}
 
-	//标题
+	//创建控件
 	title = new QLabel("商店", this);
 	title->setStyleSheet("font-size: 18px; font-weight: bold; color: #333;");
-	//金币标签
 	coinsLabel = new QLabel(QString("金币: %1").arg(playerInfo.getCoins()), this);
 	coinsLabel->setStyleSheet("font-size: 16px; color: gold;");
 
-	//商品列表
 	shopList = new QListWidget();
 
-	//按钮（包括信号槽链接）
 	buyBtn = new QPushButton("购买", this);
 	backBtn = new QPushButton("返回", this);
 	connect(buyBtn, &QPushButton::clicked, this, &ShopWindow::buyItem);
 	connect(backBtn, &QPushButton::clicked, this, &ShopWindow::goBack);
 
+	buyBtn->setObjectName("buyBtn");
+	backBtn->setObjectName("backBtn");
+
+	QString btnStyle = R"(
+        QPushButton {
+            font-size: 16px;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            color: #000000;
+        }
+        #buyBtn { background-color: #3399FF; }
+        #buyBtn:hover { background-color: #66B2FF; }
+        #buyBtn:pressed { background-color: #2673CC; }
+        #backBtn { background-color: #E65C00; }
+        #backBtn:hover { background-color: #FF7F00; }
+        #backBtn:pressed { background-color: #B34700; }
+    )";
+
+	buyBtn->setStyleSheet(btnStyle);
+	backBtn->setStyleSheet(btnStyle);
+
 	//布局
-	QVBoxLayout* mainLayout = new QVBoxLayout();
-	mainLayout -> addWidget(coinsLabel);
+	QVBoxLayout* mainLayout = new QVBoxLayout(this);
+	mainLayout->setContentsMargins(20, 40, 20, 50);
+	mainLayout->setSpacing(15);
+
+	mainLayout->addWidget(coinsLabel, 0, Qt::AlignHCenter);
 	mainLayout->addWidget(shopList);
 
 	QHBoxLayout* btnLine = new QHBoxLayout();
-	btnLine->addWidget(buyBtn);
-	btnLine->addWidget(backBtn);
+	btnLine->setSpacing(20);
+	for (auto btn : { buyBtn, backBtn }) {
+		btn->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+		btnLine->addWidget(btn);
+	}
 	mainLayout->addLayout(btnLine);
+
 	setLayout(mainLayout);
 }
 

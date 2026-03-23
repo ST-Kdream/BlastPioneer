@@ -17,72 +17,96 @@ LevelSelectWindow::LevelSelectWindow(PlayerInfo& playerInfo, QWidget* parent) :p
 //UI设置（包含返回按钮的信号槽链接，关卡按钮另外设置）
 void LevelSelectWindow::setupUI()
 {
-	setWindowTitle("难度选择");
+    setWindowTitle("难度选择");
 
-	QByteArray savedGeo = SettingsManager::instance()->loadWindowGeometry();
-	if (!savedGeo.isEmpty())
-	{
-		restoreGeometry(savedGeo);
-	}
-	else
-	{
-		resize(800, 600);
-		move(100, 100);
-	}
+    QByteArray savedGeo = SettingsManager::instance()->loadWindowGeometry();
+    if (!savedGeo.isEmpty())
+        restoreGeometry(savedGeo);
+    else {
+        resize(800, 600);
+        move(100, 100);
+    }
 
-	//标题
-	title = new QLabel("关卡选择", this);
-	title->setAlignment(Qt::AlignCenter);
-	title->setStyleSheet("font-size: 32px; font-weight: bold; color: #FFCC00;");
+    title = new QLabel("关卡选择", this);
+    title->setAlignment(Qt::AlignCenter);
+    title->setStyleSheet("font-size: 32px; font-weight: bold; color: #FFCC00;");
 
-	//返回按钮
-	backBtn = new QPushButton("返回", this);
-	backBtn->setStyleSheet(
-								"QPushButton { background-color: #E65C00; color: white; font-size: 18px; padding: 8px; border-radius: 5px; }"
-								"QPushButton:hover { background-color: #FF7F00; }"
-								"QPushButton:pressed { background-color: #B34700; }"
-							);
-	connect(backBtn, &QPushButton::clicked, this, &LevelSelectWindow::goBack);
+    backBtn = new QPushButton("返回", this);
+    backBtn->setObjectName("backBtn");
+    backBtn->setStyleSheet(R"(
+        QPushButton#backBtn {
+            background-color: #E65C00;
+            color: white;
+            font-size: 18px;
+            padding: 8px;
+            border-radius: 5px;
+        }
+        QPushButton#backBtn:hover { background-color: #FF7F00; }
+        QPushButton#backBtn:pressed { background-color: #B34700; }
+    )");
 
-	//创建关卡选择按钮
-	for (int i = 0; i < 6; ++i)
-	{
-		levelBtns[i] = new QPushButton(QString("%1").arg(i+1), this);
-	}
+    connect(backBtn, &QPushButton::clicked, this, &LevelSelectWindow::goBack);
 
-	//布局
-	QVBoxLayout* mainLayout = new QVBoxLayout();
-	mainLayout->addWidget(title);
+    for (int i = 0; i < 6; ++i) 
+    {
+        levelBtns[i] = new QPushButton(QString("%1").arg(i + 1), this);
+    }
 
-	QGridLayout* levelBtnLayout = new QGridLayout();
-	int cnt = 0;
-	for (int i = 0; i < 2; ++i)
-	{
-		for (int j = 0; j < 3; ++j)
-		{
-			levelBtnLayout->addWidget(levelBtns[cnt], i, j);
-			++cnt;
-		}
-	}
-	mainLayout->addLayout(levelBtnLayout);
+    QVBoxLayout* mainLayout = new QVBoxLayout(this);
+    mainLayout->setContentsMargins(20, 40, 20, 50);
+    mainLayout->setSpacing(20);
 
-	mainLayout->addWidget(backBtn, Qt::AlignRight);
-	setLayout(mainLayout);
+    mainLayout->addWidget(title);
+
+    QGridLayout* levelBtnLayout = new QGridLayout();
+    levelBtnLayout->setSpacing(20);
+    levelBtnLayout->setColumnStretch(0, 1);
+    levelBtnLayout->setColumnStretch(1, 1);
+    levelBtnLayout->setColumnStretch(2, 1);
+    levelBtnLayout->setRowStretch(0, 1);
+    levelBtnLayout->setRowStretch(1, 1);
+
+    int cnt = 0;
+    for (int i = 0; i < 2; ++i) 
+    {
+        for (int j = 0; j < 3; ++j) 
+        {
+            levelBtnLayout->addWidget(levelBtns[cnt], i, j);
+            ++cnt;
+        }
+    }
+    mainLayout->addLayout(levelBtnLayout);
+
+    QHBoxLayout* backLayout = new QHBoxLayout();
+    backBtn->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+    backLayout->addWidget(backBtn);
+    mainLayout->addLayout(backLayout);
+
+    setLayout(mainLayout);
 }
 
-//按钮设置（样式及初始化）
+//关卡按钮UI
 void LevelSelectWindow::setupLevelBtn()
 {
-	for (int i = 0; i < 6; ++i) 
-	{
-		levelBtns[i]->setStyleSheet(
-										"QPushButton { background-color: #3399FF; color: white; font-size: 18px; border-radius: 75px; }"
-										"QPushButton:hover { background-color: #66B2FF; }"
-										"QPushButton:pressed { background-color: #2673CC; }"
-										"QPushButton:disabled { background-color: #AAAAAA; }" 
-									);
-		connect(levelBtns[i], &QPushButton::clicked, this, [this, i]() {goGameWindow(i + 1); });
-	}
+    for (int i = 0; i < 6; ++i) 
+    {
+        levelBtns[i]->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
+        levelBtns[i]->setMinimumSize(80, 80);
+        levelBtns[i]->setMaximumSize(120, 120);
+        levelBtns[i]->setObjectName(QString("levelBtn_%1").arg(i));
+        levelBtns[i]->setStyleSheet(R"(
+            QPushButton {
+                background-color: #3399FF;
+                color: white;
+                font-size: 24px;
+                border-radius: 50px;
+            }
+            QPushButton:hover { background-color: #66B2FF; }
+            QPushButton:pressed { background-color: #2673CC; }
+            QPushButton:disabled { background-color: #AAAAAA; }
+        )");
+        connect(levelBtns[i], &QPushButton::clicked, this, [this, i]() { goGameWindow(i + 1); });
+    }
 }
 
 //界面更新

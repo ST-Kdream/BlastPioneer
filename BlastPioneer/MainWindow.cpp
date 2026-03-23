@@ -26,88 +26,143 @@ MainWindow::MainWindow(const PlayerInfo& playerInfo, const QList<Item>& items, Q
 //UI设置函数
 void MainWindow::setupUI()
 {
-	setWindowTitle("爆破先锋-首页");
-	QByteArray savedGeo = SettingsManager::instance()->loadWindowGeometry();
-	if (!savedGeo.isEmpty())
-	{
-		restoreGeometry(savedGeo);
-	}
-	else
-	{
-		resize(800, 600);
-		move(100, 100);
-	}
+    setWindowTitle("爆破先锋-首页");
 
-	//创建控件
-	btn1 = new QPushButton("玩家信息", this);
-	btn2 = new QPushButton("单人游戏", this);
-	btn3 = new QPushButton("多人游戏", this);
-	btn4 = new QPushButton("游戏规则", this);
-	btn5 = new QPushButton("设置", this);
-	mainTitle = new QLabel("爆破先锋", this);
+    QByteArray savedGeo = SettingsManager::instance()->loadWindowGeometry();
+    if (!savedGeo.isEmpty()) restoreGeometry(savedGeo);
+    else { resize(800, 600); move(100, 100); }
 
-	//样式设置
-	mainTitle->setStyleSheet(R"(color: #FFCC00; font-weight: bold; text-align: center;)");    //标题样式
-	mainTitle->setToolTip("欢迎来到爆破先锋小游戏！");
+    // 创建控件
+    btn1 = new QPushButton("玩家信息", this);
+    btn2 = new QPushButton("单人游戏", this);
+    btn3 = new QPushButton("多人游戏", this);
+    btn4 = new QPushButton("游戏规则", this);
+    btn5 = new QPushButton("设置", this);
+    mainTitle = new QLabel("爆破先锋", this);
 
-	btn1->setToolTip("点击此处查看玩家个人信息");        //设置悬浮提示
-	btn2->setToolTip("点击此处开始单人游戏");
-	btn3->setToolTip("点击此处开始多人游戏");
-	btn4->setToolTip("点击此处查看游戏规则");
-	btn5->setToolTip("设置");
+    btn1->setObjectName("playerBtn");
+    btn2->setObjectName("singleBtn");
+    btn3->setObjectName("multiBtn");
+    btn4->setObjectName("rulesBtn");
+    btn5->setObjectName("settingsBtn");
+    mainTitle->setObjectName("titleLabel");
 
-	btn1->setObjectName("playerBtn");
-	btn2->setObjectName("startBtn1");
-	btn3->setObjectName("startBtn2");
-	btn4->setObjectName("rulesBtn");
+    // 标题样式
+    mainTitle->setStyleSheet(R"(
+        QLabel#titleLabel {
+            font-size: 28px;
+            font-weight: bold;
+            color: #2C3E50;
+            padding: 10px 0 5px 0;
+            qproperty-alignment: AlignCenter;
+        }
+    )");
 
-	
-	QString mainStyle = R"(
-								QPushButton{color: #000000; border-radius: 3px;}
-								#playerBtn{background-color: #33CCFF;}
-								#playerBtn:hover{background-color: #66D9FF;}
-								#playerBtn:pressed{background-color: #2699CC;}
-								#startBtn1{background-color: #FFCC00;}
-								#startBtn1:hover{background-color: #FFF000;}
-								#startBtn1:pressed{background-color: #CC9900;}
-								#startBtn2{background-color: #FFCC00;}
-								#startBtn2:hover{background-color: #FFF000;}
-								#startBtn2:pressed{background-color: #CC9900;}
-								#rulesBtn{background-color: #33FF66;}
-								#rulesBtn:hover{background-color: #66FF99;}
-								#rulesBtn:pressed{background-color: #26CC66;}
-						   )";					//前四个按钮样式表（按钮二、三一致）
+    // 按钮样式
+    btn1->setStyleSheet(R"(
+        QPushButton#playerBtn {
+            font-size: 18px;
+            padding: 12px 24px;
+            min-width: 160px;
+            border: none;
+            border-radius: 10px;
+            background-color: #33CCFF;
+            color: white;
+        }
+        QPushButton#playerBtn:hover { background-color: #66D9FF; }
+        QPushButton#playerBtn:pressed { background-color: #2699CC; }
+    )");
 
-	btn1->setStyleSheet(mainStyle);
-	btn2->setStyleSheet(mainStyle);
-	btn3->setStyleSheet(mainStyle);
-	
+    btn2->setStyleSheet(R"(
+        QPushButton#singleBtn {
+            font-size: 18px;
+            padding: 12px 24px;
+            min-width: 160px;
+            border: none;
+            border-radius: 10px;
+            background-color: #FFCC00;
+            color: white;
+        }
+        QPushButton#singleBtn:hover { background-color: #FFE066; }
+        QPushButton#singleBtn:pressed { background-color: #CC9900; }
+    )");
 
-	btn4->setFixedSize(60, 60);
-	
-	btn4->setStyleSheet(R"(
-								QPushButton{color:#000000; border-radius: 30px; background-color: #CC66FF;}
-								QPushButton:hover{background-color: #D999FF;}
-								QPushButton:pressed{background-color: #994DCC;}
-						   )");
-	
+    btn3->setStyleSheet(R"(
+        QPushButton#multiBtn {
+            font-size: 18px;
+            padding: 12px 24px;
+            min-width: 160px;
+            border: none;
+            border-radius: 10px;
+            background-color: #66FF66;
+            color: #333;
+        }
+        QPushButton#multiBtn:hover { background-color: #99FF99; }
+        QPushButton#multiBtn:pressed { background-color: #66CC66; }
+    )");
 
-	//布局（标题最上面，3行按钮垂直排布（按钮二、三在同一行），btn5在右下角）
-	
-	QHBoxLayout* startLayout = new QHBoxLayout();
-	startLayout->addWidget(btn2);
-	startLayout->addWidget(btn3);
+    btn4->setStyleSheet(R"(
+        QPushButton#rulesBtn {
+            font-size: 18px;
+            padding: 12px 24px;
+            min-width: 160px;
+            border: none;
+            border-radius: 10px;
+            background-color: #CC66FF;
+            color: white;
+        }
+        QPushButton#rulesBtn:hover { background-color: #D999FF; }
+        QPushButton#rulesBtn:pressed { background-color: #994DCC; }
+    )");
 
-	QVBoxLayout* mainLayout = new QVBoxLayout(this);
-	mainLayout->addWidget(mainTitle);
-	mainLayout->addWidget(btn1);
-	mainLayout->addLayout(startLayout);
-	mainLayout->addWidget(btn4);
-	mainLayout->addWidget(btn5);
-	setLayout(mainLayout);
-	
+    btn5->setStyleSheet(R"(
+        QPushButton#settingsBtn {
+            font-size: 18px;
+            padding: 12px 24px;
+            min-width: 160px;
+            border: none;
+            border-radius: 10px;
+            background-color: #999999;
+            color: white;
+        }
+        QPushButton#settingsBtn:hover { background-color: #AAAAAA; }
+        QPushButton#settingsBtn:pressed { background-color: #777777; }
+    )");
+
+    // 布局
+    QVBoxLayout* mainLayout = new QVBoxLayout(this);
+    mainLayout->setContentsMargins(20, 40, 20, 50);
+    mainLayout->setSpacing(20);
+
+    mainLayout->addWidget(mainTitle, 0, Qt::AlignHCenter);
+
+    // 第一行：玩家信息
+    QHBoxLayout* row1 = new QHBoxLayout();
+    btn1->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+    row1->addWidget(btn1);
+    mainLayout->addLayout(row1);
+
+    // 第二行：单人 + 多人
+    QHBoxLayout* row2 = new QHBoxLayout();
+    row2->setSpacing(40);
+    btn2->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+    btn3->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+    row2->addWidget(btn2);
+    row2->addWidget(btn3);
+    mainLayout->addLayout(row2);
+
+    // 第三行：规则 + 设置
+    QHBoxLayout* row3 = new QHBoxLayout();
+    row3->setSpacing(40);
+    btn4->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+    btn5->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+    row3->addWidget(btn4);
+    row3->addWidget(btn5);
+    mainLayout->addLayout(row3);
+
+    setLayout(mainLayout);
 }
-
+	
 //信号槽链接函数
 void MainWindow::btnConnect()
 {

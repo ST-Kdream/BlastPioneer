@@ -12,60 +12,86 @@ SettingsWindow::SettingsWindow(QWidget* parent) :QDialog(parent)
 //UI设置
 void SettingsWindow::setupUI()
 {
-	setWindowTitle("设置");
+    setWindowTitle("设置");
 
-	QByteArray savedGeo = SettingsManager::instance()->loadWindowGeometry();
-	if (!savedGeo.isEmpty())
-	{
-		restoreGeometry(savedGeo);
-	}
-	else
-	{
-		resize(800, 600);
-		move(100, 100);
-	}
+    QByteArray savedGeo = SettingsManager::instance()->loadWindowGeometry();
+    if (!savedGeo.isEmpty())
+        restoreGeometry(savedGeo);
+    else {
+        resize(800, 600);
+        move(100, 100);
+    }
 
-	//创建控件
-	startupEffectCheck = new QCheckBox("显示启动特效并预加载");
-	gridCheck = new QCheckBox("游戏时是否显示网格");
+    //创建控件
+    startupEffectCheck = new QCheckBox("显示启动特效并预加载");
+    gridCheck = new QCheckBox("游戏时是否显示网格");
 
-	frameRateSlider = new QSlider(Qt::Horizontal);
-	frameRateSlider->setRange(30, 120);
-	frameRateSlider->setTickInterval(30);
-	frameRateSlider->setTickPosition(QSlider::TicksBelow);
+    frameRateSlider = new QSlider(Qt::Horizontal);
+    frameRateSlider->setRange(30, 120);
+    frameRateSlider->setTickInterval(30);
+    frameRateSlider->setTickPosition(QSlider::TicksBelow);
 
-	volumeSlider = new QSlider(Qt::Horizontal);
-	volumeSlider->setRange(0, 100);
-	volumeSlider->setTickInterval(10);
-	volumeSlider->setTickPosition(QSlider::TicksBelow);
+    volumeSlider = new QSlider(Qt::Horizontal);
+    volumeSlider->setRange(0, 100);
+    volumeSlider->setTickInterval(10);
+    volumeSlider->setTickPosition(QSlider::TicksBelow);
 
-	effectQualityCombo = new QComboBox();
-	effectQualityCombo->addItem("低");
-	effectQualityCombo->addItem("中");
-	effectQualityCombo->addItem("高");
+    effectQualityCombo = new QComboBox();
+    effectQualityCombo->addItem("低");
+    effectQualityCombo->addItem("中");
+    effectQualityCombo->addItem("高");
 
-	okBtn = new QPushButton("确定");
-	cancelBtn = new QPushButton("取消");
+    okBtn = new QPushButton("确定");
+    cancelBtn = new QPushButton("取消");
 
-	//布局
-	QVBoxLayout* mainLayout = new QVBoxLayout(this);
-	mainLayout->addWidget(startupEffectCheck);
-	mainLayout->addWidget(gridCheck);
+    okBtn->setObjectName("okBtn");
+    cancelBtn->setObjectName("cancelBtn");
 
-	mainLayout->addWidget(new QLabel("特效质量："));
-	mainLayout->addWidget(effectQualityCombo);
+    //按钮样式表
+    QString btnStyle = R"(
+        QPushButton {
+            font-size: 16px;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            color: #000000;
+        }
+        #okBtn { background-color: #4CAF50; }
+        #okBtn:hover { background-color: #45a049; }
+        #okBtn:pressed { background-color: #3d8b40; }
+        #cancelBtn { background-color: #E65C00; }
+        #cancelBtn:hover { background-color: #FF7F00; }
+        #cancelBtn:pressed { background-color: #B34700; }
+    )";
+    okBtn->setStyleSheet(btnStyle);
+    cancelBtn->setStyleSheet(btnStyle);
 
-	mainLayout->addWidget(new QLabel("音量："));
-	mainLayout->addWidget(volumeSlider);
+    //布局
+    QVBoxLayout* mainLayout = new QVBoxLayout(this);
+    mainLayout->setContentsMargins(20, 40, 20, 50);
+    mainLayout->setSpacing(15);
 
-	mainLayout->addWidget(new QLabel("帧率："));
-	mainLayout->addWidget(frameRateSlider);
+    mainLayout->addWidget(startupEffectCheck);
+    mainLayout->addWidget(gridCheck);
 
-	QHBoxLayout* btnLine = new QHBoxLayout();
-	btnLine->addWidget(okBtn);
-	btnLine->addWidget(cancelBtn);
-	mainLayout->addLayout(btnLine);
-	setLayout(mainLayout);
+    mainLayout->addWidget(new QLabel("特效质量："));
+    mainLayout->addWidget(effectQualityCombo);
+
+    mainLayout->addWidget(new QLabel("音量："));
+    mainLayout->addWidget(volumeSlider);
+
+    mainLayout->addWidget(new QLabel("帧率："));
+    mainLayout->addWidget(frameRateSlider);
+
+    QHBoxLayout* btnLine = new QHBoxLayout();
+    btnLine->setSpacing(20);
+    for (auto btn : { okBtn, cancelBtn }) {
+        btn->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+        btnLine->addWidget(btn);
+    }
+    mainLayout->addLayout(btnLine);
+
+    setLayout(mainLayout);
 }
 
 //载入设置

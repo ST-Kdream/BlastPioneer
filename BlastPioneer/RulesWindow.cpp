@@ -9,39 +9,52 @@ RulesWindow::RulesWindow(MainWindow* mainWin, QWidget* parent) :QWidget(parent),
 	setupUI();
 }
 
-//UI设置函数（包括一个信号槽链接）
+//UI设置（包括一个信号槽连接）
 void RulesWindow::setupUI()
 {
-	setWindowTitle("游戏规则");
+    setWindowTitle("游戏规则");
 
-	QByteArray savedGeo = SettingsManager::instance()->loadWindowGeometry();
-	if (!savedGeo.isEmpty())
-	{
-		restoreGeometry(savedGeo);
-	}
-	else
-	{
-		resize(800, 600);
-		move(100, 100);
-	}
+    QByteArray savedGeo = SettingsManager::instance()->loadWindowGeometry();
+    if (!savedGeo.isEmpty())
+        restoreGeometry(savedGeo);
+    else {
+        resize(800, 600);
+        move(100, 100);
+    }
 
-	//文本控件和返回按钮控件
-	backBtn = new QPushButton("返回", this);
-	Qrules = new QTextEdit(this);
-	backBtn->setStyleSheet(R"(
-								  QPushButton{background-color:#4CAF50;color:white;font-size:20px;padding:10px;border-radius:5px;}
-								  QPushButton:hover{background-color:#45a049;}
-								  QPushButton:pressed{background-color:#3d8b40;}
-							  )");
+    backBtn = new QPushButton("返回", this);
+    Qrules = new QTextEdit(this);
 
-	connect(backBtn, &QPushButton::clicked, this, &RulesWindow::goBack);
-	getRules();
+    backBtn->setObjectName("backBtn");
+    backBtn->setStyleSheet(R"(
+        QPushButton#backBtn {
+            font-size: 18px;
+            padding: 10px 20px;
+            min-width: 120px;
+            border: none;
+            border-radius: 8px;
+            background-color: #4CAF50;
+            color: white;
+        }
+        QPushButton#backBtn:hover { background-color: #45a049; }
+        QPushButton#backBtn:pressed { background-color: #3d8b40; }
+    )");
 
-	//布局
-	QVBoxLayout* mainLayout = new QVBoxLayout(this);
-	mainLayout->addWidget(Qrules);
-	mainLayout->addWidget(backBtn);
-	setLayout(mainLayout);
+    connect(backBtn, &QPushButton::clicked, this, &RulesWindow::goBack);
+    getRules();
+
+    //布局
+    QVBoxLayout* mainLayout = new QVBoxLayout(this);
+    mainLayout->setContentsMargins(20, 40, 20, 50);
+    mainLayout->setSpacing(15);
+    mainLayout->addWidget(Qrules);
+
+    QHBoxLayout* btnLayout = new QHBoxLayout();
+    backBtn->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+    btnLayout->addWidget(backBtn);
+    mainLayout->addLayout(btnLayout);
+
+    setLayout(mainLayout);
 }
 
 //析构函数
