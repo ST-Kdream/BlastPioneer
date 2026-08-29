@@ -6,6 +6,7 @@
 #include "SettingsWindow.h"
 #include "BagWindow.h"
 #include "ShopWindow.h"
+#include "LobbyWindow.h"
 #include <QApplication>
 
 //构造函数（初始化）
@@ -18,6 +19,7 @@ MainWindow::MainWindow(const PlayerInfo& playerInfo, const QList<Item>& items, Q
 	bagWin = nullptr;
 	shopWin = nullptr;
 	settingsWin = nullptr;
+    lobbyWin = nullptr;
 	setupUI();
 	btnConnect();
 	createWindows();
@@ -258,7 +260,19 @@ void MainWindow::GoSingleGame()
 
 void MainWindow::GoInternetGame()
 {
-	QMessageBox::information(this, "提示", "暂未实现");
+    if (!lobbyWin) {
+        lobbyWin = new LobbyWindow(this, this);
+        lobbyWin->setAttribute(Qt::WA_DeleteOnClose);
+        // 当大厅窗口关闭时，重新显示主窗口
+        connect(lobbyWin, &QObject::destroyed, this, [this]() {
+            lobbyWin = nullptr;
+            this->show();
+            });
+    }
+    this->hide();           // 隐藏主窗口
+    lobbyWin->show();
+    lobbyWin->raise();
+    lobbyWin->activateWindow();
 }
 
 void MainWindow::GoRulesWindow()

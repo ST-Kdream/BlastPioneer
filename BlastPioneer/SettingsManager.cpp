@@ -6,7 +6,6 @@ SettingsManager* SettingsManager::m_instance = nullptr;
 SettingsManager::SettingsManager() :settings(QDir(QCoreApplication::applicationDirPath()).
     filePath("Data/settings.ini"),QSettings::IniFormat)
 {
-    qDebug() << "Settings file path:" << settings.fileName();
     QDir dir(QCoreApplication::applicationDirPath() + "/Data");
     if (!dir.exists())
     {

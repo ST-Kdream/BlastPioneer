@@ -14,6 +14,7 @@ class BagWindow;
 class ShopWindow;
 class SettingsWindow;
 class PlayerInfo;
+class LobbyWindow;
 
 class MainWindow :public QWidget
 {
@@ -41,6 +42,7 @@ private:
 	BagWindow* bagWin;
 	ShopWindow* shopWin;
 	SettingsWindow* settingsWin;
+	LobbyWindow* lobbyWin;
 
 	void showEvent(QShowEvent* event) override;
 
@@ -54,6 +56,7 @@ public:
 	//查找道具
 	Item* getItem(const QString& name);
 	void savePlayerData();
+	PlayerInfo& getPlayerInfo() { return playerInfo; }
 
 private slots:
 	//窗口跳转函数

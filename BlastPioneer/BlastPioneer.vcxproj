@@ -113,8 +113,15 @@
     <ClCompile Include="GameWindow.cpp" />
     <ClCompile Include="Item.cpp" />
     <ClCompile Include="LevelSelectWindow.cpp" />
+    <ClCompile Include="LobbyWindow.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MainWindow.cpp" />
+    <ClCompile Include="MultiGameWindow.cpp">
+      <DynamicSource Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">input</DynamicSource>
+      <QtMocFileName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(Filename).moc</QtMocFileName>
+      <DynamicSource Condition="'$(Configuration)|$(Platform)'=='Release|x64'">input</DynamicSource>
+      <QtMocFileName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(Filename).moc</QtMocFileName>
+    </ClCompile>
     <ClCompile Include="PlayerInfo.cpp" />
     <ClCompile Include="PlayerWindow.cpp" />
     <ClCompile Include="Rank.cpp" />
@@ -128,6 +135,9 @@
     <QtMoc Include="MainWindow.h" />
   </ItemGroup>
   <ItemGroup>
+    <QtMoc Include="MultiGameWindow.h" />
+    <QtMoc Include="LobbyWindow.h" />
+    <ClInclude Include="NetworkProtocol.h" />
     <ClInclude Include="SettingsManager.h" />
     <QtMoc Include="SettingsWindow.h" />
     <QtMoc Include="ShopWindow.h" />
