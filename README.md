@@ -138,6 +138,6 @@ windeployqt6.exe --qmldir <项目源码目录> BlastPioneer.exe
 本项目为个人学习作品，欢迎提交 Issue 或 Pull Request。
 
 ## 📄 许可证
-本软件采用 Creative Commons Attribution-NonCommercial 4.0 International（CC BY-NC 4.0） 许可证。
-你可以自由分享、修改本作品，但不得用于商业目的，且必须保留作者署名。
+本项目采用 **GNU General Public License v3.0**（GPL-3.0） 开源许可证。
+你可以自由使用、修改、分发本软件，但任何分发（包括修改版本）必须同样以 GPL-3.0 开源，并保留原始版权声明。
 详见 [LICENSE](LICENSE) 文件。
