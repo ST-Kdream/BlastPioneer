@@ -141,3 +141,5 @@ windeployqt6.exe --qmldir <项目源码目录> BlastPioneer.exe
 本项目采用 **GNU General Public License v3.0**（GPL-3.0） 开源许可证。
 你可以自由使用、修改、分发本软件，但任何分发（包括修改版本）必须同样以 GPL-3.0 开源，并保留原始版权声明。
 详见 [LICENSE](LICENSE) 文件。
+本软件使用了 **Qt 框架**（LGPL-3.0），
+Qt 源代码可从 [Qt官方下载链接](https://www.qt.io/download) 获取。
