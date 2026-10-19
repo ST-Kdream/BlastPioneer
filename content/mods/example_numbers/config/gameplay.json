@@ -1,0 +1,9 @@
+{
+  "_comment": "玩法数值覆盖：只写要改的键，没写的保持引擎默认值（于是引擎升级后新增的数值会自动跟上）。可改的键名见 docs/mod-api.md 或游戏内的模组页。",
+  "playerSpeed": 4.2,
+  "playerBombRange": 2,
+  "playerBombFuse": 1.2,
+  "enemyBombsPerSecond": 0.8,
+  "dropChance": 0.5,
+  "warningSeconds": 0.8
+}

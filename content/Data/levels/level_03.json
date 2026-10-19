@@ -1,0 +1,12 @@
+{
+  "_comment": "第 3 关：三个敌人，开始需要走位；想调难度就改这里的数字，不用重新编译",
+  "id": 3,
+  "name": "三面受敌",
+  "playerStart": [1, 1],
+  "bricks": 35,
+  "enemyCount": 3,
+  "enemyHp": 4,
+  "seed": 1003,
+  "coins": 65,
+  "ep": 30
+}

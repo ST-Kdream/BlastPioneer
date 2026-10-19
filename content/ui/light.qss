@@ -1,0 +1,463 @@
+/* ============================================================
+ * BlastPioneer 浅色主题（L1 层）
+ *
+ * 规则：**只写 @primary 这类令牌，不写颜色值** —— 颜色在 ui/tokens.json 里（L0 层）。
+ * 想换肤改 tokens.json；想改某个控件长相改这里。
+ * mod 的 ui/override.qss 会在本文件之后追加，于是可以只覆盖它关心的部分。
+ *
+ * 令牌名清单见 ui/tokens.json；用错名字会保持原样并在日志里报出来。
+ * ============================================================ */
+
+/* ---------- 通用控件 ---------- */
+QToolTip {
+	background-color: @panel;
+	color: @ink;
+	border: 1px solid @line;
+	padding: 6px 8px;
+}
+
+QGroupBox {
+	border: 1px solid @line;
+	border-radius: @radius;
+	margin-top: 14px;
+	padding: 12px;
+	font-size: @fontBase;
+}
+
+QGroupBox::title {
+	subcontrol-origin: margin;
+	left: 10px;
+	padding: 0 6px;
+	color: @inkWeak;
+}
+
+QListWidget, QListView, QComboBox, QLineEdit, QSpinBox, QTextBrowser, QTextEdit {
+	background-color: @panel;
+	border: 1px solid @line;
+	border-radius: 6px;
+	color: @ink;
+	padding: 4px;
+	selection-background-color: @primary;
+	selection-color: @onPrimary;
+}
+
+QListWidget::item, QListView::item {
+	padding: 6px 8px;
+	border-radius: @radiusSm;
+}
+
+QListWidget::item:selected, QListView::item:selected {
+	background-color: @primary;
+	color: @onPrimary;
+}
+
+QCheckBox {
+	color: @ink;
+	spacing: 8px;
+}
+
+QSlider::groove:horizontal {
+	height: 4px;
+	background: @line;
+	border-radius: 2px;
+}
+
+QSlider::handle:horizontal {
+	background: @primary;
+	width: 14px;
+	margin: -6px 0;
+	border-radius: 7px;
+}
+
+QScrollBar:vertical {
+	background: transparent;
+	width: 10px;
+	margin: 2px;
+}
+
+QScrollBar::handle:vertical {
+	background: @line;
+	border-radius: 5px;
+	min-height: 24px;
+}
+
+QScrollBar::handle:vertical:hover {
+	background: @inkWeak;
+}
+
+QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+	height: 0;
+}
+
+/* ---------- 按钮：三种角色 ---------- */
+/* 主要动作（开始游戏 / 确定 / 使用） */
+#primaryBtn, #startBtn, #useBtn, #okBtn {
+	background-color: @primary;
+	color: @onPrimary;
+	border: none;
+	border-radius: @radius;
+	padding: 10px 18px;
+	font-size: 16px;
+}
+
+#primaryBtn:hover, #startBtn:hover, #useBtn:hover, #okBtn:hover {
+	background-color: @primaryHi;
+}
+
+#primaryBtn:pressed, #startBtn:pressed, #useBtn:pressed, #okBtn:pressed {
+	background-color: @primaryLo;
+}
+
+/* 强调/次要动作（返回 / 取消） */
+#accentBtn, #backBtn, #cancelBtn {
+	background-color: @accent;
+	color: @onPrimary;
+	border: none;
+	border-radius: @radius;
+	padding: 10px 18px;
+	font-size: 16px;
+}
+
+#accentBtn:hover, #backBtn:hover, #cancelBtn:hover {
+	background-color: @accentHi;
+}
+
+#accentBtn:pressed, #backBtn:pressed, #cancelBtn:pressed {
+	background-color: @accentLo;
+}
+
+/* 普通动作（模组页的"重新扫描"这类） */
+#ghostBtn, #reloadModsBtn {
+	background-color: @panel;
+	color: @ink;
+	border: 1px solid @line;
+	border-radius: @radius;
+	padding: 8px 14px;
+	font-size: @fontBase;
+}
+
+#ghostBtn:hover, #reloadModsBtn:hover {
+	border-color: @primary;
+	color: @primary;
+}
+
+/* 主页的"开始游戏"：做得更大更醒目 */
+#startBtn {
+	font-size: 22px;
+	padding: 22px 24px;
+	font-weight: bold;
+}
+
+/* ---------- 页面骨架（L2 层，ScaffoldScreen 提供） ---------- */
+#pageRoot {
+	background-color: @bg;
+}
+
+#pageHeader {
+	background-color: @panel;
+	border-bottom: 1px solid @line;
+}
+
+#pageTitle {
+	color: @ink;
+	font-size: @fontTitle;
+	font-weight: bold;
+}
+
+#pageSubtitle {
+	color: @inkWeak;
+	font-size: @fontBase;
+}
+
+#pageFooter {
+	background-color: @panel;
+	border-top: 1px solid @line;
+}
+
+#pageContent {
+	background-color: @bg;
+}
+
+/* ---------- 模式选择（卡片式入口） ---------- */
+#modeCard {
+	background-color: @panel;
+	border: 1px solid @line;
+	border-radius: @radius;
+	color: @ink;
+	font-size: 18px;
+	padding: 18px;
+	text-align: left;
+}
+
+#modeCard:hover {
+	border-color: @primary;
+	color: @primary;
+}
+
+#modeCard:pressed {
+	background-color: @bg;
+}
+
+#modeCardHint {
+	color: @inkWeak;
+	font-size: @fontSmall;
+}
+
+#modeEmptyHint {
+	color: @inkWeak;
+	font-size: @fontBase;
+}
+
+/* ---------- 主页：主视觉卡片 + 入口卡片 ---------- */
+/* 主页不再靠"大留白"撑场面：hero 卡片放游戏名/定位/玩家状态/开始按钮，
+   下面四张入口卡片各带一句说明。信息本身把版面填满，才不像占位图 */
+#heroCard {
+	background-color: @heroBg;
+	border: 1px solid @heroLine;
+	border-radius: @radius;
+}
+
+#heroTitle {
+	color: @heroInk;
+	font-size: 34px;
+	font-weight: bold;
+}
+
+#heroTagline {
+	color: @heroInkWeak;
+	font-size: 15px;
+}
+
+#heroStats {
+	color: @heroAccent;
+	font-size: 14px;
+	font-weight: bold;
+}
+
+#headerMeta {
+	color: @inkWeak;
+	font-size: 13px;
+}
+
+#entryCard {
+	background-color: @panel;
+	border: 1px solid @line;
+	border-radius: @radius;
+	color: @ink;
+	font-size: 17px;
+	padding: 14px 18px;
+	text-align: left;
+}
+
+#entryCard:hover {
+	border-color: @primary;
+	color: @primary;
+}
+
+#entryCard:pressed {
+	background-color: @bg;
+}
+
+/* ---------- 左侧导航（SideTabWidget） ---------- */
+/* 文字横排、滚轮滚动列表、没有上下箭头 —— 见 ui/SideTabWidget.h 的说明 */
+#sideTabsList {
+	background-color: @bg;
+	border: none;
+	border-right: 1px solid @line;
+	border-radius: 0;
+	padding: 8px 0;
+	font-size: 15px;
+}
+
+#sideTabsList::item {
+	padding: 12px 16px;
+	border: none;
+	border-radius: 0;
+	color: @inkWeak;
+}
+
+#sideTabsList::item:hover {
+	background-color: @panel;
+	color: @ink;
+}
+
+#sideTabsList::item:selected {
+	background-color: @panel;
+	color: @primary;
+	font-weight: bold;
+	border-left: 3px solid @primary;
+}
+
+#sideTabsPane {
+	background-color: @panel;
+	border: none;
+	border-radius: 0;
+}
+
+/* ---------- 模组页与通用小字 ---------- */
+#modList {
+	min-height: 120px;
+}
+
+#modSummary, #modDetail, #fieldHint {
+	color: @inkWeak;
+	font-size: @fontSmall;
+}
+
+#sectionTitle {
+	color: @ink;
+	font-size: 17px;
+	font-weight: bold;
+}
+
+#rulesView {
+	border: none;
+	border-radius: 0;
+}
+
+/* ---------- 启动页 ---------- */
+/* 启动页上方是 QML 特效，整页给深色底：否则浅色主题下白字落在浅底上看不见 */
+#splashRoot {
+	background-color: @heroBg;
+}
+
+#splashTitle {
+	color: @gold;
+	font-size: 28px;
+	font-weight: bold;
+}
+
+#splashStep {
+	color: @heroInkWeak;
+	font-size: 14px;
+}
+
+/* ---------- 首次启动（没有存档时） ---------- */
+#welcomeTitle {
+	color: @gold;
+	font-size: 30px;
+	font-weight: bold;
+}
+
+#welcomeTip {
+	color: @ink;
+	font-size: 15px;
+}
+
+/* ---------- 商店与联机大厅 ---------- */
+#coinLabel {
+	color: @gold;
+	font-size: 16px;
+	font-weight: bold;
+}
+
+#countdownLabel {
+	color: @danger;
+	font-size: 36px;
+	font-weight: bold;
+}
+
+/* ---------- 游戏内顶部信息条 ---------- */
+/* 与主题无关：它贴在深色画布上（画布颜色是玩法的一部分） */
+#gameHud {
+	background-color: @hudBg;
+	border-bottom: 1px solid @hudLine;
+}
+
+#hudValue {
+	color: @hudInk;
+	font-size: 14px;
+	font-weight: bold;
+}
+
+#hudHint {
+	color: @hudInkWeak;
+	font-size: 13px;
+}
+
+/* ---------- 背包：两种角色 ---------- */
+#bagPanel {
+	background-color: @bg;
+}
+
+/* 游戏内覆盖层：压暗而不是盖住（还能隐约看到游戏画面） */
+#bagOverlay {
+	background-color: @scrim;
+}
+
+#bagTitle {
+	color: @ink;
+	font-size: 20px;
+	font-weight: bold;
+}
+
+#bagOverlay #bagTitle {
+	color: @onPrimary;
+}
+
+#itemList {
+	background-color: @panel;
+	border: 1px solid @line;
+	border-radius: @radius;
+	color: @ink;
+	padding: 6px;
+}
+
+#itemList::item {
+	padding: 8px 10px;
+	border-radius: @radiusSm;
+}
+
+#itemList::item:selected {
+	background-color: @primary;
+	color: @onPrimary;
+}
+
+/* ---------- 关卡选择：圆形大号数字按钮 ---------- */
+/* 为什么必须写这条规则：`#levelBtn` 曾经**没有**任何样式，
+   于是它用系统调色板画自己 —— 玩家的 Windows 若是深色模式，"浅色主题"下就是
+   白字压在白底上（真实反馈："单人模式看不到关卡"，而日志里 8 关都加载正常）。 */
+#levelBtn {
+	background-color: @panel;
+	color: @primary;
+	border: 2px solid @line;
+	border-radius: 40px;
+	font-size: 26px;
+	font-weight: bold;
+}
+
+#levelBtn:hover {
+	background-color: @primary;
+	color: @onPrimary;
+	border-color: @primary;
+}
+
+#levelBtn:pressed {
+	background-color: @primaryLo;
+	color: @onPrimary;
+	border-color: @primaryLo;
+}
+
+/* 未解锁：仍然要看得清是"第几关"，只是明确地"不能点" */
+#levelBtn:disabled {
+	background-color: @bg;
+	color: @inkWeak;
+	border: 2px dashed @line;
+}
+
+/* ---------- 安全模式横幅（原生模组被崩溃保护禁用时的顶部提示） ---------- */
+/* 为什么用强调色而不是危险色：这不是错误，是"我们主动做的一件好事" */
+#safeModeBanner {
+	background-color: @accent;
+	color: @onPrimary;
+	font-size: @fontSmall;
+	font-weight: bold;
+	padding: 6px 12px;
+}
+
+/* ---------- 模组页：原生模组开关要重启才生效的提示 ---------- */
+#modHint {
+	color: @accentLo;
+	font-size: @fontSmall;
+	padding: 4px 0;
+}

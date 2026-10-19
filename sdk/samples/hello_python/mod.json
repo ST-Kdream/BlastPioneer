@@ -1,0 +1,14 @@
+{
+  "_comment": "Python 原生模组示例：逻辑全在 mod.py 里，hello_python.dll 就是 sdk/python_shim 编出来的通用胶水（改名后放在这里）。要试它需要：① 在设置里打开「允许原生模组」并勾选本模组 ② 机器上有 Python 3.8+（或用 mods/hello_python/python/ 自带一份运行时）③ 把 bp_python_shim.dll 复制成 hello_python.dll ③ 把 sdk/python/bp_mod_api.py 复制到本目录。之后在「开始游戏 → 选择模式」里会多出「示例：Python 竞技场」。",
+  "id": "hello_python",
+  "name": "示例：Python 模组",
+  "version": "0.1.0",
+  "author": "BlastPioneer",
+  "description": "用 Python 写的原生模组：订阅事件、读世界、并注册一个由 Python 决定地图/AI/胜负的模式。",
+  "apiVersion": "0.1.2",
+  "priority": 0,
+  "enabledByDefault": false,
+  "native": true,
+  "nativeLib": "hello_python",
+  "features": ["hooks"]
+}

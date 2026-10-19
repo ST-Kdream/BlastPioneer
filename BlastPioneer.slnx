@@ -1,0 +1,7 @@
+<Solution>
+  <Configurations>
+    <Platform Name="x64" />
+  </Configurations>
+  <Project Path="BlastPioneer.vcxproj" Id="3c922598-640e-457e-bfe6-4bc30164ba38" />
+  <Project Path="tools/updater/Updater.vcxproj" Id="7e1c2f4a-9b3d-4c58-8a2e-1f6d0b7c5e93" />
+</Solution>

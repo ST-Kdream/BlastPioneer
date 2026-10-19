@@ -1,0 +1,524 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="18.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{3C922598-640E-457E-BFE6-4BC30164BA38}</ProjectGuid>
+    <Keyword>QtVS_v304</Keyword>
+    <WindowsTargetPlatformVersion Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">10.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">10.0</WindowsTargetPlatformVersion>
+    <QtMsBuild Condition="'$(QtMsBuild)'=='' OR !Exists('$(QtMsBuild)\qt.targets')">$(MSBuildProjectDirectory)\QtMsBuild</QtMsBuild>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <PlatformToolset>v143</PlatformToolset>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <PlatformToolset>v143</PlatformToolset>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Condition="Exists('$(QtMsBuild)\qt_defaults.props')">
+    <Import Project="$(QtMsBuild)\qt_defaults.props" />
+  </ImportGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="QtSettings">
+    <QtInstall>QtMSVC6.10.2</QtInstall>
+    <QtModules>core;gui;network;qml;quick;widgets;quickwidgets</QtModules>
+    <QtBuildConfig>debug</QtBuildConfig>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'" Label="QtSettings">
+    <QtInstall>QtMSVC6.10.2</QtInstall>
+    <QtModules>core;gui;network;qml;quick;widgets;quickwidgets</QtModules>
+    <QtBuildConfig>release</QtBuildConfig>
+  </PropertyGroup>
+  <Target Name="QtMsBuildNotFound" BeforeTargets="CustomBuild;ClCompile" Condition="!Exists('$(QtMsBuild)\qt.targets') or !Exists('$(QtMsBuild)\qt.props')">
+    <Message Importance="High" Text="QtMsBuild: could not locate qt.targets, qt.props; project may not build correctly." />
+  </Target>
+  <ImportGroup Label="ExtensionSettings" />
+  <ImportGroup Label="Shared" />
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(QtMsBuild)\Qt.props" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(QtMsBuild)\Qt.props" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <!-- ============================================================
+       目录约定：整个仓库只有两棵树，产物不再乱跑
+
+         <仓库根>\                    源码树（工程根 = 仓库根）
+           ├── src\                    程序本体：game\ core\ ui\ screens\ + main.cpp
+           ├── content\                随程序发布的内容：Data\ Assets\ ui\ mods\
+           ├── sdk\ tools\ tests\ docs\ SDK / 工具 / 测试 / 工作笔记
+           └── BlastPioneer.vcxproj    本文件（OutDir 由下面的 BuildRoot 决定）
+
+           两条映射（改目录时最容易漏）：
+             ① src\ 用"扁平 include"，搜索路径来自 AdditionalIncludeDirectories；
+             ② content\ 下四个目录会复制成 **exe 旁边的平级目录**（Assets\ Data\ ui\ mods\），
+                所以运行期路径一直是 Data\... 、ui\...，与 content\Data\... 无关。
+
+         <仓库根>\build\              构建目录：产物 + "能直接运行的一份"
+           ├── obj\<Config>\          中间产物（.obj/.tlog/moc/rcc）
+           ├── tests\                 引擎测试（qmake 影子构建）
+           ├── Debug\                 可直接运行：exe + Qt 运行库 + Assets/Data 的副本
+           └── Release\
+
+       为什么显式钉死 OutDir/IntDir：默认表达式是 $(SolutionDir)$(Platform)\$(Configuration)\，
+       而命令行构建 .vcxproj 时 $(SolutionDir) 可能为空 —— 于是同一份工程出现两个输出位置，
+       极容易跑到旧 exe 上（这个坑真的踩过）。
+       ============================================================ -->
+  <PropertyGroup>
+    <RepoRoot>$(MSBuildProjectDirectory)</RepoRoot>
+    <BuildRoot>$(RepoRoot)\build</BuildRoot>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <OutDir>$(BuildRoot)\Debug\</OutDir>
+    <IntDir>$(BuildRoot)\obj\Debug\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <OutDir>$(BuildRoot)\Release\</OutDir>
+    <IntDir>$(BuildRoot)\obj\Release\</IntDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <!-- 头文件搜索路径：源码虽然分了组，但所有 #include 依然写裸文件名（如 "GameEngine.h"），
+       靠这几条路径解析。moc/编译器都从这里取 -I（Qt VS Tools 的 INCLUDEPATH 正是
+       从 ClCompile 的 AdditionalIncludeDirectories 推导的），所以只需要维护这一处。 -->
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <ClCompile>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>$(MSBuildProjectDirectory);$(MSBuildProjectDirectory)\src\game;$(MSBuildProjectDirectory)\src\core;$(MSBuildProjectDirectory)\src\ui;$(MSBuildProjectDirectory)\src\screens;$(RepoRoot)\sdk;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <ClCompile>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>$(MSBuildProjectDirectory);$(MSBuildProjectDirectory)\src\game;$(MSBuildProjectDirectory)\src\core;$(MSBuildProjectDirectory)\src\ui;$(MSBuildProjectDirectory)\src\screens;$(RepoRoot)\sdk;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="src\main.cpp" />
+    <ClInclude Include="src\version.h">
+      <Level>Core</Level>
+    </ClInclude>
+    <ClCompile Include="src\core\BootstrapTask.cpp">
+      <Level>Core</Level>
+    </ClCompile>
+    <ClCompile Include="src\core\DirectoryLayout.cpp">
+      <Level>Core</Level>
+    </ClCompile>
+    <ClCompile Include="src\core\FigCatalog.cpp">
+      <Level>Core</Level>
+    </ClCompile>
+    <ClCompile Include="src\core\FigManager.cpp">
+      <Level>Core</Level>
+    </ClCompile>
+    <ClCompile Include="src\core\FileManager.cpp">
+      <Level>Core</Level>
+    </ClCompile>
+    <ClCompile Include="src\core\Item.cpp">
+      <Level>Core</Level>
+    </ClCompile>
+    <ClCompile Include="src\core\ItemDatabase.cpp">
+      <Level>Core</Level>
+    </ClCompile>
+    <ClCompile Include="src\core\LevelDatabase.cpp">
+      <Level>Core</Level>
+    </ClCompile>
+    <ClCompile Include="src\core\LaunchGuard.cpp">
+      <Level>Core</Level>
+    </ClCompile>
+    <ClCompile Include="src\core\ModManager.cpp">
+      <Level>Core</Level>
+    </ClCompile>
+    <ClCompile Include="src\core\NetSession.cpp">
+      <Level>Core</Level>
+    </ClCompile>
+    <ClCompile Include="src\core\PlayerInfo.cpp">
+      <Level>Core</Level>
+    </ClCompile>
+    <ClCompile Include="src\core\PlayerProfile.cpp">
+      <Level>Core</Level>
+    </ClCompile>
+    <ClCompile Include="src\core\NativeModHost.cpp">
+      <Level>Core</Level>
+    </ClCompile>
+    <ClCompile Include="src\core\Rank.cpp">
+      <Level>Core</Level>
+    </ClCompile>
+    <ClCompile Include="src\core\SettingsManager.cpp">
+      <Level>Core</Level>
+    </ClCompile>
+    <ClCompile Include="src\core\ThemeManager.cpp">
+      <Level>Core</Level>
+    </ClCompile>
+    <ClCompile Include="src\core\UiTokens.cpp">
+      <Level>Core</Level>
+    </ClCompile>
+    <ClCompile Include="src\game\DemoGameEngine.cpp">
+      <Level>Game</Level>
+    </ClCompile>
+    <ClCompile Include="src\game\GameBoard.cpp">
+      <Level>Game</Level>
+    </ClCompile>
+    <ClCompile Include="src\game\GameEngine.cpp">
+      <Level>Game</Level>
+    </ClCompile>
+    <ClCompile Include="src\game\GameLoop.cpp">
+      <Level>Game</Level>
+    </ClCompile>
+    <ClCompile Include="src\game\ItemEffects.cpp">
+      <Level>Game</Level>
+    </ClCompile>
+    <ClCompile Include="src\game\GameplayPatch.cpp">
+      <Level>Game</Level>
+    </ClCompile>
+    <ClCompile Include="src\game\ModApi.cpp">
+      <Level>Game</Level>
+    </ClCompile>
+    <ClCompile Include="src\game\LevelData.cpp">
+      <Level>Game</Level>
+    </ClCompile>
+    <ClCompile Include="src\game\MapGenerator.cpp">
+      <Level>Game</Level>
+    </ClCompile>
+    <ClCompile Include="src\game\MultiGameEngine.cpp">
+      <Level>Game</Level>
+    </ClCompile>
+    <ClCompile Include="src\game\SingleGameEngine.cpp">
+      <Level>Game</Level>
+    </ClCompile>
+    <ClCompile Include="src\ui\AppHost.cpp">
+      <Level>UI</Level>
+    </ClCompile>
+    <ClCompile Include="src\ui\ScaffoldScreen.cpp">
+      <Level>UI</Level>
+    </ClCompile>
+    <ClCompile Include="src\ui\SideTabWidget.cpp">
+      <Level>UI</Level>
+    </ClCompile>
+    <ClCompile Include="src\ui\GameCanvas.cpp">
+      <Level>UI</Level>
+    </ClCompile>
+    <ClCompile Include="src\ui\GameHud.cpp">
+      <Level>UI</Level>
+    </ClCompile>
+    <ClCompile Include="src\ui\ScreenRouter.cpp">
+      <Level>UI</Level>
+    </ClCompile>
+    <ClCompile Include="src\screens\BagScreen.cpp">
+      <Level>Screens</Level>
+    </ClCompile>
+    <ClCompile Include="src\screens\HomeScreen.cpp">
+      <Level>Screens</Level>
+    </ClCompile>
+    <ClCompile Include="src\screens\LevelSelectScreen.cpp">
+      <Level>Screens</Level>
+    </ClCompile>
+    <ClCompile Include="src\screens\ModeSelectScreen.cpp">
+      <Level>Screens</Level>
+    </ClCompile>
+    <ClCompile Include="src\screens\ModsScreen.cpp">
+      <Level>Screens</Level>
+    </ClCompile>
+    <ClCompile Include="src\screens\LobbyScreen.cpp">
+      <Level>Screens</Level>
+    </ClCompile>
+    <ClCompile Include="src\screens\MultiGameScreen.cpp">
+      <Level>Screens</Level>
+      <DynamicSource Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">input</DynamicSource>
+      <QtMocFileName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(Filename).moc</QtMocFileName>
+      <DynamicSource Condition="'$(Configuration)|$(Platform)'=='Release|x64'">input</DynamicSource>
+      <QtMocFileName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(Filename).moc</QtMocFileName>
+    </ClCompile>
+    <ClCompile Include="src\screens\PlayerScreen.cpp">
+      <Level>Screens</Level>
+    </ClCompile>
+    <ClCompile Include="src\screens\RulesScreen.cpp">
+      <Level>Screens</Level>
+    </ClCompile>
+    <ClCompile Include="src\screens\SettingsScreen.cpp">
+      <Level>Screens</Level>
+    </ClCompile>
+    <ClCompile Include="src\screens\ShopScreen.cpp">
+      <Level>Screens</Level>
+    </ClCompile>
+    <ClCompile Include="src\screens\SingleGameScreen.cpp">
+      <Level>Screens</Level>
+    </ClCompile>
+    <ClCompile Include="src\screens\SplashScreen.cpp">
+      <Level>Screens</Level>
+    </ClCompile>
+    <ClCompile Include="src\screens\WelcomeScreen.cpp">
+      <Level>Screens</Level>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\core\DirectoryLayout.h">
+      <Level>Core</Level>
+    </ClInclude>
+    <ClInclude Include="src\core\FigCatalog.h">
+      <Level>Core</Level>
+    </ClInclude>
+    <ClInclude Include="src\core\FigManager.h">
+      <Level>Core</Level>
+    </ClInclude>
+    <ClInclude Include="src\core\FileManager.h">
+      <Level>Core</Level>
+    </ClInclude>
+    <ClInclude Include="src\core\Item.h">
+      <Level>Core</Level>
+    </ClInclude>
+    <ClInclude Include="src\core\ItemDatabase.h">
+      <Level>Core</Level>
+    </ClInclude>
+    <ClInclude Include="src\core\LevelDatabase.h">
+      <Level>Core</Level>
+    </ClInclude>
+    <ClInclude Include="src\core\LaunchGuard.h">
+      <Level>Core</Level>
+    </ClInclude>
+    <ClInclude Include="src\core\ModManager.h">
+      <Level>Core</Level>
+    </ClInclude>
+    <ClInclude Include="src\core\NativeModHost.h">
+      <Level>Core</Level>
+    </ClInclude>
+    <ClInclude Include="sdk\bp_mod_api.h">
+      <Level>SDK</Level>
+    </ClInclude>
+    <ClInclude Include="src\core\NetworkProtocol.h">
+      <Level>Core</Level>
+    </ClInclude>
+    <ClInclude Include="src\core\PlayerInfo.h">
+      <Level>Core</Level>
+    </ClInclude>
+    <ClInclude Include="src\core\PlayerProfile.h">
+      <Level>Core</Level>
+    </ClInclude>
+    <ClInclude Include="src\core\Rank.h">
+      <Level>Core</Level>
+    </ClInclude>
+    <ClInclude Include="src\core\SettingsManager.h">
+      <Level>Core</Level>
+    </ClInclude>
+    <ClInclude Include="src\core\ThemeManager.h">
+      <Level>Core</Level>
+    </ClInclude>
+    <ClInclude Include="src\core\UiTokens.h">
+      <Level>Core</Level>
+    </ClInclude>
+    <ClInclude Include="src\game\DemoGameEngine.h">
+      <Level>Game</Level>
+    </ClInclude>
+    <ClInclude Include="src\game\GameBoard.h">
+      <Level>Game</Level>
+    </ClInclude>
+    <ClInclude Include="src\game\GameConfig.h">
+      <Level>Game</Level>
+    </ClInclude>
+    <ClInclude Include="src\game\GameEngine.h">
+      <Level>Game</Level>
+    </ClInclude>
+    <ClInclude Include="src\game\GameLoop.h">
+      <Level>Game</Level>
+    </ClInclude>
+    <ClInclude Include="src\game\GameTypes.h">
+      <Level>Game</Level>
+    </ClInclude>
+    <ClInclude Include="src\game\ItemEffects.h">
+      <Level>Game</Level>
+    </ClInclude>
+    <ClInclude Include="src\game\KeyDispatch.h">
+      <Level>Game</Level>
+    </ClInclude>
+    <ClInclude Include="src\game\LevelData.h">
+      <Level>Game</Level>
+    </ClInclude>
+    <ClInclude Include="src\game\MapGenerator.h">
+      <Level>Game</Level>
+    </ClInclude>
+    <ClInclude Include="src\game\GameplayPatch.h">
+      <Level>Game</Level>
+    </ClInclude>
+    <ClInclude Include="src\game\ModApi.h">
+      <Level>Game</Level>
+    </ClInclude>
+    <ClInclude Include="src\game\MultiGameEngine.h">
+      <Level>Game</Level>
+    </ClInclude>
+    <ClInclude Include="src\game\SingleGameEngine.h">
+      <Level>Game</Level>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <QtMoc Include="src\core\BootstrapTask.h">
+      <Level>Core</Level>
+    </QtMoc>
+    <QtMoc Include="src\core\NetSession.h">
+      <Level>Core</Level>
+    </QtMoc>
+    <QtMoc Include="src\ui\AppHost.h">
+      <Level>UI</Level>
+    </QtMoc>
+    <QtMoc Include="src\ui\GameCanvas.h">
+      <Level>UI</Level>
+    </QtMoc>
+    <QtMoc Include="src\ui\ScaffoldScreen.h">
+      <Level>UI</Level>
+    </QtMoc>
+    <QtMoc Include="src\ui\SideTabWidget.h">
+      <Level>UI</Level>
+    </QtMoc>
+    <QtMoc Include="src\ui\GameHud.h">
+      <Level>UI</Level>
+    </QtMoc>
+    <QtMoc Include="src\ui\ScreenBase.h">
+      <Level>UI</Level>
+    </QtMoc>
+    <QtMoc Include="src\ui\ScreenRouter.h">
+      <Level>UI</Level>
+    </QtMoc>
+    <QtMoc Include="src\screens\BagScreen.h">
+      <Level>Screens</Level>
+    </QtMoc>
+    <QtMoc Include="src\screens\HomeScreen.h">
+      <Level>Screens</Level>
+    </QtMoc>
+    <QtMoc Include="src\screens\LevelSelectScreen.h">
+      <Level>Screens</Level>
+    </QtMoc>
+    <QtMoc Include="src\screens\ModeSelectScreen.h">
+      <Level>Screens</Level>
+    </QtMoc>
+    <QtMoc Include="src\screens\ModsScreen.h">
+      <Level>Screens</Level>
+    </QtMoc>
+    <QtMoc Include="src\screens\LobbyScreen.h">
+      <Level>Screens</Level>
+    </QtMoc>
+    <QtMoc Include="src\screens\MultiGameScreen.h">
+      <Level>Screens</Level>
+    </QtMoc>
+    <QtMoc Include="src\screens\PlayerScreen.h">
+      <Level>Screens</Level>
+    </QtMoc>
+    <QtMoc Include="src\screens\RulesScreen.h">
+      <Level>Screens</Level>
+    </QtMoc>
+    <QtMoc Include="src\screens\SettingsScreen.h">
+      <Level>Screens</Level>
+    </QtMoc>
+    <QtMoc Include="src\screens\ShopScreen.h">
+      <Level>Screens</Level>
+    </QtMoc>
+    <QtMoc Include="src\screens\SingleGameScreen.h">
+      <Level>Screens</Level>
+    </QtMoc>
+    <QtMoc Include="src\screens\SplashScreen.h">
+      <Level>Screens</Level>
+    </QtMoc>
+    <QtMoc Include="src\screens\WelcomeScreen.h">
+      <Level>Screens</Level>
+    </QtMoc>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="src\startupEffect.qml" />
+  </ItemGroup>
+  <ItemGroup>
+    <QtRcc Include="src\Resource.qrc" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">
+    <Import Project="$(QtMsBuild)\qt.targets" />
+  </ImportGroup>
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+  <!-- ============================================================
+       构建后把"内容资源"同步到运行目录
+
+       为什么需要它：工程目录里的 Assets/Data 是给编译与阅读用的，
+       而真正跑起来读的是 exe 旁边那一份（x64\<Config>\Assets 与 \Data）。
+       以前靠手工复制，于是经常出现"改了 JSON 但运行时还是旧值"。
+
+       两条硬规则：
+         1. 绝不覆盖用户数据：Data\playerData.json（存档）、Data\settings.ini（设置）
+            与 Data\launch_state.json（崩溃保护的启动记录）写在 Exclude 里，
+            构建永远不会碰它们 —— 否则源码树里的一份旧记录会被复制进运行目录，污染崩溃判定。
+         2. SkipUnchangedFiles：只复制时间戳或大小变了的文件，构建不会变慢。
+       ============================================================ -->
+  <Target Name="CopyContentToOutDir" AfterTargets="Build">
+    <ItemGroup>
+      <ContentAssetFiles Include="$(MSBuildProjectDirectory)\content\Assets\**\*.*" />
+      <ContentDataFiles Include="$(MSBuildProjectDirectory)\content\Data\**\*.*"
+                        Exclude="$(MSBuildProjectDirectory)\content\Data\playerData.json;$(MSBuildProjectDirectory)\content\Data\settings.ini;$(MSBuildProjectDirectory)\content\Data\launch_state.json" />
+      <ContentModFiles Include="$(MSBuildProjectDirectory)\content\mods\**\*.*" />
+      <!-- ui\ 里既有样式表也有源码，所以用 Exclude 排掉源码扩展名：
+           这样以后往 ui\ 里放图标/字体之类的资源，不用改这里就会自动同步 -->
+      <ContentUiFiles Include="$(MSBuildProjectDirectory)\src\ui\**\*.*"
+                      Exclude="$(MSBuildProjectDirectory)\src\ui\*.cpp;$(MSBuildProjectDirectory)\src\ui\*.h;$(MSBuildProjectDirectory)\src\ui\*.hpp" />
+    </ItemGroup>
+    <Copy SourceFiles="@(ContentAssetFiles)"
+          DestinationFiles="@(ContentAssetFiles->'$(OutDir)Assets\%(RecursiveDir)%(Filename)%(Extension)')"
+          SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(ContentDataFiles)"
+          DestinationFiles="@(ContentDataFiles->'$(OutDir)Data\%(RecursiveDir)%(Filename)%(Extension)')"
+          SkipUnchangedFiles="true" />
+    <!-- 仓库里带的示例模组也同步过去；它们是默认禁用的，不会改变默认玩法 -->
+    <Copy SourceFiles="@(ContentModFiles)"
+          DestinationFiles="@(ContentModFiles->'$(OutDir)mods\%(RecursiveDir)%(Filename)%(Extension)')"
+          SkipUnchangedFiles="true" />
+    <!-- 界面样式表：改配色就是改这些 .qss 文本，不需要重新编译；
+         同步到运行目录之后程序读的是那一份（想立刻试效果，直接改运行目录那份再重启即可） -->
+    <Copy SourceFiles="@(ContentUiFiles)"
+          DestinationFiles="@(ContentUiFiles->'$(OutDir)ui\%(RecursiveDir)%(Filename)%(Extension)')"
+          SkipUnchangedFiles="true" />
+    <Message Importance="High" Text="内容资源已同步: $(OutDir)（Assets + Data + mods + ui；用户存档与设置不动）" />
+  </Target>
+</Project>

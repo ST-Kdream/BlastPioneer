@@ -1,4 +1,22 @@
-# Visual Studio
+# ============================================================
+# 仓库里只有两棵树：
+#   <repo>/        源码树：src\ content\ sdk\ tools\ tests\ docs\
+#   <repo>/build/  构建目录：产物 + "能直接运行的一份"（全部不进版本库）
+# 发布包由 tools/package_release.ps1 生成到 dist\（也不进版本库）。
+# ============================================================
+
+# ---------- 构建输出（唯一的构建目录） ----------
+build/
+
+# ---------- 打包产物（tools/package_release.ps1 的输出） ----------
+dist/
+
+# ---------- 工作笔记：按需求，文档不上传 ----------
+# 这几份文档是接手/重构时的现场记录，留在本地参考，不进版本库。
+# 如果你其实想公开它们，把下面一行删掉即可（其余规则不受影响）。
+docs/
+
+# ---------- Visual Studio ----------
 .vs/
 *.sln
 *.slnx
@@ -10,28 +28,49 @@
 *.opendb
 *.vcxproj.user
 
-# 编译输出
-x64/
-Debug/
-Release/
+# ---------- 编译产物（正常情况下只会出现在 build/ 下，这里留作兜底） ----------
 *.exe
 *.ilk
 *.obj
-*.pch
 *.lib
 *.dll
 *.exp
+*.tlog
+*.recipe
+*.iobj
+*.ipdb
 
-# Qt
+# ---------- 运行时生成（更新缓存、日志、模组） ----------
+cache/
+logs/
+# 注意：exe 旁边的 mods/（玩家装的模组）不进版本库，
+# 但 content/ 里随仓库发布的示例模组要进版本库（见下面两条 ! 规则）
+mods/
+!content/mods/
+!content/mods/**
+
+# ---------- 万一有人在源码目录里直接跑 qmake（正常流程是影子构建到 build/tests） ----------
+Makefile
+Makefile.Debug
+Makefile.Release
+*.pro.user
+.qmake.stash
+release/
+debug/
+
+# ---------- Qt 生成物 ----------
 moc_*.cpp
 moc_*.h
 ui_*.h
 qrc_*.cpp
 *.qm
 
-# 其他
+# ---------- Python 生成物（sdk\ 里的验证脚本） ----------
+__pycache__/
+*.pyc
+
+# ---------- 其它 ----------
 *.log
-*.tlog
 *.ipch/
 *.aps
 *.ncb

@@ -1,0 +1,12 @@
+{
+  "_comment": "第 4 关：砖块变厚（40 块），敌人血 5 —— 该考虑捡道具了",
+  "id": 4,
+  "name": "厚墙与铁甲",
+  "playerStart": [1, 1],
+  "bricks": 40,
+  "enemyCount": 4,
+  "enemyHp": 5,
+  "seed": 1004,
+  "coins": 70,
+  "ep": 40
+}

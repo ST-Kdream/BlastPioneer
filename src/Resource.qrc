@@ -1,0 +1,17 @@
+<RCC>
+    <!--
+      资源路径必须保持不变（代码里读的是 :/Data/... 与 :/Assets/...），
+      但这棵树已经搬到 content/ 与 src/ 下，所以用 alias 把"打包后的资源名"
+      和"磁盘上的真实位置"解耦：以后移动磁盘目录不需要改任何代码。
+
+      为什么只把这四样放进 qrc：它们**参与程序行为**（道具表、规则文本、玩家图标、启动特效），
+      而且要求"缺了文件也能跑"。其余资源（关卡、样式表、模组）留在磁盘上 ——
+      它们要能被 mod 覆盖、能热改、能随发布包更新。
+    -->
+    <qresource prefix="/">
+        <file alias="Data/itemInfo.json">../content/Data/itemInfo.json</file>
+        <file alias="Data/gamerules.txt">../content/Data/gamerules.txt</file>
+        <file alias="Assets/picture/player.png">../content/Assets/picture/player.png</file>
+        <file alias="startupEffect.qml">startupEffect.qml</file>
+    </qresource>
+</RCC>

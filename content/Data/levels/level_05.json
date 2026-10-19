@@ -1,0 +1,12 @@
+{
+  "_comment": "第 5 关：五个敌人，场上同时可放 3 颗炸弹会明显不够用",
+  "id": 5,
+  "name": "连锁爆破",
+  "playerStart": [1, 1],
+  "bricks": 45,
+  "enemyCount": 5,
+  "enemyHp": 5,
+  "seed": 1005,
+  "coins": 75,
+  "ep": 50
+}

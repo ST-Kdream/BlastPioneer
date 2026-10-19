@@ -1,0 +1,12 @@
+{
+  "_comment": "这是一个 L1 数据模组示例：只改数据、不写代码。默认禁用（enabledByDefault = false），在「设置 → 模组」里勾选即可启用。",
+  "id": "example_numbers",
+  "name": "示例：改数值",
+  "version": "1.0",
+  "author": "BlastPioneer",
+  "description": "演示 L1 数据模组：改玩法数值、改道具字段、覆盖并新增关卡。勾选后立刻生效（关卡列表会多出一个「示例新增关卡」）。",
+  "apiVersion": "0.1.0",
+  "priority": 0,
+  "enabledByDefault": false,
+  "features": ["gameplay", "items", "levels"]
+}

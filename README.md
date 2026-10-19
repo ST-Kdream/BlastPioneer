@@ -1,145 +1,156 @@
-# BlastPioneer（爆破先锋）
+# BlastPioneer
 
-一款基于 Qt/C++ 开发的炸弹人风格游戏，包含单人闯关、局域网多人对战、道具商店、背包系统、QML 启动特效等丰富功能。
-
-## ✨ 特性
-
-- **🎮 单人闯关**：逐步挑战多张地图，击败敌人，收集金币和经验，提升段位
-- **🌐 多人对战**：通过局域网（或本地回环）实现最多 4 人的实时对战，主机权威同步
-- **🛒 商店系统**：使用金币购买各类道具（生命药水、速度靴、炸弹强化等）
-- **🎒 背包管理**：查看并使用已拥有的道具，在战斗中提供增益
-- **⚙️ 设置选项**：调整帧率、音量、特效质量、网格显示等
-- **✨ 启动特效**：基于 QML 的粒子爆炸效果，提升游戏启动体验（可开关）
-- **💾 数据持久化**：玩家信息、背包、通关进度自动保存为 JSON 文件
-- **🎯 段位系统**：根据经验值自动晋升段位（萌弹新手 → 灭世弹神）
-
-## 📁 目录结构
-```text
-BlastPioneer/                                      # 项目根目录
-├── README.md                                      # 项目说明文档
-├── LICENSE                                        # 许可证文件
-└── BlastPioneer/                                  # 主程序目录（所有内容集中在此）
-    ├── Assets/                                    # 游戏资源文件夹
-    │   └── picture/                               # 图片资源（玩家、敌人、炸弹、道具等）
-    ├── Data/                                      # 数据配置文件夹
-    │   ├── playerData.json                        # 玩家存档数据（运行时自动生成）
-    │   ├── settings.ini                           # 用户设置配置文件（运行时自动生成）
-    │   ├── gamerules.txt                          # 游戏规则文本（已打包至qrc）
-    │   └── itemInfo.json                          # 道具数据配置（已打包至qrc）
-    ├── MainWindow.h/cpp                           # 主窗口（程序入口界面）
-    ├── GameWindow.h/cpp                           # 单人游戏窗口
-    ├── MultiGameWindow.h/cpp                      # 多人游戏窗口
-    ├── LobbyWindow.h/cpp                          # 联机大厅窗口
-    ├── PlayerWindow.h/cpp                         # 玩家信息窗口
-    ├── BagWindow.h/cpp                            # 背包窗口
-    ├── ShopWindow.h/cpp                           # 商店窗口
-    ├── SettingsWindow.h/cpp                       # 设置窗口
-    ├── RulesWindow.h/cpp                          # 游戏规则窗口
-    ├── LevelSelectWindow.h/cpp                    # 关卡选择窗口
-    ├── StartupEffectWindow.h/cpp                  # 启动特效窗口（含QML加载）
-    ├── PlayerInfo.h/cpp                           # 玩家数据管理类
-    ├── SettingsManager.h/cpp                      # 设置管理类（单例）
-    ├── Item.h/cpp                                 # 道具类
-    ├── Rank.h/cpp                                 # 段位系统类
-    ├── DataLoader.h/cpp                           # 数据预加载类（qrc资源读取）
-    ├── NetworkProtocol.h                          # 网络协议定义（仅头文件）
-    ├── main.cpp                                   # 程序入口点
-    ├── Resource.qrc                               # Qt 资源文件（打包图片、文本等）
-    ├── startupEffect.qml                          # QML 启动特效动画
-    ├── BlastPioneer.vcxproj                       # Visual Studio 项目文件
-    └── BlastPioneer.vcxproj.filters               # VS 项目筛选器
-```
-
-## 🔧 编译要求
-
-| 项目 | 要求 |
-|------|------|
-| **操作系统** | Windows 10/11（x64） |
-| **编译器** | Visual Studio 2022（或 2026）带 C++ 桌面开发组件 |
-| **Qt 版本** | Qt 6.0 及以上（推荐 6.10.2） |
-| **Qt 模块** | `core`、`gui`、`widgets`、`network`、`qml`、`quick`、`quickwidgets` |
-| **构建工具** | Visual Studio 项目文件（.vcxproj）已提供 |
-
-## 🚀 编译与运行
-
-### 方式 A：Visual Studio（推荐）
-
-1. 安装 Qt 6 并配置 Visual Studio 的 Qt 插件（Qt VS Tools）
-2. 打开 `BlastPioneer.vcxproj`
-3. 选择构建配置（Debug/Release）和平台（x64）
-4. 点击「生成解决方案」或按 `Ctrl+Shift+B`
-5. 按 `F5` 运行调试
-
-### 方式 B：Qt Creator
-
-1. 打开 Qt Creator，选择「打开项目」
-2. 选择 `BlastPioneer.vcxproj` 或自行生成 `CMakeLists.txt`
-3. 配置 Qt 版本和编译器
-4. 点击「运行」
-
-### 独立部署
-
-编译完成后，若要独立运行 `.exe`，使用 Qt 自带的部署工具将依赖的 DLL 和 QML 资源复制到 exe 所在目录：
-
-```bash
-windeployqt6.exe --qmldir <项目源码目录> BlastPioneer.exe
-```
-
-##  🎮操作指南
-
-| 按键 | 功能 |
-|------|------|
-| W A S D | 上下左右移动 |
-| Space | 放置炸弹 |
-| B | 在游戏中打开背包（单人模式） |
-| 鼠标 | 点击界面按钮导航 |
-
-##  🌐多人联机
-
-### 基本流程
-
-1. 在主界面点击「多人游戏」进入联机大厅
-2. **创建房间**：点击「创建房间」成为主机，等待其他玩家加入
-3. **加入房间**：点击「刷新列表」发现局域网内的房间，选中后点击「加入选中房间」；或手动输入主机 IP 和端口（默认 `9999`）后点击「手动加入」
-4. **开始游戏**：主机需至少 2 名玩家才能开始，倒计时 3 秒后进入对战
-
-### 联机机制
-
-| 项目 | 说明 |
-|------|------|
-| 协议 | UDP |
-| 同步方式 | 主机权威（Host Authority），所有游戏逻辑由主机计算，客户端仅发送输入并接收状态 |
-| 最大人数 | 4 人 |
-| 端口 | 默认 `9999`（可手动指定） |
+炸弹人风格的闯关 + 局域网对战，Qt 6 / C++20 / MSVC。这个仓库自带一套原生模组接口
+（C ABI，`sdk/`），模组可以用 C++ 或 Python 写，并且能给游戏添加自己的模式。
 
 ---
 
-### ️ 免责声明
+## 代码结构
 
-> 本项目**不提供任何网络服务**。多人联机功能基于局域网通信实现，所有数据传输均在玩家本地设备之间直接进行，不经过任何第三方服务器或中继节点。
->
-> - 本功能不收集、存储或转发任何用户数据。
-> - 网络连接的稳定性取决于玩家自身的局域网环境，因网络波动、防火墙策略或路由器配置等原因导致的连接异常，不在本项目的责任范围内。
-> - 使用联机功能前，请确保已获得所在网络环境的管理授权，并遵守相关网络使用规定。
+```
+<repo>/
+├── src/                        程序本体（只放源码，不放资源）
+│   ├── game/                   引擎：游戏规则、棋盘、关卡数据、道具效果、模组 ABI 的引擎侧
+│   ├── core/                   单例与服务：目录、文件、设置、存档、数据库、网络、主题、崩溃保护
+│   ├── ui/                     界面框架：窗口壳、页面骨架、路由、自绘控件（颜色全在 content/ui/*.qss）
+│   ├── screens/                14 个界面
+│   ├── main.cpp                入口：命令行、目录解析、按界面 id 注册、自检模式
+│   ├── version.h               版本号的唯一来源（界面、打包脚本、更新器都读它）
+│   ├── Resource.qrc            只把"缺了也得能跑"的几样打进去（用 alias 保持 :/Data/... 路径）
+│   └── startupEffect.qml       启动特效（唯一的 QML，走 QQuickWidget）
+│
+├── content/                    随程序发布的内容（改这些不用重新编译）
+│   ├── Data/                   配置与数据：玩法默认值由代码兜底、关卡 JSON、模组兼容声明
+│   ├── Assets/picture/         图片
+│   ├── ui/                     主题：tokens.json + light.qss + dark.qss（模组可覆盖）
+│   └── mods/                   随仓库发布的示例模组（默认不启用）
+│
+├── sdk/                        原生模组 SDK
+│   ├── bp_mod_api.h            唯一的对外契约（追加式演进，偏移量由 static_assert 冻结）
+│   ├── python/                 作者用的 ctypes 声明 bp_mod_api.py + 两个验证脚本
+│   ├── python_shim/            把 mod.py 变成合规模组的胶水 DLL（含构建脚本）
+│   └── samples/                C++ 与 Python 示例模组
+│
+├── tests/                      引擎测试（qmake，不需要界面；报错信息必须是 ASCII）
+├── tools/                      构建与发布工具
+│   ├── package_release.ps1     打发布包：白名单取 Qt 运行库 + 干净化 + 启动自检
+│   ├── make_manifest.ps1       生成差分更新清单（manifest.json）
+│   ├── test_updater.ps1        更新器端到端自测（本地 HTTP 服务，不需要外网）
+│   └── updater/                更新器源码（独立 exe，QtCore+Network+Widgets，不用 moc）
+│
+├── build/                      构建产物（不进版本库）
+├── dist/                       发布包产物（不进版本库）
+│
+├── BlastPioneer.vcxproj        唯一工程文件（Debug/Release 都在里面）
+├── BlastPioneer.slnx
+├── README.md  LICENSE  .gitignore
+```
 
-##  已知问题与待更新
+**两条约定**，破坏它们会让后面的人很难受：
 
-- [ ] 联机大厅刷新列表后可能导致端口无法绑定
-- [ ] 多人游戏下开局可能卡入墙中
-- [ ] 非主界面关闭窗口程序并未结束，但窗口全部隐藏
-- [ ] 炸弹爆炸后长时间显示红格
-- [ ] 待更新背景和音效
-- [ ] 待更新人物移动动作
-- [ ] 待更新炸弹倒计时与爆炸提醒
+1. `src/` 里只有代码，`content/` 里只有内容。运行期两者会**并排放到 exe 旁边**
+   （`Assets/` `Data/` `ui/` `mods/`），所以代码里读的路径一直是 `Data/...`、`ui/...`，
+   与仓库里的 `content/Data/...` 无关 —— 这个映射由 `BlastPioneer.vcxproj` 的
+   `CopyContentToOutDir` 目标负责。
+2. 颜色、字号、圆角只写在 `content/ui/*.qss`，控件里只写 `objectName`。
+   **没有 qss 规则的控件会用调色板颜色**，在深色系统上会变成浅字压浅底。
 
-  更新日志见[update_log.txt](update_log.txt)
+---
 
-##  🤝 贡献与反馈
-本项目为个人学习作品，欢迎提交 Issue 或 Pull Request。
+## 发布包结构
 
-## 📄 许可证
-本项目采用 **GNU General Public License v3.0**（GPL-3.0） 开源许可证。
-你可以自由使用、修改、分发本软件，但任何分发（包括修改版本）必须同样以 GPL-3.0 开源，并保留原始版权声明。
-详见 [LICENSE](LICENSE) 文件。
-本软件使用了 **Qt 框架**（LGPL-3.0），
-Qt 源代码可从 [Qt官方下载链接](https://www.qt.io/download) 获取。
+由 `tools/package_release.ps1` 生成到 `dist/BlastPioneer-<version>/`。
+**不用 windeployqt**：它会把用不上的模块全拷进来（软件 OpenGL 19.7MB、D3D12 着色器编译器、
+qmltooling 开发工具……），实测直接部署是 120MB/96 文件，白名单后是 **65MB/73 文件**。
+
+```
+BlastPioneer-<version>/
+├── BlastPioneer.exe            主程序
+├── Updater.exe                 更新器（独立 exe，与主程序共用下面的 Qt 运行库）
+├── version.txt                 version / channel / built / graphics=d3d11（更新器读它）
+├── NOTICE.txt                  第三方许可（Qt LGPLv3、d3dcompiler、ICU）
+├── LICENSE
+│
+├── Qt6Core.dll  Qt6Gui.dll  Qt6Widgets.dll  Qt6Network.dll
+├── Qt6OpenGL.dll  Qt6Quick.dll  Qt6Qml.dll  Qt6QmlModels.dll
+├── Qt6QmlMeta.dll  Qt6QmlWorkerScript.dll  Qt6QuickWidgets.dll  Qt6Svg.dll
+├── d3dcompiler_47.dll  icuuc.dll
+│
+├── platforms/                  qwindows.dll（没有它起不来）
+├── styles/                     qmodernwindowsstyle.dll
+├── imageformats/               gif ico jpeg svg
+├── iconengines/                svg 图标引擎
+├── tls/                        schannel（HTTPS，更新器要用）
+├── networkinformation/
+├── qml/                        QML + QtQml + QtQuick + QtQuick.Window 共 17 个文件（启动特效）
+│
+├── Assets/  Data/  ui/  mods/  内容（与仓库 content/ 一一对应）
+└── Update/                     运行时创建：staging/（下载中）backup/（回滚用）
+```
+
+包内**不包含**任何用户数据：`Data/playerData.json`（存档）、`Data/settings.ini`（设置）、
+`Data/launch_state.json`（崩溃保护记录）、`logs/`、`cache/` 都会被脚本删掉并在最后校验 ——
+校验不通过脚本直接失败，不会产出"能发但脏"的包。
+
+**图形策略**：只支持 D3D11（`src/main.cpp` 里 `QQuickWindow::setGraphicsApi(Direct3D11)` 钉死）。
+所以不带 `opengl32sw.dll`，也不留 `QT_OPENGL` / `QT_QUICK_BACKEND` 之类的兜底环境变量。
+
+---
+
+## 更新（Updater.exe）
+
+外部更新器：**文件级差分**，只下载变化的文件，校验 sha256，先备份再替换，自检失败自动回滚。
+源是一个**有序列表**，按顺序试，谁先成谁完成整次更新（不交叉重试）：
+
+| 顺序 | 源 | 说明 |
+|---|---|---|
+| 1 | `cdn.jsdelivr.net/gh/ST-Kdream/BlastPioneer@release/latest` | GitHub 的公共 CDN，国内通常最快；单文件 20 MB 上限 |
+| 2 | `ghfast.top/https://raw.githubusercontent.com/...` | raw 的反代，CDN 不可用时的主力 |
+| 3 | `raw.githubusercontent.com/ST-Kdream/BlastPioneer/release/latest` | 官方源，永远最后 |
+
+三条源的目录结构完全一致（`manifest.json` + `files/<路径>`），所以代码只有一套。
+在 `Data/settings.ini` 里可以覆盖：
+
+```ini
+[update]
+sources=https://my.mirror/blastpioneer          ; 逗号/分号/空格分隔，越靠前越先试
+channel=stable
+keepBackup=true
+```
+
+发布一次更新（镜像与官网都是同一份东西）：
+
+```powershell
+pwsh -File tools\package_release.ps1                      # 1. 出包（含自检）
+pwsh -File tools\make_manifest.ps1 -Dir dist\BlastPioneer-0.1.1 -Version 0.1.1 \
+     -Delete ui/old.qss                                   # 2. 生成 manifest.json
+# 3. 把 dist\BlastPioneer-0.1.1\* 上传到 <base>\files\ ，manifest.json 放 <base>\
+# 4. 官网：把同一份内容推到 release 分支的 latest\ 目录
+pwsh -File tools\test_updater.ps1                         # 端到端自测（本地起 HTTP 服务）
+```
+
+## 构建与运行
+
+```powershell
+# 构建（唯一构建目录 build/；两个工程都产出到 build\Release\）
+& 'D:\Mygrammer\aboutcpp\grammer\MSBuild\Current\Bin\MSBuild.exe' BlastPioneer.vcxproj /p:Configuration=Release /p:Platform=x64
+& 'D:\Mygrammer\aboutcpp\grammer\MSBuild\Current\Bin\MSBuild.exe' tools\updater\Updater.vcxproj /p:Configuration=Release /p:Platform=x64
+
+# 跑
+.\build\Release\BlastPioneer.exe
+
+# 引擎测试
+cd tests ; .\run_tests.bat
+
+# 界面结构自检（14 个界面构造一遍后退出）
+.\build\Release\BlastPioneer.exe --ui-selftest
+
+# 界面截图（设计自查，改配色后看一眼）
+.\build\Release\BlastPioneer.exe --root=<临时目录> --ui-shot=<截图目录>
+
+# 打发布包（构建 + 取运行库 + 干净化 + 启动自检）
+pwsh -File tools\package_release.ps1
+```
+
+调试用：`--root=<目录>` 把数据目录指到别处、`--play-mode=<modId>/<modeId>` 直接进一个模组模式、
+`--safe-mode` 本次不加载原生模组。

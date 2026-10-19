@@ -1,0 +1,13 @@
+{
+  "_comment": "原生模组（C ABI）示例：订阅爆炸/关卡开始/关卡结束/敌人受伤/使用道具事件，读棋盘与炸弹快照，用独立随机流，并在炸了 3 次之后请求暂停。默认禁用；要试它需要两步：① 在「设置 → 模组」里打开「允许原生模组」并勾选本模组（或直接改 settings.ini 的 [mods] 段）② 把 build.bat 编出来的 hello_native.dll 放到本目录。",
+  "id": "hello_native",
+  "name": "示例：原生模组（C ABI）",
+  "version": "0.1.1",
+  "author": "BlastPioneer",
+  "description": "用 C++ 写的原生模组：统计爆炸、读棋盘与炸弹、订阅关卡胜负，并把一切写进日志。声明 apiVersion 0.1.0 也照样能加载（加法式演进）。",
+  "apiVersion": "0.1.1",
+  "priority": 0,
+  "enabledByDefault": false,
+  "native": true,
+  "features": ["hooks"]
+}

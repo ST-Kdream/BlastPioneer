@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  更新器工程（独立 exe，与主程序共用同一套 Qt DLL）
+
+  为什么单独一个工程而不是塞进主工程：
+    · 更新器要在主程序**退出之后**替换主程序的文件，两者的生命周期是分开的；
+    · 它不需要 Qt Widgets 之外的任何东西，也不该被主工程的 moc/rcc 规则拖累
+      （本工程**不用 moc**：源码里没有 Q_OBJECT，连接一律用 lambda）。
+
+  为什么手写 Qt 路径而不是靠 Qt VS Tools：
+    这个工程只需要 include + lib + dll 三件事，手写反而更透明，命令行 MSBuild 也能直接构建。
+    换 Qt 版本时传 /p:QtDir=<新路径> 即可。
+
+  输出目录 = <repo>\build\<Config>\，和主程序同一个文件夹 —— 打包脚本在那里找 Updater.exe。
+-->
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>17.0</VCProjectVersion>
+    <ProjectGuid>{7E1C2F4A-9B3D-4C58-8A2E-1F6D0B7C5E93}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>Updater</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+
+  <PropertyGroup Label="UserMacros">
+    <!-- 仓库根：本工程在 <repo>\tools\updater\ 下 -->
+    <RepoRoot>$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)\..\..'))</RepoRoot>
+    <BuildRoot>$(RepoRoot)\build</BuildRoot>
+    <!-- Qt 安装位置（换版本时 /p:QtDir=... 覆盖） -->
+    <QtDir Condition="'$(QtDir)' == ''">D:\Mygrammer\Qt\6.10.2\msvc2022_64</QtDir>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <OutDir>$(BuildRoot)\Debug\</OutDir>
+    <IntDir>$(BuildRoot)\obj\Updater\Debug\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <OutDir>$(BuildRoot)\Release\</OutDir>
+    <IntDir>$(BuildRoot)\obj\Updater\Release\</IntDir>
+  </PropertyGroup>
+
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalIncludeDirectories>$(QtDir)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <WarningLevel>Level3</WarningLevel>
+      <!-- 源码里有中文注释：不加 /utf-8，MSVC 会按本地代码页解码并报一堆不相关的错。
+           /Zc:__cplusplus 是 Qt 的硬要求：不加的话 Qt 认为我们是 C++14。 -->
+      <AdditionalOptions>/utf-8 /Zc:__cplusplus %(AdditionalOptions)</AdditionalOptions>
+      <PreprocessorDefinitions>UNICODE;_UNICODE;WIN32_LEAN_AND_MEAN;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <AdditionalLibraryDirectories>$(QtDir)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>Qt6Core.lib;Qt6Gui.lib;Qt6Widgets.lib;Qt6Network.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+
+  <ItemGroup>
+    <ClCompile Include="main.cpp" />
+  </ItemGroup>
+
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+
+  <!-- 构建完把需要的 Qt DLL 拷到输出目录（缺了 Updater.exe 直接起不来，报错很难懂） -->
+  <Target Name="CopyUpdaterQtRuntime" AfterTargets="Build">
+    <ItemGroup>
+      <UpdaterQtFiles Include="$(QtDir)\bin\Qt6Core.dll;$(QtDir)\bin\Qt6Gui.dll;$(QtDir)\bin\Qt6Widgets.dll;$(QtDir)\bin\Qt6Network.dll;$(QtDir)\bin\Qt6Svg.dll;$(QtDir)\bin\icuuc.dll;$(QtDir)\bin\d3dcompiler_47.dll" />
+    </ItemGroup>
+    <Copy SourceFiles="@(UpdaterQtFiles)" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" Condition="Exists('%(UpdaterQtFiles.Identity)')" />
+  </Target>
+</Project>

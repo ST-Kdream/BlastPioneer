@@ -1,0 +1,12 @@
+{
+  "_comment": "第 6 关：最高难度。砖块 50 块几乎铺满可走区域，六个敌人血 6",
+  "id": 6,
+  "name": "最后一堵墙",
+  "playerStart": [1, 1],
+  "bricks": 50,
+  "enemyCount": 6,
+  "enemyHp": 6,
+  "seed": 1006,
+  "coins": 80,
+  "ep": 60
+}

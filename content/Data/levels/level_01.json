@@ -1,0 +1,12 @@
+{
+  "_comment": "第 1 关：数值与旧版公式一致（砖块 20+5*1，敌人 1 个），只是变成可改的数据",
+  "id": 1,
+  "name": "初次交锋",
+  "playerStart": [1, 1],
+  "bricks": 25,
+  "enemyCount": 1,
+  "enemyHp": 3,
+  "seed": 1001,
+  "coins": 55,
+  "ep": 10
+}
