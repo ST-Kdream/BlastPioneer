@@ -1,4 +1,8 @@
 #include "AppHost.h"
+#include <QAbstractSpinBox>
+#include <QPlainTextEdit>
+#include <QTextEdit>
+#include <QLineEdit>
 #include "ScreenRouter.h"
 #include "ScreenBase.h"
 #include "SettingsManager.h"
@@ -147,6 +151,17 @@ bool AppHost::eventFilter(QObject* watched, QEvent* event)
 	}
 
 	QKeyEvent* keyEvent = static_cast<QKeyEvent*>(event);
+
+	//文本输入控件必须拿到原始按键：这里以前无差别 return true，导致设置页里
+	//QLineEdit 收不到字符（"更新源"那一栏完全打不了字）。Esc 例外 —— 它始终是"返回"。
+	//为什么用 focusWidget 判断而不是 watched：按键可能投递给父控件，真正要吃字的是当前焦点控件。
+	QWidget* focus = QApplication::focusWidget();
+	const bool textInput = qobject_cast<QLineEdit*>(focus) || qobject_cast<QTextEdit*>(focus)
+		|| qobject_cast<QPlainTextEdit*>(focus) || qobject_cast<QAbstractSpinBox*>(focus);
+	if (textInput && keyEvent->key() != Qt::Key_Escape)
+	{
+		return QWidget::eventFilter(watched, event);
+	}
 
 	//统一分发（bp::dispatchKey）：Esc 走 handleBack，其余走 handleKeyPress/Release
 	//注意：这里只做一层分发 —— 游戏界面内部会在自己的 handleKeyPress 里

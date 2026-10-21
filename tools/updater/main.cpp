@@ -94,14 +94,18 @@ static void logLine(const QString& text)
 }
 
 // ---------------------------------------------------------------------------
-// 版本号：按段比较数字，其它字符忽略（"0.1.0" < "0.1.1" < "0.2" < "1.0"）
+// 版本号：语义化版本 + 预发布标签
+//
+//   0.1.0-beta.1 < 0.1.0-beta.2 < 0.1.0-rc.1 < 0.1.0 < 0.1.1
+//
+// 为什么不能只比数字：上一版把非数字字符全丢掉，于是 "0.1.0-beta.1" 被当成 [0,1,0,1]、
+// "0.1.0" 被当成 [0,1] —— beta 反而"大于"正式版，正式版永远不会被更新下来。
 // ---------------------------------------------------------------------------
-static QList<int> versionParts(const QString& version)
+static QList<int> numericParts(const QString& text)
 {
 	QList<int> parts;
-	const QStringList pieces = version.split(QRegularExpression(QStringLiteral("[^0-9]+")),
-											 Qt::SkipEmptyParts);
-	for (const QString& piece : pieces)
+	for (const QString& piece : text.split(QRegularExpression(QStringLiteral("[^0-9]+")),
+											Qt::SkipEmptyParts))
 	{
 		parts.append(piece.toInt());
 	}
@@ -109,15 +113,53 @@ static QList<int> versionParts(const QString& version)
 	return parts;
 }
 
+//预发布标签的先后：alpha < beta < rc < (无标签，即正式版)
+static int prereleaseRank(const QString& tag)
+{
+	const QString lower = tag.toLower();
+	if (lower.isEmpty()) { return 3; }
+	if (lower.startsWith(QLatin1String("alpha"))) { return 0; }
+	if (lower.startsWith(QLatin1String("beta"))) { return 1; }
+	if (lower.startsWith(QLatin1String("rc"))) { return 2; }
+	return 1;   // 不认识的标签按 beta 处理，宁可当成预发布也不越过正式版
+}
+
+static bool isPrerelease(const QString& version)
+{
+	return version.contains(QLatin1Char('-'));
+}
+
 static int compareVersions(const QString& left, const QString& right)
 {
-	const QList<int> a = versionParts(left);
-	const QList<int> b = versionParts(right);
+	const int dashA = left.indexOf(QLatin1Char('-'));
+	const int dashB = right.indexOf(QLatin1Char('-'));
+	const QString coreA = dashA < 0 ? left : left.left(dashA);
+	const QString coreB = dashB < 0 ? right : right.left(dashB);
+	const QString preA = dashA < 0 ? QString() : left.mid(dashA + 1);
+	const QString preB = dashB < 0 ? QString() : right.mid(dashB + 1);
+
+	const QList<int> a = numericParts(coreA);
+	const QList<int> b = numericParts(coreB);
 	const int count = qMax(a.size(), b.size());
 	for (int i = 0; i < count; ++i)
 	{
 		const int va = i < a.size() ? a.at(i) : 0;
 		const int vb = i < b.size() ? b.at(i) : 0;
+		if (va != vb) { return va < vb ? -1 : 1; }
+	}
+
+	//核心号相同：正式版 > 预发布版；两个预发布版先比标签，再比标签里的数字
+	const int rankA = prereleaseRank(preA);
+	const int rankB = prereleaseRank(preB);
+	if (rankA != rankB) { return rankA < rankB ? -1 : 1; }
+
+	const QList<int> numA = numericParts(preA);
+	const QList<int> numB = numericParts(preB);
+	const int numCount = qMax(numA.size(), numB.size());
+	for (int i = 0; i < numCount; ++i)
+	{
+		const int va = i < numA.size() ? numA.at(i) : 0;
+		const int vb = i < numB.size() ? numB.at(i) : 0;
 		if (va != vb) { return va < vb ? -1 : 1; }
 	}
 	return 0;
@@ -135,9 +177,14 @@ static int compareVersions(const QString& left, const QString& right)
 // ---------------------------------------------------------------------------
 struct UpdateSettings
 {
-	QStringList sources;                          // 有序的 base 列表（空 = 用内置默认）
+	QStringList sources;                          // 有序的镜像列表（空 = 用内置默认）
+	QString officialBase =                        // 官方源：永远最后，且不受"使用镜像"开关影响
+		QStringLiteral("https://raw.githubusercontent.com/ST-Kdream/BlastPioneer/release/latest");
 	QString channel = QStringLiteral("stable");
 	bool keepBackup = true;
+	bool useMirror = true;                        // 关掉它 = 只走官方源（镜像可能有延迟）
+	bool trackPrerelease = false;                 // 是否接受 alpha/beta/rc
+	bool trackPrereleaseExplicit = false;         // 设置里有没有明确写过（没写就跟随当前版本）
 };
 
 // 内置默认源（改这里就等于改所有玩家的默认行为；也可以在设置里覆盖）
@@ -174,6 +221,20 @@ static UpdateSettings readSettings(const QString& rootDir)
 	if (ini.contains(QStringLiteral("keepBackup")))
 	{
 		settings.keepBackup = ini.value(QStringLiteral("keepBackup")).toBool();
+	}
+	if (ini.contains(QStringLiteral("useMirror")))
+	{
+		settings.useMirror = ini.value(QStringLiteral("useMirror")).toBool();
+	}
+	if (ini.contains(QStringLiteral("officialBase")))
+	{
+		const QString value = ini.value(QStringLiteral("officialBase")).toString().trimmed();
+		if (!value.isEmpty()) { settings.officialBase = value; }
+	}
+	if (ini.contains(QStringLiteral("trackPrerelease")))
+	{
+		settings.trackPrerelease = ini.value(QStringLiteral("trackPrerelease")).toBool();
+		settings.trackPrereleaseExplicit = true;
 	}
 	ini.endGroup();
 
@@ -416,10 +477,12 @@ struct Options
 {
 	QString rootDir;
 	QString sourceOverride;      // --source=<base>：只用这一个源（测试 / 临时换源）
-	QString mirrorBase;          // --mirror=<base>：插到最前面的源
+	QString mirrorBase;          // --mirror=<base>：同 --source
 	QString channel;
 	bool checkOnly = false;
 	bool assumeYes = false;
+	bool noMirror = false;       // --no-mirror：忽略镜像，只走官方源
+	bool trackPrerelease = false;// --prerelease：接受 alpha/beta/rc
 };
 
 static int runUpdate(const Options& options)
@@ -455,19 +518,42 @@ static int runUpdate(const Options& options)
 	}
 	logLine(QStringLiteral("本地版本：%1").arg(localVersion.isEmpty() ? QStringLiteral("（未知）") : localVersion));
 
-	// ---- 2) 取清单：按顺序试每个源（镜像在前，官网在最后） -----------------
+	// ---- 2) 取清单：按顺序试每个源（镜像在前，官方源在最后） -----------------
+	// 两个开关的意义：
+	//   · useMirror  —— 镜像可能有延迟（CDN 缓存），想立刻拿到最新版就关掉它只走官方；
+	//   · trackPrerelease —— 是否接受 alpha/beta/rc。没在设置里明确写过时**跟随当前版本**：
+	//     你装的是 beta，就默认继续追 beta，否则 beta 玩家永远升不到 beta.2。
 	UpdateSettings settings = readSettings(rootDir);
+	if (!settings.trackPrereleaseExplicit) { settings.trackPrerelease = isPrerelease(localVersion); }
+	if (options.trackPrerelease) { settings.trackPrerelease = true; }
+	if (options.noMirror) { settings.useMirror = false; }
 	const QString channel = options.channel.isEmpty() ? settings.channel : options.channel;
 
-	// 命令行给了 --source / --mirror 就只用它（测试与"临时换源"用）
-	QStringList bases = options.sourceOverride.isEmpty() ? settings.sources
-														 : QStringList{ options.sourceOverride };
-	if (!options.mirrorBase.isEmpty()) { bases = QStringList{ options.mirrorBase }; }
+	QStringList bases;
+	if (!options.sourceOverride.isEmpty())
+	{
+		bases.append(options.sourceOverride);            // 测试/排障：只用指定源
+	}
+	else if (!options.mirrorBase.isEmpty())
+	{
+		bases.append(options.mirrorBase);
+	}
+	else
+	{
+		if (settings.useMirror) { bases.append(settings.sources); }
+		if (!settings.officialBase.isEmpty()) { bases.append(settings.officialBase); }
+	}
+	bases.removeDuplicates();
+	bases.removeAll(QString());
 	if (bases.isEmpty())
 	{
-		logLine(QStringLiteral("没有可用的更新源：请在 设置 → 更新 里填写，或检查 settings.ini 的 [update] sources"));
+		logLine(QStringLiteral("没有可用的更新源：请在 设置 → 更新 里填写，或关掉「使用镜像」"));
 		return 1;
 	}
+	logLine(QStringLiteral("更新源：%1（镜像 %2，预发布 %3）")
+		.arg(bases.size())
+		.arg(settings.useMirror ? QStringLiteral("开") : QStringLiteral("关"))
+		.arg(settings.trackPrerelease ? QStringLiteral("要") : QStringLiteral("不要")));
 
 	Manifest manifest;
 	bool haveManifest = false;
@@ -494,9 +580,11 @@ static int runUpdate(const Options& options)
 			logLine(QStringLiteral("  清单不合法：%1").arg(error));
 			continue;
 		}
-		if (!parsed.channel.isEmpty() && parsed.channel != channel)
+		// 预发布过滤：关掉"追踪预发布"时，只接受正式版（版本号里没有 '-'）
+		if (!settings.trackPrerelease && isPrerelease(parsed.version))
 		{
-			logLine(QStringLiteral("  跳过：清单属于 %1 通道，本机是 %2 通道").arg(parsed.channel, channel));
+			logLine(QStringLiteral("  跳过：%1 是预发布版（设置里没勾「追踪预发布版本」）")
+				.arg(parsed.version));
 			continue;
 		}
 
@@ -791,7 +879,9 @@ static void printUsage()
 		<< "  --window           用窗口显示进度（默认是控制台）\n"
 		<< "  --source=<地址>    只用这一个源（覆盖设置里的候选列表；调试/换源用）\n"
 		<< "  --mirror=<地址>    同 --source\n"
-		<< "  --channel=<名字>   选择通道（默认 stable）\n"
+		<< "  --no-mirror        忽略镜像，只走官方源（镜像有缓存延迟时用）\n"
+		<< "  --prerelease       接受预发布版（alpha / beta / rc）\n"
+		<< "  --channel=<名字>   清单里记录的通道名（默认 stable）\n"
 		<< "  --root=<目录>      更新哪个目录（默认：本 exe 所在目录）\n"
 		<< "  --help             显示这段说明\n"
 		<< "\n"
@@ -822,6 +912,8 @@ int main(int argc, char* argv[])
 		if (arg == QStringLiteral("--check")) { options.checkOnly = true; }
 		else if (arg == QStringLiteral("--yes")) { options.assumeYes = true; }
 		else if (arg == QStringLiteral("--window")) { wantWindow = true; }
+		else if (arg == QStringLiteral("--no-mirror")) { options.noMirror = true; }
+		else if (arg == QStringLiteral("--prerelease")) { options.trackPrerelease = true; }
 		else if (arg == QStringLiteral("--help") || arg == QStringLiteral("-h")) { showHelp = true; }
 		else if (arg.startsWith(QStringLiteral("--root="))) { options.rootDir = arg.mid(7); }
 		else if (arg.startsWith(QStringLiteral("--source="))) { options.sourceOverride = arg.mid(9); }

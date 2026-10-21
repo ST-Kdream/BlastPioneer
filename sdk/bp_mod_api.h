@@ -436,9 +436,11 @@ struct BpHostApi
     BpResult (BP_CALL *spawn_enemy)(int32_t row, int32_t col, int32_t hp);
     BpResult (BP_CALL *remove_entity)(int32_t entityId);
     BpResult (BP_CALL *damage_entity)(int32_t entityId, int32_t amount);
+    /* amount 为伤害点数；单人模式 playerIndex 传 0，多人按 0..player_count-1 */
     BpResult (BP_CALL *damage_player)(int32_t playerIndex, int32_t amount);
     BpResult (BP_CALL *spawn_drop)(int32_t row, int32_t col, BpStr itemName);
-    BpResult (BP_CALL *set_time_scale)(double scale);      /* L3 */
+    /* 时间倍率：0 = 冻结，1 = 正常，上限 4（超出会被夹住）；只影响推进速度，不改规则 */
+    BpResult (BP_CALL *set_time_scale)(double scale);
     BpResult (BP_CALL *request_pause)(int32_t paused);      /* L2 已实现 */
     /* 触发一件**已有**道具的效果（名字或效果 id 都行）：引擎自己的效果注册表说了算 */
     BpResult (BP_CALL *apply_item_effect)(BpStr nameOrEffectId);
@@ -452,8 +454,10 @@ struct BpHostApi
      * 校验不过（重名/类型不支持/声明了不会实现的能力）-> 返回错误码并在日志里说明。 */
     BpResult (BP_CALL *register_mode)(const BpModeDesc* desc);
 
-    /* ---- 仍是预留（本版本为 NULL）：per-mode 的各种 setter 不需要了，
-     * 因为钩子本身就在 BpModApi 里，模式用 flags 声明"接管哪些部分" ---- */
+    /* ---- 仍是预留：本版本恒为 NULL，**不要调用** ----
+     * 这三个槽位原本打算放"per-mode 的细粒度 setter"；0.1.2 用 BpModeDesc 的字段
+     * 加上 set_tile / set_player_start 已经够用，所以没有填。
+     * 判断"某个函数在运行期存不存在"请看 host->size，不要假设这些槽位可用。 */
     void*    (BP_CALL *reserved_mapgen)(void);
     void*    (BP_CALL *reserved_ai)(void);
     void*    (BP_CALL *reserved_win)(void);

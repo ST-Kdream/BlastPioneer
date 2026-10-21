@@ -55,7 +55,9 @@
     <RepoRoot>$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)\..\..'))</RepoRoot>
     <BuildRoot>$(RepoRoot)\build</BuildRoot>
     <!-- Qt 安装位置（换版本时 /p:QtDir=... 覆盖） -->
-    <QtDir Condition="'$(QtDir)' == ''">D:\Mygrammer\Qt\6.10.2\msvc2022_64</QtDir>
+    <!-- Qt ????????? QTDIR(? /p:QtDir=...),????????
+         QTDIR ?? msvc20xx_64 ???,?? C:\Qt\6.10.2\msvc2022_64 -->
+    <QtDir Condition="'$(QtDir)' == ''">$(QTDIR)</QtDir>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
@@ -90,6 +92,11 @@
   </ItemGroup>
 
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+
+  <!-- QTDIR ????????????,?????"??? QtCore"????? -->
+  <Target Name="RequireQtDir" BeforeTargets="ClCompile" Condition="'$(QtDir)' == ''">
+    <Error Text="QTDIR is not set. Point it at your Qt msvc kit (e.g. C:\Qt\6.10.2\msvc2022_64) or pass /p:QtDir=&lt;that path&gt;." />
+  </Target>
 
   <!-- 构建完把需要的 Qt DLL 拷到输出目录（缺了 Updater.exe 直接起不来，报错很难懂） -->
   <Target Name="CopyUpdaterQtRuntime" AfterTargets="Build">

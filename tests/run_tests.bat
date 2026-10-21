@@ -29,11 +29,25 @@ rem ============================================================
 setlocal
 cd /d "%~dp0"
 
-set QT_BIN=D:\Mygrammer\Qt\6.10.2\msvc2022_64\bin
-set VCVARS=D:\Mygrammer\aboutcpp\grammer\VC\Auxiliary\Build\vcvars64.bat
+rem --- locate Qt and MSVC without hardcoding this machine's paths ---
+rem   Optional local override, NOT in version control: <repo>\qt-env.bat
+rem       content:  set "QTDIR=C:\Qt\6.10.2\msvc2022_64"
+if exist "%~dp0..\qt-env.bat" call "%~dp0..\qt-env.bat"
+rem   Qt   : set QTDIR (e.g. C:\Qt\6.10.2\msvc2022_64) or edit QT_BIN below
+rem   MSVC : found via vswhere; set VCVARS to force a specific VS install
+if not defined QT_BIN if defined QTDIR set "QT_BIN=%QTDIR%\bin"
+if not defined QT_BIN for %%d in (C: D: E:) do if not defined QT_BIN if exist "%%d\Qt" for /d %%q in ("%%d\Qt\6.*") do if not defined QT_BIN if exist "%%q\msvc2022_64\bin\qmake.exe" set "QT_BIN=%%q\msvc2022_64\bin"
+if not defined QT_BIN (
+    echo [ERROR] Qt not found. Set QTDIR to your Qt msvc kit ^(e.g. C:\Qt\6.10.2\msvc2022_64^).
+    exit /b 1
+)
+set "VSWHERE=%ProgramFiles(x86)%\Microsoft Visual Studio\Installer\vswhere.exe"
+rem NOTE: do not put this inside a parenthesised block. "%ProgramFiles(x86)%" expands to
+rem "Program Files (x86)", and that ")" would close the block early -- classic cmd trap.
+if exist "%VSWHERE%" if not defined VCVARS for /f "usebackq tokens=*" %%i in (`"%VSWHERE%" -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath`) do set "VCVARS=%%i\VC\Auxiliary\Build\vcvars64.bat"
 
 rem <repo>\build\tests  (this script sits in <repo>\tests)
-set BUILD_DIR=%~dp0..\..\x64\tests
+set BUILD_DIR=%~dp0..\build\tests
 
 if not exist "%QT_BIN%\qmake.exe" (
     echo [ERROR] qmake not found: %QT_BIN%\qmake.exe

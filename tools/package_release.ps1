@@ -1,4 +1,4 @@
-# ============================================================================
+﻿# ============================================================================
 #  package_release.ps1 -- build the release package (curated, verified, no junk)
 #
 #  WHY NOT windeployqt
@@ -37,7 +37,11 @@ param(
     [string]$Name = "",
     [string]$OutRoot = "dist",
     [string]$Config = "Release",
-    [string]$QtBin = "D:\Mygrammer\Qt\6.10.2\msvc2022_64\bin",
+    # 这台机器上 Qt 与 MSBuild 的位置**不写死在脚本里**：
+    #   Qt     -> -QtBin 参数，或环境变量 QTDIR（指向 Qt 的 msvc20xx_64 目录）
+    #   MSBuild-> 环境变量 MSBUILD，或用 vswhere 找 VS 安装位置
+    # 之前把某个人的本机路径写在这里，别人 clone 下来第一步就跑不动。
+    [string]$QtBin = "",
     [switch]$SkipBuild,
     [switch]$NoVerify
 )
@@ -48,7 +52,67 @@ $toolsDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $repo = Split-Path -Parent $toolsDir
 $buildDir = Join-Path $repo ("build\" + $Config)
 $project = Join-Path $repo "BlastPioneer.vcxproj"
-$msbuild = "D:\Mygrammer\aboutcpp\grammer\MSBuild\Current\Bin\MSBuild.exe"
+
+# ---- 找工具链 ------------------------------------------------------------
+$vswhere = Join-Path ${env:ProgramFiles(x86)} "Microsoft Visual Studio\Installer\vswhere.exe"
+
+function Find-MsBuild {
+    if ($env:MSBUILD -and (Test-Path $env:MSBUILD)) { return $env:MSBUILD }
+    if (Test-Path $vswhere) {
+        $root = & $vswhere -latest -products * -requires Microsoft.Component.MSBuild -property installationPath
+        if ($root) {
+            $candidate = Join-Path $root.Trim() "MSBuild\Current\Bin\MSBuild.exe"
+            if (Test-Path $candidate) { return $candidate }
+        }
+    }
+    $onPath = Get-Command msbuild -ErrorAction SilentlyContinue
+    if ($onPath) { return $onPath.Source }
+    throw "MSBuild not found. Install VS 2022 (C++ workload), run from a Developer prompt, or set `$env:MSBUILD."
+}
+
+function Find-QtBin {
+    if ($QtBin) { return $QtBin }
+    if ($env:QTDIR) {
+        $bin = Join-Path $env:QTDIR "bin"
+        if (Test-Path (Join-Path $bin "Qt6Core.dll")) { return $bin }
+    }
+    # 没有 QTDIR 就扫一遍常见位置：新手 clone 下来只要装了 Qt 就能直接跑
+    foreach ($drive in @("C:", "D:", "E:")) {
+        $root = Join-Path $drive "Qt"
+        if (-not (Test-Path $root)) { continue }
+        foreach ($version in (Get-ChildItem $root -Directory -Filter "6.*" | Sort-Object Name -Descending)) {
+            $candidate = Join-Path $version.FullName "msvc2022_64\bin"
+            if (Test-Path (Join-Path $candidate "Qt6Core.dll")) { return $candidate }
+        }
+    }
+    throw "Qt not found. Set `$env:QTDIR to your Qt msvc kit (e.g. C:\Qt\6.10.2\msvc2022_64) or pass -QtBin <path to that kit's bin>."
+}
+
+# ---- 找 VC++ 运行库（app-local 部署：玩家没装运行库也能跑） ----------------
+# 为什么不依赖系统：Windows 只自带很老的 VC 运行库，没有 vcruntime140 的机器上
+# 双击会直接报"缺少 VCRUNTIME140.dll"。所以把 CRTs 复制进包（微软允许 app-local）。
+function Find-CrtDir {
+    $roots = @()
+    if (Test-Path $vswhere) {
+        $root = & $vswhere -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
+        if ($root) { $roots += $root.Trim() }
+    }
+    if ($env:VCToolsRedistDir) { $roots += $env:VCToolsRedistDir.Trim() }
+    foreach ($root in $roots) {
+        $redist = Join-Path $root "VC\Redist\MSVC"
+        if (Test-Path $redist) {
+            $crt = Get-ChildItem $redist -Directory | Sort-Object Name -Descending |
+                ForEach-Object { Get-ChildItem (Join-Path $_.FullName "x64") -Directory -Filter "Microsoft.VC1*.CRT" -ErrorAction SilentlyContinue } |
+                Select-Object -First 1
+            if ($crt) { return $crt.FullName }
+        }
+    }
+    return ""
+}
+
+$msbuild = Find-MsBuild
+$QtBin = Find-QtBin
+$crtDir = Find-CrtDir
 
 # ---- single source of truth for the version: src\version.h -----------------
 $versionHeader = Join-Path $repo "src\version.h"
@@ -146,6 +210,23 @@ foreach ($dll in $qtDlls) {
     Copy-Item $from -Destination $target
 }
 Write-Host ("  {0} dlls" -f $qtDlls.Count)
+
+# ---- VC++ 运行库（app-local） ---------------------------------------------
+# 必须打进包：很多机器只装了"很老的"VC 运行库，没有 vcruntime140 / msvcp140，
+# 双击就是"缺少 VCRUNTIME140.dll"。这些文件可以随应用分发（微软允许 app-local）。
+$crtDlls = @("vcruntime140.dll", "vcruntime140_1.dll", "msvcp140.dll", "concrt140.dll")
+if ($crtDir) {
+    $copied = 0
+    foreach ($dll in $crtDlls) {
+        $from = Join-Path $crtDir $dll
+        if (Test-Path $from) { Copy-Item $from -Destination $target -Force; $copied++ }
+    }
+    Write-Host ("  VC++ runtime: {0}/{1} from {2}" -f $copied, $crtDlls.Count, $crtDir)
+    if ($copied -lt 3) { throw "VC runtime copy incomplete (need at least vcruntime140 + msvcp140)" }
+} else {
+    # 找不到就**失败**，不要产出一个"在开发机上能跑、在玩家机上打不开"的包
+    throw "VC++ runtime not found (looked for VC\Redist\MSVC\*\x64\Microsoft.VC1*.CRT). Install the VS C++ workload, or set `$env:VCToolsRedistDir."
+}
 
 $qtRoot = Split-Path -Parent $QtBin
 foreach ($plugin in $qtPlugins) {
@@ -245,6 +326,7 @@ Write-Host "== report =="
 Write-Host ("  size        : {0} MB / {1} files" -f $sizeMb, $fileCount)
 Write-Host ("  levels      : {0} json" -f (Get-ChildItem (Join-Path $target "Data\levels") -Filter *.json -ErrorAction SilentlyContinue).Count)
 Write-Host ("  user data   : {0}" -f $(if ($leaked.Count -eq 0) { "none (good)" } else { "LEAKED: " + ($leaked -join ", ") }))
+Write-Host ("  vc runtime  : {0}" -f $(if ((Test-Path (Join-Path $target "vcruntime140.dll")) -and (Test-Path (Join-Path $target "msvcp140.dll"))) { "vcruntime140 + msvcp140 (good)" } else { "MISSING" }))
 
 if ($leaked.Count -ne 0) { throw "user data leaked into the package -- do not ship" }
 

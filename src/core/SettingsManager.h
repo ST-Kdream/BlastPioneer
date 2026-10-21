@@ -64,6 +64,12 @@ public:
 	void setUpdateSources(const QStringList& sources);
 	bool updateKeepBackup() const;
 	void setUpdateKeepBackup(bool keep);
+	//???????:?????????????????
+	bool updateUseMirror() const;
+	void setUpdateUseMirror(bool use);
+	//????????(alpha/beta/rc)
+	bool updateTrackPrerelease() const;
+	void setUpdateTrackPrerelease(bool track);
 
 	bool allowNativeMods() const;
 	void setAllowNativeMods(bool allowed);

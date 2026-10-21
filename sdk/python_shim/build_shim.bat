@@ -22,7 +22,16 @@ REM  Keep THIS FILE ASCII-only: cmd.exe reads .bat in the OEM code page.
 REM ============================================================================
 setlocal
 
-set "VCVARS=D:\Mygrammer\aboutcpp\grammer\VC\Auxiliary\Build\vcvars64.bat"
+rem Optional local override, NOT in version control: <repo>\qt-env.bat
+if exist "%~dp0..\..\qt-env.bat" call "%~dp0..\..\qt-env.bat"
+
+rem --- locate MSVC (vcvars64.bat) without hardcoding this machine's paths ---
+rem Set VCVARS yourself if you want to force a specific VS install.
+set "VSWHERE=%ProgramFiles(x86)%\Microsoft Visual Studio\Installer\vswhere.exe"
+rem NOTE: do not put this inside a parenthesised block. "%ProgramFiles(x86)%" expands to
+rem "Program Files (x86)", and that ")" would close the block early -- classic cmd trap.
+if exist "%VSWHERE%" if not defined VCVARS for /f "usebackq tokens=*" %%i in (`"%VSWHERE%" -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath`) do set "VCVARS=%%i\VC\Auxiliary\Build\vcvars64.bat"
+if not defined VCVARS set "VCVARS=%ProgramFiles%\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat"
 if not exist "%VCVARS%" (
     echo [ERROR] vcvars64.bat not found: %VCVARS%
     echo         Edit the VCVARS line above if MSVC lives somewhere else.

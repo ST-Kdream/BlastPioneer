@@ -1,5 +1,6 @@
 #include "SettingsManager.h"
 #include "DirectoryLayout.h"
+#include "../version.h"
 #include <QDir>
 #include <QRegularExpression>
 
@@ -150,6 +151,28 @@ bool SettingsManager::updateKeepBackup() const
 void SettingsManager::setUpdateKeepBackup(bool keep)
 {
 	settings.setValue("update/keepBackup", keep);
+}
+
+bool SettingsManager::updateUseMirror() const
+{
+	return settings.value("update/useMirror", true).toBool();
+}
+
+void SettingsManager::setUpdateUseMirror(bool use)
+{
+	settings.setValue("update/useMirror", use);
+}
+
+bool SettingsManager::updateTrackPrerelease() const
+{
+	// 默认跟随当前版本：beta 版默认追踪预发布，正式版默认不追
+	const bool currentIsPrerelease = QStringLiteral(BP_VERSION_STRING).contains(QLatin1Char('-'));
+	return settings.value("update/trackPrerelease", currentIsPrerelease).toBool();
+}
+
+void SettingsManager::setUpdateTrackPrerelease(bool track)
+{
+	settings.setValue("update/trackPrerelease", track);
 }
 
 void SettingsManager::setAllowNativeMods(bool allowed)

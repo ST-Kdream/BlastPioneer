@@ -154,6 +154,8 @@ void SettingsScreen::setupUI()
 	updateLayout->addWidget(new QLabel(QStringLiteral("更新源（从哪找新版本）"), updatePage));
 	updateLayout->addWidget(m_updateSourcesEdit);
 	updateLayout->addWidget(m_keepBackupCheck);
+	updateLayout->addWidget(m_useMirrorCheck);
+	updateLayout->addWidget(m_prereleaseCheck);
 	updateLayout->addSpacing(8);
 	updateLayout->addWidget(checkUpdateBtn);
 	updateLayout->addWidget(m_updateHint);
@@ -227,6 +229,8 @@ void SettingsScreen::loadSettings()
 	m_volumeSlider->setValue(settings.volume());
 	if (m_updateSourcesEdit) { m_updateSourcesEdit->setText(settings.updateSources().join(QStringLiteral(", "))); }
 	if (m_keepBackupCheck) { m_keepBackupCheck->setChecked(settings.updateKeepBackup()); }
+	if (m_useMirrorCheck) { m_useMirrorCheck->setChecked(settings.updateUseMirror()); }
+	if (m_prereleaseCheck) { m_prereleaseCheck->setChecked(settings.updateTrackPrerelease()); }
 	m_frameRateSlider->setValue(settings.frameRate());
 
 	m_frameRateLabel->setText(QStringLiteral("%1 帧/秒").arg(m_frameRateSlider->value()));
@@ -257,6 +261,8 @@ void SettingsScreen::saveSettings()
 	settings.setUiBaseStyle(m_baseStyleCombo->currentData().toString());
 	if (m_updateSourcesEdit) { settings.setUpdateSources(m_updateSourcesEdit->text().split(QRegularExpression(QStringLiteral("[,;\\s]+")), Qt::SkipEmptyParts)); }
 	if (m_keepBackupCheck) { settings.setUpdateKeepBackup(m_keepBackupCheck->isChecked()); }
+	if (m_useMirrorCheck) { settings.setUpdateUseMirror(m_useMirrorCheck->isChecked()); }
+	if (m_prereleaseCheck) { settings.setUpdateTrackPrerelease(m_prereleaseCheck->isChecked()); }
 }
 
 //配色：立刻生效并保存（这类改动必须当场看见才判断得出好不好看）

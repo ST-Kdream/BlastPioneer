@@ -1,4 +1,4 @@
-# ============================================================================
+﻿# ============================================================================
 #  make_manifest.ps1 -- generate the differential-update manifest for a package
 #
 #  The updater (Updater.exe) compares every file's sha256 against this manifest,

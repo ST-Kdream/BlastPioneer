@@ -54,6 +54,8 @@ private:
 	//??:???(????)+ ?????? + "????"??
 	class QLineEdit* m_updateSourcesEdit = nullptr;
 	QCheckBox* m_keepBackupCheck = nullptr;
+	QCheckBox* m_useMirrorCheck = nullptr;
+	QCheckBox* m_prereleaseCheck = nullptr;
 	QLabel* m_updateHint = nullptr;
 
 private slots:

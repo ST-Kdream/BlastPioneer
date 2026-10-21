@@ -15,7 +15,7 @@
 #     run_tests.bat
 #
 # Or manually, from "x64 Native Tools Command Prompt for VS 2022":
-#     D:\Mygrammer\Qt\6.10.2\msvc2022_64\bin\qmake.exe tests.pro
+#     "%QTDIR%\bin\qmake.exe" tests.pro
 #     nmake
 #     release\bp_tests.exe            (exit code 0 = all passed)
 #
