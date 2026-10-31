@@ -3,10 +3,10 @@
 > 炸弹人风格的闯关 + 局域网对战游戏（Qt 6 / C++20 / Windows x64）。
 > 关卡、道具、界面配色、甚至**整个玩法模式**都可以用 JSON 或模组替换 —— 游戏本体只是"一个能跑的壳"。
 
-![status](https://img.shields.io/badge/version-v0.1.0--beta.1-orange)
+![status](https://img.shields.io/badge/version-v0.1.0--rc.1-orange)
 ![platform](https://img.shields.io/badge/platform-Windows%20x64-blue)
 ![qt](https://img.shields.io/badge/Qt-6.10-41CD52)
-![license](https://img.shields.io/badge/license-see%20LICENSE-lightgrey)
+![license](https://img.shields.io/badge/license-GPL3.0-lightgrey)
 
 ---
 
@@ -23,6 +23,8 @@
 - **崩溃保护**：原生模组连续两次异常结束会自动进入安全模式（本次不加载任何原生模组），
   也可以随时按住 `Shift` 启动或加 `--safe-mode`；顶部横幅会显示当前状态。
 - **绿色免安装**：解压即玩，存档与设置在程序目录内，不写注册表。
+- **安装器**：按用户安装到 `%LOCALAPPDATA%\Programs\BlastPioneer`，不需要管理员权限；
+  升级不覆盖存档，卸载也保留 `Data\` 里的玩家数据。
 - **内置更新器**：`Updater.exe` 做**文件级差分**更新（只下变化的文件），多源可切换，失败自动回滚。
 
 ---
@@ -120,15 +122,29 @@ BlastPioneer/
 
 ## 📥 下载与安装
 
-目前**只提供绿色版（免安装）**：
+目前提供两种包（内容相同，按喜好选一种）：
 
-1. 到 [Releases](https://github.com/ST-Kdream/BlastPioneer/releases) 下载最新压缩包（约 67 MB）。
+| 包 | 大小 | 适合 |
+|---|---|---|
+| `BlastPioneer-0.1.0-rc.1.zip`（绿色版） | 约 37 MB（解压后约 67 MB） | 想解压即玩、放在 U 盘或自定义目录 |
+| `BlastPioneer-0.1.0-rc.1-setup.exe`（安装版） | 约 32 MB | 想出现在开始菜单/桌面，按用户安装、不弹 UAC |
+
+**绿色版**：
+
+1. 到 [Releases](https://github.com/ST-Kdream/BlastPioneer/releases) 下载最新 zip。
 2. 解压到**任意可写目录**（不要放 `C:\Program Files`，那里没有写权限，存档会失败）。
 3. 双击 `BlastPioneer.exe`。首次启动会让你创建存档。
 4. 想更新：双击同目录下的 `Updater.exe`，或 设置 → 更新 → 检查更新。
 
-> 安装版（安装器）暂未提供。Releases 页面同时给出每个版本的更新清单，
-> 老版本可以直接用 `Updater.exe` 差分升级，不必重新下一整包。
+**安装版**：
+
+1. 下载 `BlastPioneer-0.1.0-rc.1-setup.exe` 并双击。
+2. 默认按用户安装到 `%LOCALAPPDATA%\Programs\BlastPioneer`，**不需要管理员权限**；
+   卸载会保留 `Data\` 里的存档与设置。
+3. 安装器与绿色版目录布局完全一致，更新器照常可用。
+
+> Releases 页面同时给出每个版本的更新清单；老版本可以直接用 `Updater.exe` 差分升级，
+> 不必重新下一整包。
 
 ---
 
@@ -152,7 +168,7 @@ BlastPioneer/
 ## 🧪 开发自检
 
 ```powershell
-cd tests ; .\run_tests.bat                          # 引擎测试，期望 passed 519, failed 0
+cd tests ; .\run_tests.bat                          # 引擎测试，期望 passed 601, failed 0
 .\build\Release\BlastPioneer.exe --ui-selftest       # 14 个界面构造一遍（不弹窗）
 .\build\Release\BlastPioneer.exe --ui-shot=<目录>    # 把每个界面截图存 PNG（改配色后自查）
 pwsh -File tools\package_release.ps1                 # 打包：取运行库 + 清用户数据 + 启动自检

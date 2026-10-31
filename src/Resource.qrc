@@ -12,6 +12,9 @@
         <file alias="Data/itemInfo.json">../content/Data/itemInfo.json</file>
         <file alias="Data/gamerules.txt">../content/Data/gamerules.txt</file>
         <file alias="Assets/picture/player.png">../content/Assets/picture/player.png</file>
+        <!-- 应用图标也进 qrc：窗口/任务栏图标读取时 Assets 可能还没就绪或被玩家删掉，
+             内嵌一份才能保证任务栏永远不是 Qt 默认图标（exe 图标由 src/app.rc 负责） -->
+        <file alias="Assets/picture/BlastPioneer.ico">../content/Assets/picture/BlastPioneer.ico</file>
         <file alias="startupEffect.qml">startupEffect.qml</file>
     </qresource>
 </RCC>

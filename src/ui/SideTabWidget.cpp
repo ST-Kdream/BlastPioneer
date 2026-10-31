@@ -26,7 +26,6 @@ SideTabWidget::SideTabWidget(QWidget* parent) : QWidget(parent)
 	layout->setSpacing(0);
 	layout->addWidget(m_list);
 	layout->addWidget(m_stack, 1);
-	setLayout(layout);
 
 	//选中哪一项就显示哪一页（单向同步：列表是唯一入口，避免两边互相触发）
 	connect(m_list, &QListWidget::currentRowChanged, this, [this](int row)

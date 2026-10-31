@@ -13,6 +13,7 @@ class QLineEdit;
 class QPushButton;
 class QTimer;
 class QUdpSocket;
+class QWidget;
 
 //发现的房间信息
 struct RoomInfo {
@@ -40,6 +41,8 @@ public:
 
 	void onEnter(const QVariantMap& args) override;
 	void onExit() override;
+	//Esc：在房间里先"离开房间"（保住玩家的直觉），空闲时才回上一屏
+	bool handleBack() override;
 
 private slots:
 	void createRoom();
@@ -51,6 +54,8 @@ private slots:
 	void showCountdown();
 	void updateCountdown();
 	void readPendingDatagrams();
+	//加入请求发出后 6 秒内没有 ACK（IP/端口写错、房主没开）：回到空闲状态并说明原因
+	void onJoinTimeout();
 
 private:
 	void setupUI();
@@ -58,6 +63,13 @@ private:
 
 	void switchToHostMode();
 	void switchToClientMode(const QHostAddress& addr, quint16 port);
+	//离开当前房间/取消加入：停定时器、关 socket、把界面恢复成空闲态
+	void leaveRoom();
+	//按 currentMode 统一刷新"哪些按钮可见/可点"，所有状态迁移都必须经过它
+	void applyModeUi();
+	void updateActionHint();
+	//房主离开时通知还在等待的客户端，避免他们永远停在"等待开始"
+	void sendRoomClosed();
 	//从对局返回大厅后端口已释放，需要重新绑定
 	bool ensureSocketBound();
 	void processJoinRequest(const QHostAddress& sender, quint16 senderPort, const QByteArray& data);
@@ -73,6 +85,7 @@ private:
 
 	QTimer* announceTimer = nullptr;   // 主机广播定时器
 	QTimer* countdownTimer = nullptr;  // 倒计时定时器
+	QTimer* joinTimeoutTimer = nullptr; // 客户端等待 JOIN_ACK 的超时
 	QHostAddress serverAddress;
 	quint16 serverPort = 9999;
 
@@ -83,6 +96,10 @@ private:
 	int nextPlayerId = 2;        // 主机分配玩家ID
 	int myPlayerId = 0;          // 客户端自己的ID
 	int countdownSeconds = 0;
+	bool joinedAck = false;      // 客户端是否已经收到接受回执
+	// 大厅 -> 对战时不要把 socket 关掉：对战界面要用同一个 socket 收发。
+	// 之前 onExit 无条件 close()，结果主机还能本地玩、客户端一个包都收不到。
+	bool handOffToMatch = false;
 
 	// 玩家数据
 	QMap<int, QString> playerNames;               // id -> 名字
@@ -93,15 +110,16 @@ private:
 
 	// UI控件
 	QLabel* statusLabel = nullptr;
+	QWidget* roomListSection = nullptr;         // "周围的房间"整段（空闲时才显示）
 	QListWidget* playerListWidget = nullptr;    // 显示当前房间玩家
 	QListWidget* roomListWidget = nullptr;      // 显示发现的房间
-	QLineEdit* ipEdit = nullptr;
-	QLineEdit* portEdit = nullptr;
 	QPushButton* createRoomBtn = nullptr;
 	QPushButton* joinSelectedBtn = nullptr;
 	QPushButton* manualJoinBtn = nullptr;
 	QPushButton* refreshBtn = nullptr;
 	QPushButton* startGameBtn = nullptr;
+	QPushButton* leaveRoomBtn = nullptr;
 	QPushButton* backBtn = nullptr;
+	QLabel* actionHint = nullptr;
 	QLabel* countdownLabel = nullptr;
 };

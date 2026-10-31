@@ -124,9 +124,10 @@ void PlayerScreen::changeName()
 	connect(btnBox, &QDialogButtonBox::accepted, &newNameInput, &QDialog::accept);
 	connect(btnBox, &QDialogButtonBox::rejected, &newNameInput, &QDialog::reject);
 
+	// 布局在 new 时已经把 &newNameInput 作为父对象绑定过了，
+	// 这里再 setLayout 是重复设置（Qt 会警告 already has a layout）
 	mainLayout->addWidget(nameInput);
 	mainLayout->addWidget(btnBox);
-	newNameInput.setLayout(mainLayout);
 
 	if (newNameInput.exec() == QDialog::Accepted)
 	{

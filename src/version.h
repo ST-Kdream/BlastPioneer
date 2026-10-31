@@ -11,7 +11,8 @@
 // 版本号规则（与 mod 接口版本是两件事，不要混）：
 //   主.次.修订   ——  修订 = 只修 bug；次 = 加功能但存档兼容；主 = 破坏性改动
 // 当前阶段仍是 0.x：语义化版本里 0.x 的"次版本"允许破坏性改动。
-#define BP_VERSION_STRING "0.1.0-beta.2"
+#define BP_VERSION_STRING "0.1.0-rc.1"
 
 // 更新通道：发布包里的 version.txt 会带上它，更新器据此决定去哪个通道找清单
+// rc 也算预发布：统一走 beta 通道，正式版发布时再改成 stable
 #define BP_UPDATE_CHANNEL "beta"

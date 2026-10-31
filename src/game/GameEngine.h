@@ -289,6 +289,14 @@ protected:
 	//ghost = true 表示无视墙体（电子幽灵态）；返回 true 表示所在格子变了
 	bool moveEntityBy(GridPosF& pos, double dxCells, double dyCells, bool ghost);
 
+	// ---- 反卡死 ----
+	//幽灵态（可穿墙）结束时人可能正站在墙/砖块里：那之后四面都可能被堵死，
+	//表现就是"人卡在墙里动不了、只能重开"。这里把实体挤到最近的空地（BFS，最多 maxSteps 步）。
+	//返回 true 表示位置被修正过。
+	bool nudgeToWalkable(GridPosF& pos, int maxSteps = 4);
+	//对玩家做上面这件事，并同步棋盘上的实体标记。每帧开头调一次（可走时是 O(1) 直接返回）
+	bool unstickPlayer(int maxSteps = 4);
+
 	//放置炸弹（会做"同格已有炸弹""超过上限"的检查）
 	bool tryPlaceBomb(const GridPos& cell, BombOwner owner);
 

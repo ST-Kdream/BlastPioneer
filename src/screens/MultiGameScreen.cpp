@@ -10,6 +10,10 @@
 #include "NativeModHost.h"
 
 #include <QVBoxLayout>
+#include <QHBoxLayout>
+#include <QLabel>
+#include <QPushButton>
+#include <QResizeEvent>
 #include <QKeyEvent>
 #include <QTimer>
 #include <QMessageBox>
@@ -48,6 +52,14 @@ MultiGameScreen::MultiGameScreen(QWidget* parent) : ScreenBase(parent)
 	m_engine->setLevelFinishedCallback([this](bool victory) { onMatchFinished(victory); });
 
 	m_loop->setSteppedCallback([this](int advancedSteps) { onEngineStepped(advancedSteps); });
+
+	//客户端心跳只接线一次：以前每次 onEnter 都 connect 一个 lambda，
+	//多打几局之后同一个 timer 会触发 N 次（输入包重复发送）。
+	m_clientTimer.setInterval(50);
+	m_clientTimer.setTimerType(Qt::PreciseTimer);
+	connect(&m_clientTimer, &QTimer::timeout, this, &MultiGameScreen::onClientHeartbeat);
+
+	setupPauseOverlay();
 }
 
 MultiGameScreen::~MultiGameScreen()
@@ -59,6 +71,69 @@ MultiGameScreen::~MultiGameScreen()
 		m_engine->setStateChangedCallback(nullptr);
 		m_engine->setLevelFinishedCallback(nullptr);
 	}
+}
+
+//暂停遮罩：盖在画布上的一层（不进入窗口栈，所以不会触发 onEnter/onExit）
+void MultiGameScreen::setupPauseOverlay()
+{
+	m_pauseOverlay = new QWidget(this);
+	m_pauseOverlay->setObjectName("pauseOverlay");
+	m_pauseOverlay->setAttribute(Qt::WA_StyledBackground, true);
+	m_pauseOverlay->hide();
+
+	QVBoxLayout* outer = new QVBoxLayout(m_pauseOverlay);
+	outer->setContentsMargins(24, 24, 24, 24);
+	outer->addStretch(1);
+
+	QWidget* panel = new QWidget(m_pauseOverlay);
+	panel->setObjectName("pausePanel");
+	panel->setAttribute(Qt::WA_StyledBackground, true);
+	panel->setMaximumWidth(460);
+
+	QVBoxLayout* panelLayout = new QVBoxLayout(panel);
+	panelLayout->setContentsMargins(28, 24, 28, 24);
+	panelLayout->setSpacing(12);
+
+	m_pauseTitle = new QLabel(QStringLiteral("已暂停"), panel);
+	m_pauseTitle->setObjectName("pauseTitle");
+	m_pauseTitle->setAlignment(Qt::AlignCenter);
+
+	m_pauseHint = new QLabel(
+		QStringLiteral("按 Esc 或点「继续游戏」回到对局。\n返回大厅会结束本局，并让双方都回到大厅。"),
+		panel);
+	m_pauseHint->setObjectName("pauseHint");
+	m_pauseHint->setWordWrap(true);
+	m_pauseHint->setAlignment(Qt::AlignCenter);
+
+	QHBoxLayout* buttonRow = new QHBoxLayout();
+	buttonRow->setSpacing(12);
+	m_resumeBtn = new QPushButton(QStringLiteral("继续游戏"), panel);
+	m_resumeBtn->setObjectName("primaryBtn");
+	m_leaveBtn = new QPushButton(QStringLiteral("返回大厅"), panel);
+	m_leaveBtn->setObjectName("accentBtn");
+	buttonRow->addWidget(m_resumeBtn);
+	buttonRow->addWidget(m_leaveBtn);
+
+	panelLayout->addWidget(m_pauseTitle);
+	panelLayout->addWidget(m_pauseHint);
+	panelLayout->addSpacing(4);
+	panelLayout->addLayout(buttonRow);
+
+	QHBoxLayout* center = new QHBoxLayout();
+	center->addStretch(1);
+	center->addWidget(panel);
+	center->addStretch(1);
+	outer->addLayout(center);
+	outer->addStretch(1);
+
+	connect(m_resumeBtn, &QPushButton::clicked, this, [this]() { resumeMatch(); });
+	connect(m_leaveBtn, &QPushButton::clicked, this, &MultiGameScreen::confirmLeaveMatch);
+}
+
+void MultiGameScreen::resizeEvent(QResizeEvent* event)
+{
+	QWidget::resizeEvent(event);
+	if (m_pauseOverlay) { m_pauseOverlay->setGeometry(rect()); }
 }
 
 //进入界面：从 NetSession 读取本次对局的全部上下文，然后开局
@@ -77,9 +152,17 @@ void MultiGameScreen::onEnter(const QVariantMap& args)
 
 	m_input = bp::InputState();
 	m_finished = false;
+	m_paused = false;
+	m_remotePaused = false;
 	m_netStepCounter = 0;
+	if (m_pauseOverlay) { m_pauseOverlay->hide(); }
+	if (m_pauseTitle) { m_pauseTitle->setText(QStringLiteral("已暂停")); }
 
 	m_canvas->setShowGrid(SettingsManager::instance().showGrid());
+
+	//数值配置必须先于 addPlayer：玩家的初始血量/火力取自配置，
+	//顺序反了会先按默认值建人、再改配置（模组改过数值时会不一致）。
+	m_engine->setConfig(ModManager::instance().gameConfig());
 
 	//参与者：按 id 升序灌进引擎（QMap 本身有序，两端顺序因此一致）
 	m_engine->clearPlayers();
@@ -96,9 +179,6 @@ void MultiGameScreen::onEnter(const QVariantMap& args)
 
 	m_engine->setLocalPlayerId(myPlayerId);
 	m_engine->setAuthoritative(isHost);
-
-	//数值配置：默认值 + 所有生效 mod 的玩法覆盖（两端各算一次，结果一致）
-	m_engine->setConfig(ModManager::instance().gameConfig());
 
 	//对局种子：大厅广播的那个，两端必须一致，否则地图都不一样
 	m_engine->setRandomSeed(static_cast<qint64>(session.matchSeed()));
@@ -118,13 +198,27 @@ void MultiGameScreen::onEnter(const QVariantMap& args)
 	NativeModHost::instance().setActiveEngine(isHost ? m_engine.get() : nullptr);
 
 	//网络数据监听（socket 是 NetSession 的那个，这里只接 readyRead）
+	if (readyReadConnection) { disconnect(readyReadConnection); readyReadConnection = QMetaObject::Connection(); }
 	if (socket)
 	{
 		readyReadConnection = connect(socket, &QUdpSocket::readyRead,
 									  this, &MultiGameScreen::readNetworkData);
 	}
 
+	// 诊断：如果走到这里 socket 还是没绑定，说明大厅 -> 对战的交接被破坏了。
+	// 以前正是 LobbyScreen::onExit 无条件 close() 造成"主机能玩、客户端全静止"。
+	if (!socket || !NetSession::instance().isOpen())
+	{
+		FileManager::instance().log("game",
+			QStringLiteral("联机对局警告：socket 未绑定，收发都会失败（大厅交接问题）"));
+	}
+
 	m_loop->start();
+
+	//客户端心跳：每 50ms 上报一次输入并强制重画。
+	//不依赖引擎逻辑步 —— 客户端是镜像，本地没有"真实推进"，靠逻辑步驱动上报会直接失联。
+	if (!isHost) { m_clientTimer.start(); }
+	else { m_clientTimer.stop(); }
 
 	FileManager::instance().log("game", QStringLiteral("联机对战开始：主机=%1 玩家=%2 种子=%3")
 		.arg(isHost ? QStringLiteral("是") : QStringLiteral("否"))
@@ -135,37 +229,183 @@ void MultiGameScreen::onEnter(const QVariantMap& args)
 //离开界面：停循环、断开网络监听、必要时通知客户端
 void MultiGameScreen::onExit()
 {
+	m_clientTimer.stop();
 	m_loop->stop();
+
+	m_paused = false;
+	m_remotePaused = false;
+	if (m_pauseOverlay) { m_pauseOverlay->hide(); }
 
 	//归还引擎：离开对局后宿主不能再操作它（模组的调用一律得到"时机不对"）
 	NativeModHost::instance().setActiveEngine(nullptr);
 
 	if (readyReadConnection) { disconnect(readyReadConnection); readyReadConnection = QMetaObject::Connection(); }
 
-	//主机中途退出（按 Esc 或退出程序）：得告诉客户端"这局不打了"，
-	//否则客户端会一直等主机状态，界面像卡住一样
+	//主机中途退出（窗口关闭 / 退出程序）：得告诉客户端"这局不打了"，
+	//否则客户端会一直等主机状态，界面像卡住一样。
+	//正常"暂停菜单 -> 返回大厅"会先把 m_finished 置 true，不会重复发。
 	if (isHost && socket && !m_finished) { sendGameOver(-1); }
 }
 
-//Esc：通知对手并回大厅
+//Esc：打开/关闭暂停菜单。联机中途直接退局不符合直觉，也容易误触。
 bool MultiGameScreen::handleBack()
 {
-	m_loop->stop();
+	if (m_finished) { return true; }
 
-	if (isHost && socket && !m_finished) { sendGameOver(-1); }
-	m_finished = true;
-
-	//回大厅而不是"回上一屏"：对战界面是 replace 上来的，栈里下面是主页，
-	//直接 pop 会回主页；而这一局的联机会话既然结束，玩家最需要的是"大厅里再来一局"
-	//（大厅的 onEnter 会重置 NetSession 并重新绑定端口）
-	ScreenRouter::instance().replace(ScreenId::Lobby);
+	if (m_paused)
+	{
+		// 主机暂停时，客户端不能自行解除；只能等主机继续或点「返回大厅」
+		if (m_remotePaused) { return true; }
+		resumeMatch();
+	}
+	else
+	{
+		pauseMatch();
+	}
 	return true;
+}
+
+// ---------- 暂停菜单 ----------
+
+void MultiGameScreen::pauseMatch(bool remote)
+{
+	if (m_finished || m_paused) { return; }
+
+	m_paused = true;
+	m_remotePaused = remote;
+
+	//先把"按住的键"清掉：暂停期间收不到 KeyRelease，
+	//不清的话继续游戏时角色会一直朝一个方向走。
+	m_input = bp::InputState();
+	if (isHost) { syncLocalInput(); }
+	else if (!remote) { sendInputToHost(); }
+
+	m_loop->pause();
+	m_clientTimer.stop();
+
+	if (!remote && isHost) { sendPauseState(true); }
+
+	if (m_pauseTitle) { m_pauseTitle->setText(remote ? QStringLiteral("主机已暂停") : QStringLiteral("已暂停")); }
+	if (m_pauseHint)
+	{
+		m_pauseHint->setText(remote
+			? QStringLiteral("主机暂停了本局，等待主机继续…\n你也可以直接返回大厅。")
+			: QStringLiteral("按 Esc 或点「继续游戏」回到对局。\n返回大厅会结束本局，并让双方都回到大厅。"));
+	}
+	if (m_resumeBtn) { m_resumeBtn->setVisible(!remote); }
+
+	if (m_pauseOverlay)
+	{
+		m_pauseOverlay->setGeometry(rect());
+		m_pauseOverlay->raise();
+		m_pauseOverlay->show();
+	}
+
+	m_canvas->update();
+}
+
+void MultiGameScreen::resumeMatch(bool remote)
+{
+	if (!m_paused) { return; }
+
+	m_paused = false;
+	m_remotePaused = false;
+	if (m_pauseOverlay) { m_pauseOverlay->hide(); }
+
+	m_loop->resume();
+	m_clientTimer.stop();
+
+	if (!remote && isHost) { sendPauseState(false); }
+	if (!isHost && !m_finished)
+	{
+		m_clientTimer.start();
+		if (!remote) { sendInputToHost(); }
+	}
+
+	m_input = bp::InputState();
+	if (isHost) { syncLocalInput(); }
+
+	m_canvas->update();
+	m_hud->refresh();
+}
+
+void MultiGameScreen::sendPauseState(bool paused)
+{
+	if (!isHost || !socket) { return; }
+
+	QByteArray packet;
+	QDataStream stream(&packet, QIODevice::WriteOnly);
+	stream.setVersion(QDataStream::Qt_6_0);
+	stream << static_cast<quint16>(MSG_GAME_PAUSE) << paused;
+
+	for (auto it = clientEndpoints.constBegin(); it != clientEndpoints.constEnd(); ++it)
+	{
+		socket->writeDatagram(packet, it.value().address, it.value().port);
+	}
+}
+
+void MultiGameScreen::confirmLeaveMatch()
+{
+	if (m_finished)
+	{
+		leaveMatch();
+		return;
+	}
+
+	const QMessageBox::StandardButton answer = QMessageBox::question(
+		this,
+		QStringLiteral("返回大厅"),
+		QStringLiteral("确定要离开这一局吗？\n离开后本局立即结束，双方都会回到大厅。"),
+		QMessageBox::Yes | QMessageBox::No,
+		QMessageBox::No);
+
+	if (answer != QMessageBox::Yes) { return; }
+
+	leaveMatch();
+}
+
+void MultiGameScreen::leaveMatch()
+{
+	m_loop->stop();
+	m_clientTimer.stop();
+	m_paused = false;
+	m_remotePaused = false;
+	if (m_pauseOverlay) { m_pauseOverlay->hide(); }
+
+	// 主机离开：告诉客户端这局结束；客户端离开：让主机把留下的玩家判为胜者。
+	// 两条都必须赶在 m_finished=true 之前发，否则 onExit 会以为已经收尾过。
+	if (socket && !m_finished)
+	{
+		if (isHost) { sendGameOver(-1); }
+		else
+		{
+			QByteArray packet;
+			QDataStream stream(&packet, QIODevice::WriteOnly);
+			stream.setVersion(QDataStream::Qt_6_0);
+			stream << static_cast<quint16>(MSG_GAME_OVER) << kOpponentLeftWinnerId;
+			socket->writeDatagram(packet, hostAddress, hostPort);
+		}
+	}
+
+	m_finished = true;
+	ScreenRouter::instance().replace(ScreenId::Lobby);
+}
+
+void MultiGameScreen::onClientHeartbeat()
+{
+	if (m_finished || m_paused) { return; }
+
+	sendInputToHost();
+	m_canvas->update();
+	m_hud->refresh();
 }
 
 // ---------- 每逻辑步 ----------
 
 void MultiGameScreen::onEngineStepped(int advancedSteps)
 {
+	if (m_finished || m_paused) { return; }
+
 	m_netStepCounter += advancedSteps;
 
 	//原生模组只跑主机：每个逻辑步调一次（dt 恒为 1/60，与引擎的固定步长一致）。
@@ -215,6 +455,7 @@ GameStateSnapshot MultiGameScreen::makeNetworkSnapshot() const
 		//连续格子坐标：(x = 列, y = 行)，客户端收到后还原成 GridPosF
 		snap.playerPositions.append(QPointF(player.pos.col(), player.pos.row()));
 		snap.playerLives.append(player.lives);
+		snap.playerMaxLives.append(player.maxLives);
 		snap.playerNames.append(player.name);
 		snap.playerRanges.append(player.bombRange);
 		snap.playerMaxBombs.append(player.maxBombs);
@@ -318,20 +559,31 @@ void MultiGameScreen::readNetworkData()
 
 		if (isHost)
 		{
-			//主机只关心客户端输入；其它（大厅广播等）忽略
-			if (msgType != MSG_PLAYER_INPUT) { continue; }
+			if (msgType == MSG_PLAYER_INPUT)
+			{
+				PlayerInput input;
+				stream >> input;
 
-			PlayerInput input;
-			stream >> input;
+				bp::InputState state;
+				state.up = input.is_moveup;
+				state.down = input.is_movedown;
+				state.left = input.is_moveleft;
+				state.right = input.is_moveright;
+				state.placeBomb = input.is_placeBomb;
 
-			bp::InputState state;
-			state.up = input.is_moveup;
-			state.down = input.is_movedown;
-			state.left = input.is_moveleft;
-			state.right = input.is_moveright;
-			state.placeBomb = input.is_placeBomb;
-
-			m_engine->submitRemoteInput(input.playerId, state);
+				m_engine->submitRemoteInput(input.playerId, state);
+			}
+			else if (msgType == MSG_GAME_OVER)
+			{
+				// 客户端按「返回大厅」时发来的特殊结束消息：留下的玩家（主机）获胜。
+				int winnerId = -1;
+				stream >> winnerId;
+				if (winnerId == kOpponentLeftWinnerId && !m_finished)
+				{
+					m_engine->declareWinner(myPlayerId);
+				}
+			}
+			//其它（大厅广播等）忽略
 		}
 		else
 		{
@@ -348,6 +600,13 @@ void MultiGameScreen::readNetworkData()
 
 				//客户端不自己判定胜负：主机说结束了就是结束了
 				m_engine->declareWinner(winnerId);
+			}
+			else if (msgType == MSG_GAME_PAUSE)
+			{
+				bool paused = false;
+				stream >> paused;
+				if (paused) { pauseMatch(true); }
+				else { resumeMatch(true); }
 			}
 		}
 	}
@@ -391,9 +650,13 @@ void MultiGameScreen::applyNetworkSnapshot(const GameStateSnapshot& snap)
 		drops.append(drop);
 	}
 
-	m_engine->applyRemotePlayers(snap.playerIds, positions, snap.playerLives);
+	m_engine->applyRemotePlayers(snap.playerIds, positions, snap.playerLives,
+								 snap.playerRanges, snap.playerMaxBombs, snap.playerMaxLives);
 	m_engine->applyRemoteBombs(bombs);
 	m_engine->applyRemoteDrops(drops);
+	//客户端是靠快照前进的：本地引擎不 tick，所以这里必须主动重画，否则画面就"静止"了
+	m_canvas->update();
+	m_hud->refresh();
 
 	//UDP 是"尽力而为"：万一"游戏结束"那条消息正好丢了，客户端靠状态快照也能收尾，
 	//不至于永远停在"等主机"的画面上
@@ -409,6 +672,20 @@ void MultiGameScreen::applyNetworkSnapshot(const GameStateSnapshot& snap)
 
 void MultiGameScreen::handleKeyPress(QKeyEvent* event)
 {
+	if (m_finished) { return; }
+
+	if (m_paused)
+	{
+		// 暂停菜单里回车 = 继续（鼠标点按钮仍然可用；AppHost 会吃掉按键，所以这里显式处理）。
+		// 主机暂停时客户端不能自行继续。
+		if (!m_remotePaused
+			&& (event->key() == Qt::Key_Return || event->key() == Qt::Key_Enter))
+		{
+			resumeMatch();
+		}
+		return;
+	}
+
 	switch (event->key())
 	{
 	case Qt::Key_W: m_input.up = true; break;
@@ -424,6 +701,8 @@ void MultiGameScreen::handleKeyPress(QKeyEvent* event)
 
 void MultiGameScreen::handleKeyRelease(QKeyEvent* event)
 {
+	if (m_finished || m_paused) { return; }
+
 	switch (event->key())
 	{
 	case Qt::Key_W: m_input.up = false; break;
@@ -443,7 +722,13 @@ void MultiGameScreen::onMatchFinished(bool victory)
 {
 	Q_UNUSED(victory);
 
+	if (m_finished) { return; }
+
 	m_loop->stop();
+	m_clientTimer.stop();
+	m_paused = false;
+	m_remotePaused = false;
+	if (m_pauseOverlay) { m_pauseOverlay->hide(); }
 	m_finished = true;
 
 	//主机把"谁赢了"发给客户端
@@ -457,8 +742,10 @@ void MultiGameScreen::onMatchFinished(bool victory)
 
 void MultiGameScreen::showMatchResult()
 {
-	//已经离开界面（例如玩家抢先按了 Esc）就不再弹框
+	//已经离开界面（例如玩家抢先按了 Esc / 返回大厅）就不再弹框
 	if (!isVisible()) { return; }
+
+	if (m_pauseOverlay) { m_pauseOverlay->hide(); }
 
 	const int winnerId = m_engine->winnerId();
 
@@ -469,6 +756,6 @@ void MultiGameScreen::showMatchResult()
 
 	QMessageBox::information(this, QStringLiteral("对局结束"), text);
 
-	//同 handleBack：打完一局回大厅，可以立刻再来一局
+	//同"返回大厅"：打完一局回大厅，可以立刻再来一局
 	ScreenRouter::instance().replace(ScreenId::Lobby);
 }

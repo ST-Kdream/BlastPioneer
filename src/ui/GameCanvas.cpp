@@ -528,7 +528,9 @@ void GameCanvas::paintMultiPlayers(QPainter& painter) const
 			painter.setPen(Qt::NoPen);
 		}
 
-		//血条
+		//血条：**自己是绿的、别人是红的**。
+		//以前用的是 playerColor(玩家 id)（房主是 1 号，于是"房主绿、其他人红"），
+		//但玩家关心的是"我"和"敌人"，不是"谁是主机"。
 		if (m_showBars && player.maxLives > 0)
 		{
 			const double barW = m_cellSize * 0.6;
@@ -541,19 +543,22 @@ void GameCanvas::paintMultiPlayers(QPainter& painter) const
 
 			const double ratio = qBound(0.0,
 				static_cast<double>(player.lives) / static_cast<double>(player.maxLives), 1.0);
-			painter.setBrush(color);
+			painter.setBrush(player.local ? QColor(90, 220, 120) : QColor(240, 80, 80));
 			painter.drawRect(QRectF(barX, barY, barW * ratio, barH));
 		}
 
-		//名字
+		//名字：长名字要**省略号截断**，而不是画一半被裁掉（多人模式里名字很长很常见）
 		QFont font = painter.font();
 		font.setPointSizeF(qMax(7.0, m_cellSize * 0.2));
 		font.setBold(player.local);
 		painter.setFont(font);
 		painter.setPen(QColor(255, 255, 255, 230));
-		painter.drawText(QRectF(center.x() - m_cellSize, center.y() + m_cellSize * 0.28,
-								m_cellSize * 2.0, m_cellSize * 0.4),
-						 Qt::AlignHCenter | Qt::AlignTop, player.name);
+
+		const QRectF nameRect(center.x() - m_cellSize, center.y() + m_cellSize * 0.28,
+							  m_cellSize * 2.0, m_cellSize * 0.4);
+		const QString shown = QFontMetricsF(font).elidedText(player.name, Qt::ElideRight,
+															 qMax(8.0, nameRect.width() - 2.0));
+		painter.drawText(nameRect, Qt::AlignHCenter | Qt::AlignTop, shown);
 		font.setBold(false);
 		painter.setFont(font);
 	}

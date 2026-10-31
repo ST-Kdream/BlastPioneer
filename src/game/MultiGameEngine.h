@@ -93,7 +93,13 @@ public:
 	bool tryPlaceBombFor(int playerId);
 
 	// ---------- 客户端：直接套用主机广播的状态（不跑规则） ----------
-	void applyRemotePlayers(const QList<int>& ids, const QList<GridPosF>& positions, const QList<int>& lives);
+	//ranges / maxBombs / maxLives 是可选的：传了就同步（道具会改这些数值），
+	//不传则保持本地值（测试里只关心位置/生命时不用构造多余列表）。
+	void applyRemotePlayers(const QList<int>& ids, const QList<GridPosF>& positions,
+							const QList<int>& lives,
+							const QList<int>& ranges = QList<int>(),
+							const QList<int>& maxBombs = QList<int>(),
+							const QList<int>& maxLives = QList<int>());
 	void applyRemoteBombs(const QList<Bomb>& bombs);
 	void applyRemoteDrops(const QList<DropItem>& drops);
 

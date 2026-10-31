@@ -144,6 +144,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp" />
+    <ResourceCompile Include="src\app.rc" />
     <ClInclude Include="src\version.h">
       <Level>Core</Level>
     </ClInclude>
@@ -499,10 +500,9 @@
       <ContentDataFiles Include="$(MSBuildProjectDirectory)\content\Data\**\*.*"
                         Exclude="$(MSBuildProjectDirectory)\content\Data\playerData.json;$(MSBuildProjectDirectory)\content\Data\settings.ini;$(MSBuildProjectDirectory)\content\Data\launch_state.json" />
       <ContentModFiles Include="$(MSBuildProjectDirectory)\content\mods\**\*.*" />
-      <!-- ui\ 里既有样式表也有源码，所以用 Exclude 排掉源码扩展名：
-           这样以后往 ui\ 里放图标/字体之类的资源，不用改这里就会自动同步 -->
-      <ContentUiFiles Include="$(MSBuildProjectDirectory)\src\ui\**\*.*"
-                      Exclude="$(MSBuildProjectDirectory)\src\ui\*.cpp;$(MSBuildProjectDirectory)\src\ui\*.h;$(MSBuildProjectDirectory)\src\ui\*.hpp" />
+      <!-- ui\ 的内容在 content\ui\（tokens.json + 两套 qss），源码在 src\ui\。
+           以前这里指向 src\ui，结果改完 qss 构建不会同步，运行目录一直是旧的。 -->
+      <ContentUiFiles Include="$(MSBuildProjectDirectory)\content\ui\**\*.*" />
     </ItemGroup>
     <Copy SourceFiles="@(ContentAssetFiles)"
           DestinationFiles="@(ContentAssetFiles->'$(OutDir)Assets\%(RecursiveDir)%(Filename)%(Extension)')"

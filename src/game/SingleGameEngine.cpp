@@ -95,8 +95,19 @@ void SingleGameEngine::onLevelInit()
 	//玩家回到出生点
 	playerPosRef() = GridPosF::centered(start);
 
+	//兜一道：生成器（尤其是模组换进来的生成器）万一没保护出生格，
+	//先把它清成空地；仍然不可走就 BFS 挤到最近空地，绝不让玩家开局站在墙里
+	if (boardRef().tile(start) == TileType::Brick)
+	{
+		boardRef().setTile(start, TileType::Empty);
+	}
+	if (!boardRef().walkable(start))
+	{
+		unstickPlayer(8);
+	}
+
 	//兜一道：确保玩家出生格是玩家标记
-	boardRef().markEntity(start, EntityKind::Player);
+	boardRef().markEntity(playerPos().cell, EntityKind::Player);
 }
 
 bool SingleGameEngine::beginLevel(int level)
@@ -111,6 +122,9 @@ void SingleGameEngine::advance(const FrameContext& ctx)
 {
 	m_elapsedSeconds += ctx.frameTime;
 
+	//反卡死：站在墙/砖块里就先挤出来（幽灵态结束时最容易发生；可走时是一次 O(1) 判断）
+	unstickPlayer();
+
 	//电子幽灵态倒计时（加速类道具改的是倍率，倒计时只是"限时状态"）
 	if (m_ghostTimer > 0.0)
 	{
@@ -119,6 +133,8 @@ void SingleGameEngine::advance(const FrameContext& ctx)
 		{
 			m_ghostTimer = 0.0;
 			m_playerGhost = false;
+			//刚好停在墙里：立刻挤到最近的空地，别让玩家"卡死到只能重开"
+			unstickPlayer();
 		}
 	}
 

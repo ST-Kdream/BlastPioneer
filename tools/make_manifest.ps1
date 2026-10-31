@@ -64,7 +64,8 @@ $manifest = [ordered]@{
 }
 
 $json = $manifest | ConvertTo-Json -Depth 6
-Set-Content -Path $OutFile -Value $json -Encoding UTF8
+# 必须**无 BOM**：Qt 的 QJsonDocument 不接受 BOM，带 BOM 的清单会让更新器直接判"清单不合法"
+[System.IO.File]::WriteAllText($OutFile, $json, (New-Object System.Text.UTF8Encoding($false)))
 
 $totalMb = [math]::Round(($files | ForEach-Object { $_.size } | Measure-Object -Sum).Sum / 1MB, 1)
 Write-Host ("manifest  : {0}" -f $OutFile)

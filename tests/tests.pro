@@ -70,6 +70,7 @@ HEADERS += \
     $$CORE_DIR/LaunchGuard.h \
     $$CORE_DIR/DirectoryLayout.h \
     $$CORE_DIR/FileManager.h \
+    $$CORE_DIR/NetSession.h \
     $$SDK_DIR/bp_mod_api.h \
     test_key_dispatch.h
 
@@ -89,4 +90,5 @@ SOURCES += \
     $$CORE_DIR/UiTokens.cpp \
     $$CORE_DIR/LaunchGuard.cpp \
     $$CORE_DIR/DirectoryLayout.cpp \
-    $$CORE_DIR/FileManager.cpp
+    $$CORE_DIR/FileManager.cpp \
+    $$CORE_DIR/NetSession.cpp

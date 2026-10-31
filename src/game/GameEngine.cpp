@@ -230,6 +230,75 @@ bool GameEngine::moveEntityBy(GridPosF& pos, double dxCells, double dyCells, boo
 	return oldCell != pos.cell;
 }
 
+//反卡死：站在实心格子里时，就近挤到空地
+//
+// 为什么需要它：电子幽灵态（8/15 秒）允许穿墙，倒计时结束时人可能正好停在墙里；
+// 一旦四面都是墙/砖块，任何方向都走不动 —— 玩家只能重开一局。
+// 这里用广度优先找**最近**的可走格（默认最多 4 步），把人和格内偏移一起摆正。
+bool GameEngine::nudgeToWalkable(GridPosF& pos, int maxSteps)
+{
+	if (m_board.walkable(pos.cell)) { return false; }
+
+	//kRows × kCols 很小（13×11 级别），直接开一个访问表，别为这点事引入 QSet
+	bool visited[GameBoard::rows()][GameBoard::cols()] = {};
+	const auto visit = [&visited](const GridPos& p) -> bool&
+	{
+		return visited[p.row][p.col];
+	};
+
+	QList<GridPos> queue;
+	QList<int> depths;
+	queue.append(pos.cell);
+	depths.append(0);
+	visit(pos.cell) = true;
+
+	static const int dr[4] = { -1, 1, 0, 0 };
+	static const int dc[4] = { 0, 0, -1, 1 };
+
+	for (int head = 0; head < queue.size(); ++head)
+	{
+		const GridPos current = queue.at(head);
+		const int depth = depths.at(head);
+		if (depth >= maxSteps) { continue; }
+
+		for (int i = 0; i < 4; ++i)
+		{
+			const GridPos next(current.row + dr[i], current.col + dc[i]);
+			if (!GameBoard::inBounds(next) || visit(next)) { continue; }
+			visit(next) = true;
+
+			if (m_board.walkable(next))
+			{
+				//摆到格子中心：避免"挤出来以后还压在格边、下一步又是墙"
+				pos.cell = next;
+				pos.offsetX = 0.5;
+				pos.offsetY = 0.5;
+				return true;
+			}
+
+			queue.append(next);
+			depths.append(depth + 1);
+		}
+	}
+
+	return false;
+}
+
+bool GameEngine::unstickPlayer(int maxSteps)
+{
+	if (m_board.walkable(m_playerPos.cell)) { return false; }
+
+	const GridPos oldCell = m_playerPos.cell;
+	if (!nudgeToWalkable(m_playerPos, maxSteps)) { return false; }
+
+	if (m_playerPos.cell != oldCell)
+	{
+		m_board.clearEntity(oldCell);
+		m_board.markEntity(m_playerPos.cell, EntityKind::Player);
+	}
+	return true;
+}
+
 bool GameEngine::tryPlaceBomb(const GridPos& cell, BombOwner owner)
 {
 	//玩家炸弹受"同时可放数量"限制；敌人不限制（由冷却控制）

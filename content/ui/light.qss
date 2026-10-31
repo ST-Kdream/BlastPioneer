@@ -90,6 +90,61 @@ QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
 }
 
 /* ---------- 按钮：三种角色 ---------- */
+/* 兜底角色：**任何没有 objectName 的 QPushButton**（对话框的确定/取消、
+   QMessageBox 的标准按钮、第三方/模组加进来的按钮）都走这一套。
+   以前这类按钮吃的是系统调色板 + Windows 默认样式：白底、悬停变蓝，
+   和 #primaryBtn / #accentBtn / #ghostBtn 完全不是一套语言。
+   有了这条兜底，新增按钮即使忘了设 objectName 也不会"突然变白"。 */
+QPushButton {
+	background-color: @panel;
+	color: @ink;
+	border: 1px solid @line;
+	border-radius: @radius;
+	padding: 8px 14px;
+	font-size: @fontBase;
+}
+
+QPushButton:hover {
+	background-color: @bg;
+	border-color: @primary;
+	color: @primary;
+}
+
+QPushButton:pressed {
+	background-color: @line;
+	border-color: @primaryLo;
+	color: @primaryLo;
+}
+
+QPushButton:focus {
+	border-color: @primary;
+}
+
+/* 对话框里的默认按钮（确定/加入等）：和主操作同色，一眼看出"回车会做哪个" */
+QPushButton:default {
+	background-color: @primary;
+	color: @onPrimary;
+	border: 1px solid @primary;
+}
+
+QPushButton:default:hover {
+	background-color: @primaryHi;
+	border-color: @primaryHi;
+}
+
+QPushButton:default:pressed {
+	background-color: @primaryLo;
+	border-color: @primaryLo;
+}
+
+/* 禁用态必须"看得出来"：空心 + 虚线 + 灰字，和可点按钮明显区分。
+   放在 hover/pressed 之后，避免禁用时仍被悬停规则染成主色。 */
+QPushButton:disabled {
+	background-color: @bg;
+	color: @inkWeak;
+	border: 1px dashed @line;
+}
+
 /* 主要动作（开始游戏 / 确定 / 使用） */
 #primaryBtn, #startBtn, #useBtn, #okBtn {
 	background-color: @primary;
@@ -139,6 +194,20 @@ QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
 #ghostBtn:hover, #reloadModsBtn:hover {
 	border-color: @primary;
 	color: @primary;
+}
+
+/* 各角色的禁用态：统一成"灰底 + 虚线"，但仍保留各自的填充语义 */
+#primaryBtn:disabled, #startBtn:disabled, #useBtn:disabled, #okBtn:disabled,
+#accentBtn:disabled, #backBtn:disabled, #cancelBtn:disabled {
+	background-color: @line;
+	color: @inkWeak;
+	border: 1px dashed @line;
+}
+
+#ghostBtn:disabled, #reloadModsBtn:disabled {
+	background-color: @bg;
+	color: @inkWeak;
+	border: 1px dashed @line;
 }
 
 /* 主页的"开始游戏"：做得更大更醒目 */
@@ -443,6 +512,29 @@ QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
 	background-color: @bg;
 	color: @inkWeak;
 	border: 2px dashed @line;
+}
+
+/* ---------- 联机暂停菜单（Esc） ---------- */
+/* 半透明遮罩 + 一块实心面板：既让玩家看到"游戏停住了"，又不至于把画面完全盖死 */
+#pauseOverlay {
+	background-color: @scrim;
+}
+
+#pausePanel {
+	background-color: @panel;
+	border: 1px solid @line;
+	border-radius: @radius;
+}
+
+#pauseTitle {
+	color: @ink;
+	font-size: 24px;
+	font-weight: bold;
+}
+
+#pauseHint {
+	color: @inkWeak;
+	font-size: @fontBase;
 }
 
 /* ---------- 安全模式横幅（原生模组被崩溃保护禁用时的顶部提示） ---------- */

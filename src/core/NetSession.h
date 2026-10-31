@@ -24,6 +24,13 @@ public:
 	bool isOpen() const;
 	//绑定到本机任意地址（port 传 0 表示由系统分配）
 	bool bind(quint16 port);
+	//"按需绑定"：已经开在想要的端口上就什么都不做，否则先 close 再 bind。
+	//为什么需要：刷新列表会把 socket 绑到临时端口，之后加入房间/创建房间再 bind 一次就会失败
+	//（AddressInUse），玩家看到的就是"刷新列表后加入房间端口绑定失败"。
+	//port == 0 表示"哪个端口都行"，此时只要已经开着就直接成功。
+	bool bindOrRebind(quint16 port);
+	//当前本地端口（未绑定返回 0）
+	quint16 localPort() const;
 	//关闭并释放 socket（不删除，保证指针长期有效）
 	void close();
 

@@ -168,7 +168,13 @@ void MultiGameEngine::onLevelInit()
 		spec.brickCount = config().brickBaseCount + config().brickPerLevel;
 		spec.enemyCount = 0;                       //多人对局没有电脑敌人
 		spec.seed = mapSeed;
-		if (!points.isEmpty()) { spec.playerStart = points.first(); }
+		if (!points.isEmpty())
+		{
+			spec.playerStart = points.first();
+			//其余出生点也必须交给生成器保护：只保护第一个的话，2~4 号玩家
+			//会直接站在随机生成的砖块里（真实反馈："开局就卡在墙里"）
+			for (int i = 1; i < points.size(); ++i) { spec.playerStarts.append(points.at(i)); }
+		}
 		m_generator->generate(boardRef(), spec);
 	}
 
@@ -179,6 +185,17 @@ void MultiGameEngine::onLevelInit()
 		m_players[i].pos = GridPosF::centered(cell);
 		//多人模式不把玩家写进格子标记（只有炸弹写），清掉生成器留下的出生点标记
 		boardRef().clearEntity(cell);
+
+		//兜一道：生成器没保护好（例如模组换了地图生成器）时，宁可把出生格清成空地，
+		//也不能让玩家站在砖块/墙里。仍然不可走就用 BFS 挤到最近空地。
+		if (boardRef().tile(cell) == TileType::Brick)
+		{
+			boardRef().setTile(cell, TileType::Empty);
+		}
+		if (!boardRef().walkable(cell))
+		{
+			nudgeToWalkable(m_players[i].pos, 8);
+		}
 	}
 
 	rebuildPlayerViews();
@@ -225,6 +242,8 @@ void MultiGameEngine::updateGhostTimers(const FrameContext& ctx)
 		{
 			player.ghostTimer = 0.0;
 			player.ghost = false;
+			//?????????:??????(????????????)
+			nudgeToWalkable(player.pos);
 		}
 	}
 }
@@ -396,7 +415,9 @@ void MultiGameEngine::checkMatchEnd()
 
 void MultiGameEngine::declareWinner(int winnerId)
 {
-	if (!isRunning()) { return; }
+	//暂停时也要能结算：联机里"主机按 Esc 暂停"和"对局结束"可能同时到达，
+	//如果这里只认 Running，客户端暂停后收到 GAME_OVER 会永远停在暂停界面。
+	if (m_phase != Phase::Running && m_phase != Phase::Paused) { return; }
 
 	m_winnerId = winnerId;
 	//本机是不是赢家由引擎判断：界面只需要弹一句"你赢了/XX 获胜"
@@ -419,7 +440,10 @@ bool MultiGameEngine::requestDamagePlayer(int playerIndex, int amount)
 // ---------- 客户端：套用主机广播的状态 ----------
 
 void MultiGameEngine::applyRemotePlayers(const QList<int>& ids, const QList<GridPosF>& positions,
-										 const QList<int>& lives)
+										 const QList<int>& lives,
+										 const QList<int>& ranges,
+										 const QList<int>& maxBombs,
+										 const QList<int>& maxLives)
 {
 	const int count = qMin(ids.size(), qMin(positions.size(), lives.size()));
 
@@ -429,6 +453,12 @@ void MultiGameEngine::applyRemotePlayers(const QList<int>& ids, const QList<Grid
 		if (!player) { continue; }
 		player->pos = positions.at(i);
 		player->lives = lives.at(i);
+
+		//HUD 上"威力/上限/最大生命"也会随道具变化，客户端必须一起收，
+		//否则会出现"主机吃了加威力，客户端显示还是旧值"（画面与 HUD 不一致）。
+		if (i < ranges.size()) { player->bombRange = ranges.at(i); }
+		if (i < maxBombs.size()) { player->maxBombs = maxBombs.at(i); }
+		if (i < maxLives.size()) { player->maxLives = qMax(1, maxLives.at(i)); }
 	}
 
 	rebuildPlayerViews();

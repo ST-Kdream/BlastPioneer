@@ -27,6 +27,24 @@ bool NetSession::isOpen() const
 }
 
 //绑定端口
+quint16 NetSession::localPort() const
+{
+	if (!m_socket || m_socket->state() != QAbstractSocket::BoundState) { return 0; }
+	return m_socket->localPort();
+}
+
+bool NetSession::bindOrRebind(quint16 port)
+{
+	//已经开着：想要"任意端口"或正好就是这个端口 -> 直接成功，绝不重复 bind
+	if (m_socket && m_socket->state() == QAbstractSocket::BoundState)
+	{
+		if (port == 0 || m_socket->localPort() == port) { return true; }
+	}
+
+	close();
+	return bind(port);
+}
+
 bool NetSession::bind(quint16 port)
 {
 	return socket()->bind(QHostAddress::Any, port);

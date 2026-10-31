@@ -25,6 +25,14 @@ AppHost::AppHost(QWidget* parent) : QWidget(parent)
 	setWindowTitle("爆破先锋");
 	setMinimumSize(800, 600);
 
+	//显式给顶层窗口设一次图标。QApplication::setWindowIcon 本来会作为默认值生效，
+	//但任务栏取的是**窗口**的图标（WM_GETICON）；这里再设一次，避免某些 Windows
+	//组合下默认值没有传播到窗口，出现"exe/资源管理器图标正常、任务栏是默认图标"。
+	if (!qApp->windowIcon().availableSizes().isEmpty())
+	{
+		setWindowIcon(qApp->windowIcon());
+	}
+
 	//窗口位置与大小：整个程序只有这一个顶层窗口，因此只保存一份几何
 	QByteArray savedGeo = SettingsManager::instance().screenGeometry("AppHost");
 	if (!savedGeo.isEmpty())
@@ -64,7 +72,7 @@ void AppHost::initialize()
 	//安全模式横幅：要在第一个界面显示之前就准备好，否则玩家会先看到一屏没有提示的界面
 	setupSafeModeBanner();
 
-	//正常退出 = 崩溃保护里的"clean"（契约 §3.3）。
+	//正常退出 = 崩溃保护里的"clean"
 	//挂 aboutToQuit 而不是 closeEvent：退出确认被取消时不该记成"正常退出"，
 	//而 aboutToQuit 只在真的开始退出时才会来
 	connect(qApp, &QCoreApplication::aboutToQuit, this, []() {
@@ -77,9 +85,6 @@ void AppHost::initialize()
 }
 
 //安全模式横幅
-//
-// 为什么必须"说出来"：安全模式下原生模组一个都没加载，玩家如果不知道这件事，
-// 会以为"模组装坏了"或者"游戏坏了"。横幅就是那句"这是有意的、以及怎么退出安全模式"。
 void AppHost::setupSafeModeBanner()
 {
 	if (!LaunchGuard::instance().blockNativeMods()) { return; }

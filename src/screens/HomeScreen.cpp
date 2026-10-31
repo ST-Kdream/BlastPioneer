@@ -74,7 +74,6 @@ void HomeScreen::setupUI()
 	heroLayout->addWidget(m_stats);
 	heroLayout->addSpacing(6);
 	heroLayout->addLayout(heroButtons);
-	hero->setLayout(heroLayout);
 
 	contentLayout()->addWidget(hero);
 

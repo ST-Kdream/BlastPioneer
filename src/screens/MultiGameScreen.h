@@ -7,6 +7,7 @@
 #include <QHostAddress>
 #include <QMap>
 #include <QMetaObject>
+#include <QTimer>
 
 #include <memory>
 
@@ -14,6 +15,10 @@ class GameCanvas;
 class GameHud;
 class QUdpSocket;
 class QKeyEvent;
+class QLabel;
+class QPushButton;
+class QResizeEvent;
+class QWidget;
 
 // ============================================================
 // 联机对战界面（阶段二起：薄壳）
@@ -41,7 +46,7 @@ public:
 
 	void onEnter(const QVariantMap& args) override;
 	void onExit() override;
-	//Esc：通知对手并回大厅
+	//Esc：打开/关闭暂停菜单（不再"一按就退回大厅"）
 	bool handleBack() override;
 
 	//键盘输入：由 AppHost 统一分发（Qt 的按键只送有焦点的子控件）
@@ -51,14 +56,28 @@ public:
 	//当前引擎（调试/测试用）
 	bp::MultiGameEngine* engine() const { return m_engine.get(); }
 
+protected:
+	void resizeEvent(QResizeEvent* event) override;
+
 private slots:
 	void readNetworkData();
+	//客户端心跳（15~20Hz）：不依赖逻辑步地上报输入并重绘
+	void onClientHeartbeat();
 	//对局结束（由引擎回调触发）：停循环，推迟到本轮事件处理结束后再弹框
 	void onMatchFinished(bool victory);
 	//弹结果框 + 返回大厅
 	void showMatchResult();
+	//暂停菜单里的"返回大厅"（先确认）
+	void confirmLeaveMatch();
 
 private:
+	void setupPauseOverlay();
+	//remote=true 表示"主机暂停"这条消息来自网络：客户端只显示遮罩，不反向发消息
+	void pauseMatch(bool remote = false);
+	void resumeMatch(bool remote = false);
+	void sendPauseState(bool paused);
+	void leaveMatch();
+
 	//每推进若干逻辑步做一次网络收发
 	void onEngineStepped(int advancedSteps);
 	//引擎状态 -> 网络快照（主机）
@@ -92,4 +111,23 @@ private:
 	quint16 hostPort = 0;
 	QMap<int, ClientEndpoint> clientEndpoints;
 	int myPlayerId = 0;
+
+	//客户端心跳：**不依赖引擎逻辑步**地上报输入并重画画布。
+	//为什么需要它：客户端是非权威镜像，本地引擎不跑规则，逻辑步一旦不推进（或推进得慢），
+	//原来"在 onEngineStepped 里上报输入"的路径就断了 —— 表现就是"客户端按键没反应、画面静止"。
+	QTimer m_clientTimer;
+	QTimer m_redrawTimer;
+
+	// ---- 暂停菜单（Esc） ----
+	//为什么不再"Esc 直接回大厅"：联机中途误按 Esc 就丢局不符合常识，而且回去后
+	//大厅的按钮状态曾没有复位（表现为"所有按钮都点不动"）。现在先暂停，明确确认才离开。
+	bool m_paused = false;
+	// true = 这块暂停遮罩是"主机暂停"发来的：客户端不能自己按 Esc/回车继续，
+	// 只能等主机继续，或点「返回大厅」离开。
+	bool m_remotePaused = false;
+	QWidget* m_pauseOverlay = nullptr;
+	QLabel* m_pauseTitle = nullptr;
+	QLabel* m_pauseHint = nullptr;
+	QPushButton* m_resumeBtn = nullptr;
+	QPushButton* m_leaveBtn = nullptr;
 };

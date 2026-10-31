@@ -46,11 +46,9 @@
 #include <QtCore/QThread>
 #include <QtCore/QTimer>
 #include <QtCore/QUrl>
-
 #include <QtNetwork/QNetworkAccessManager>
 #include <QtNetwork/QNetworkReply>
 #include <QtNetwork/QNetworkRequest>
-
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QHBoxLayout>
 #include <QtWidgets/QLabel>
@@ -59,8 +57,8 @@
 #include <QtWidgets/QPushButton>
 #include <QtWidgets/QVBoxLayout>
 #include <QtWidgets/QWidget>
-
 #include <cstdio>
+#include <windows.h>
 #include <functional>
 
 // ---------------------------------------------------------------------------
@@ -75,6 +73,7 @@ static void logLine(const QString& text)
 		.arg(QDateTime::currentDateTime().toString(QStringLiteral("HH:mm:ss")), text);
 
 	QTextStream out(stdout);
+	out.setEncoding(QStringConverter::Utf8);
 	out << stamped << Qt::endl;
 
 	if (g_logView)
@@ -95,11 +94,7 @@ static void logLine(const QString& text)
 
 // ---------------------------------------------------------------------------
 // 版本号：语义化版本 + 预发布标签
-//
 //   0.1.0-beta.1 < 0.1.0-beta.2 < 0.1.0-rc.1 < 0.1.0 < 0.1.1
-//
-// 为什么不能只比数字：上一版把非数字字符全丢掉，于是 "0.1.0-beta.1" 被当成 [0,1,0,1]、
-// "0.1.0" 被当成 [0,1] —— beta 反而"大于"正式版，正式版永远不会被更新下来。
 // ---------------------------------------------------------------------------
 static QList<int> numericParts(const QString& text)
 {
@@ -191,9 +186,10 @@ struct UpdateSettings
 static QStringList defaultSources()
 {
 	return QStringList{
-		QStringLiteral("https://cdn.jsdelivr.net/gh/ST-Kdream/BlastPioneer@release/latest"),
+		QStringLiteral("https://gitee.com/zzx-st-kdream/BlastPioneer/raw/release/latest"),
+		QStringLiteral("https://raw.githubusercontent.com/ST-Kdream/BlastPioneer/release/latest"),
 		QStringLiteral("https://ghfast.top/https://raw.githubusercontent.com/ST-Kdream/BlastPioneer/release/latest"),
-		QStringLiteral("https://raw.githubusercontent.com/ST-Kdream/BlastPioneer/release/latest")
+		QStringLiteral("https://cdn.jsdelivr.net/gh/ST-Kdream/BlastPioneer@release/latest")
 	};
 }
 
@@ -245,7 +241,7 @@ static UpdateSettings readSettings(const QString& rootDir)
 // ---------------------------------------------------------------------------
 // HTTP：同步取一份数据（QNetworkAccessManager 是异步的，这里用事件循环等它）
 // ---------------------------------------------------------------------------
-static bool httpGet(const QUrl& url, QByteArray* body, QString* error, int timeoutMs = 20000)
+static bool httpGet(const QUrl& url, QByteArray* body, QString* error, int timeoutMs = 45000)
 {
 	if (!url.isValid())
 	{
@@ -356,8 +352,19 @@ struct Manifest
 
 	bool parse(const QByteArray& json, QString* error)
 	{
+		// ?????**? BOM** ? UTF-8;???????????? BOM
+		// (PowerShell 5.1 ? Set-Content -Encoding UTF8 ???),? QJsonDocument
+		// ?? BOM ????"??" -- ???"???????????????????"????
+		// ??????? BOM ??,???????? BOM(tools/make_manifest.ps1 ????)?
+		QByteArray clean = json;
+		if (clean.startsWith("\xEF\xBB\xBF")) { clean.remove(0, 3); }
+		while (!clean.isEmpty() && (clean.at(0) == '\n' || clean.at(0) == '\r' || clean.at(0) == ' '))
+		{
+			clean.remove(0, 1);
+		}
+
 		QJsonParseError parseError{};
-		const QJsonDocument document = QJsonDocument::fromJson(json, &parseError);
+		const QJsonDocument document = QJsonDocument::fromJson(clean, &parseError);
 		if (document.isNull() || !document.isObject())
 		{
 			*error = QStringLiteral("manifest.json 不是合法 JSON：%1").arg(parseError.errorString());
@@ -583,7 +590,7 @@ static int runUpdate(const Options& options)
 		// 预发布过滤：关掉"追踪预发布"时，只接受正式版（版本号里没有 '-'）
 		if (!settings.trackPrerelease && isPrerelease(parsed.version))
 		{
-			logLine(QStringLiteral("  跳过：%1 是预发布版（设置里没勾「追踪预发布版本」）")
+			logLine(QStringLiteral("  跳过：%1 是预发布版")
 				.arg(parsed.version));
 			continue;
 		}
@@ -654,11 +661,19 @@ static int runUpdate(const Options& options)
 		const QUrl url(manifestBase + QStringLiteral("/files/") + entry.path);
 		logLine(QStringLiteral("下载 %1（%2 KB）").arg(entry.path).arg(entry.size / 1024));
 
+		// 国内链路偶尔会断一次；单文件重试 2 次，别让"一次抖动"废掉整次更新。
+		// （不算"换源"：换源只发生在取清单阶段，见上面的源循环。）
 		QByteArray body;
 		QString error;
-		if (!httpGet(url, &body, &error))
+		bool downloaded = false;
+		for (int attempt = 1; attempt <= 3 && !downloaded; ++attempt)
 		{
-			logLine(QStringLiteral("  失败：%1").arg(error));
+			if (attempt > 1) { logLine(QStringLiteral("  第 %1 次重试……").arg(attempt - 1)); }
+			downloaded = httpGet(url, &body, &error);
+			if (!downloaded) { logLine(QStringLiteral("  失败：%1").arg(error)); }
+		}
+		if (!downloaded)
+		{
 			logLine(QStringLiteral("更新已中止，游戏没有被动过"));
 			return 1;
 		}
@@ -807,7 +822,8 @@ static int runUpdate(const Options& options)
 		{
 			QTextStream stream(&version);
 			stream << "version=" << manifest.version << "\n";
-			stream << "channel=" << channel << "\n";
+			// ???????(?????????):beta ???????? stable
+			stream << "channel=" << (manifest.channel.isEmpty() ? channel : manifest.channel) << "\n";
 			// built 用 UTC + 明确的毫秒省略格式。注意别再手动拼 "Z"：
 			// Qt::ISODate 对 UTC 时间已经带 Z，拼一次就变成 "...ZZ"（自测里看到过）。
 			stream << "built=" << QDateTime::currentDateTimeUtc().toString(QStringLiteral("yyyy-MM-ddTHH:mm:ss"))
@@ -890,6 +906,12 @@ static void printUsage()
 
 int main(int argc, char* argv[])
 {
+	// Windows 控制台默认是本地代码页（中文系统 = GBK），而我们按 UTF-8 输出中文，
+	// 结果全是乱码。把输入/输出代码页都切成 UTF-8，日志与进度在控制台里就正常了。
+	// （窗口模式不依赖它；但两种模式走同一份 logLine，统一设置最省事。）
+	SetConsoleOutputCP(CP_UTF8);
+	SetConsoleCP(CP_UTF8);
+
 	QCoreApplication::setApplicationName(QStringLiteral("BlastPioneer Updater"));
 	QCoreApplication::setApplicationVersion(QStringLiteral("0.1.0"));
 

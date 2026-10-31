@@ -17,6 +17,11 @@ struct LevelSpec
 	int      enemyHp = 3;
 	quint32  seed = 0;             //随机种子（相同种子必须产出相同地图）
 	GridPos  playerStart = GridPos(1, 1);
+
+	//多人的其它出生点（不包含 playerStart）。
+	//随机生成器必须把它们、以及它们周围一圈都留空：否则 2~4 号玩家会直接生成在砖块/墙里
+	//（以前只保护 spec.playerStart，单人是好的，多人一开局就有人卡墙）。
+	QList<GridPos> playerStarts;
 };
 
 //生成出的敌人初始数据

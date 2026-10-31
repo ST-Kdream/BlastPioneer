@@ -3,8 +3,16 @@
 #include <QLoggingCategory>
 #include <QGuiApplication>
 #include <QThread>
+#include <QFileInfo>
+#include <QIcon>
 #include <QQuickWindow>
 #include <QSGRendererInterface>
+
+#ifdef Q_OS_WIN
+#include <windows.h>
+#include <shobjidl.h>
+#pragma comment(lib, "shell32.lib")
+#endif
 
 #include "DirectoryLayout.h"
 #include "FileManager.h"
@@ -53,7 +61,15 @@ int main(int argc, char* argv[])
 
 	QApplication app(argc, argv);
 	app.setOrganizationName("ST-Kdream");
+	app.setApplicationName(QStringLiteral("BlastPioneer"));
 	app.setApplicationVersion(QStringLiteral(BP_VERSION_STRING));
+
+#ifdef Q_OS_WIN
+	//任务栏分组/图标归属：必须在创建第一个窗口之前设置。
+	//不设时 Windows 会把进程归到一个临时 AppID 下，任务栏有时拿不到 exe 的图标
+	//（桌面/资源管理器正常、任务栏却是默认图标，就是这一类问题）。
+	SetCurrentProcessExplicitAppUserModelID(L"ST-Kdream.BlastPioneer");
+#endif
 
 	// 解析启动参数（--root=<目录> 可以在开发时把数据目录指到源码树）
 	QCommandLineParser parser;
@@ -78,6 +94,22 @@ int main(int argc, char* argv[])
 	//目录布局：必须在任何数据访问之前解析
 	DirectoryLayout::instance().resolve(parser.value(rootOption));
 	DirectoryLayout::instance().ensureRuntimeDirs();
+
+	// 应用图标：必须在解析根目录之后读 —— 原来它写在 resolve() 之前，
+	// root() 还是空串，路径变成 "/Assets/picture/..."，文件当然不存在；
+	// 结果 exe 的内嵌图标（资源管理器/桌面）正常，窗口/任务栏却退回 Qt 默认图标。
+	// qrc 里另存了一份兜底，Assets 被删掉也不会出现默认图标。
+	{
+		QIcon icon;
+		const QString iconPath = DirectoryLayout::instance().root()
+			+ QStringLiteral("/Assets/picture/BlastPioneer.ico");
+		if (QFileInfo::exists(iconPath)) { icon = QIcon(iconPath); }
+		if (icon.availableSizes().isEmpty())
+		{
+			icon = QIcon(QStringLiteral(":/Assets/picture/BlastPioneer.ico"));
+		}
+		if (!icon.availableSizes().isEmpty()) { app.setWindowIcon(icon); }
+	}
 
 	//界面截图目录（--ui-shot）：留空表示不自检截图
 	const QString shotDir = parser.value(QStringLiteral("ui-shot")).trimmed();

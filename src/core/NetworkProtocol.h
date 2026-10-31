@@ -15,8 +15,14 @@ enum MessageType
     MSG_START_GAME = 4,   // 主机通知开始游戏
     MSG_GAME_STATE = 5,   // 主机广播游戏状态快照
     MSG_PLAYER_INPUT = 6,   // 客户端发送玩家输入
-    MSG_GAME_OVER = 7    // 游戏结束消息
+    MSG_GAME_OVER = 7,    // 游戏结束消息
+    MSG_GAME_PAUSE = 8,   // 主机暂停/继续（客户端据此显示同一块暂停遮罩）
+    MSG_ROOM_CLOSED = 9    // 房主解散房间（大厅里还在等待的客户端回到空闲状态）
 };
+
+//MSG_GAME_OVER 的一个特殊 winnerId：客户端主动离开对局。
+//主机收到后把"留下的那个玩家"判为胜者并结束本局 —— 否则客户端走了、主机还在傻等。
+constexpr int kOpponentLeftWinnerId = -2;
 
 //客户端IP+端口
 struct ClientEndpoint
@@ -54,6 +60,7 @@ struct GameStateSnapshot
     QList<int> playerIds;
     QList<QPointF> playerPositions;   // (列, 行) 连续格子坐标
     QList<int> playerLives;
+    QList<int> playerMaxLives;        // 上限也会被道具改（"眼睛"等），HUD 要一起同步
     QList<QString> playerNames;
     QList<int> playerRanges;
     QList<int> playerMaxBombs;
@@ -91,6 +98,7 @@ inline QDataStream& operator>>(QDataStream& data, PlayerInput& input)
 inline QDataStream& operator<<(QDataStream& out, const GameStateSnapshot& snap)
 {
     out << snap.playerIds << snap.playerPositions << snap.playerLives
+        << snap.playerMaxLives
         << snap.playerNames << snap.playerRanges << snap.playerMaxBombs
         << snap.bombPositions << snap.bombTimers << snap.bombFuseTotals << snap.bombRanges
         << snap.bombOwners << snap.dropPositions << snap.dropNames
@@ -102,6 +110,7 @@ inline QDataStream& operator<<(QDataStream& out, const GameStateSnapshot& snap)
 inline QDataStream& operator>>(QDataStream& in, GameStateSnapshot& snap)
 {
     in >> snap.playerIds >> snap.playerPositions >> snap.playerLives
+        >> snap.playerMaxLives
         >> snap.playerNames >> snap.playerRanges >> snap.playerMaxBombs
         >> snap.bombPositions >> snap.bombTimers >> snap.bombFuseTotals >> snap.bombRanges
         >> snap.bombOwners >> snap.dropPositions >> snap.dropNames

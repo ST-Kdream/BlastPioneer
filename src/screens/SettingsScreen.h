@@ -12,7 +12,7 @@ class SideTabWidget;
 //（用 ui/SideTabWidget 而不是 QTabWidget::West —— 后者会把标签文字竖排、页多了还出现上下箭头、
 //  滚轮悬停时会直接切页；具体毛病写在 SideTabWidget.h 里）
 //
-// 内容分三类：外观 / 游戏 / 声音。「模组」不在这里：它是独立页面（主页 → 模组）。
+	//内容分四类：外观 / 游戏 / 声音 / 更新。「模组」不在这里：它是独立页面（主页 → 模组）。
 class SettingsScreen : public ScaffoldScreen
 {
 	Q_OBJECT
@@ -25,6 +25,8 @@ public:
 	bool persistent() const override { return true; }
 
 	void onEnter(const QVariantMap& args) override;
+	//Esc 也要走"要不要保存"的询问（不然 Esc 会绕过它）
+	bool handleBack() override;
 
 private:
 	void setupUI();
@@ -32,6 +34,12 @@ private:
 	void loadSettings();
 	//把控件当前值写入设置
 	void saveSettings();
+	//只写「更新」页的四个控件（点检查更新前必须先让它们生效）
+	void saveUpdateSettingsFromUi();
+	//界面值与本机已保存值是否不同
+	bool hasUnsavedChanges() const;
+	//「返回」按钮：有改动就先问，没改动直接回
+	void onBackRequested();
 
 	SideTabWidget* m_tabs = nullptr;
 
@@ -47,11 +55,14 @@ private:
 	QLabel* m_frameRateLabel = nullptr;
 	QComboBox* m_effectQualityCombo = nullptr;
 	QCheckBox* m_confirmExitCheck = nullptr;
+	//??????(???????????;???)
+	QCheckBox* m_allowNativeCheck = nullptr;
 
 	//声音
 	QSlider* m_volumeSlider = nullptr;
 	QLabel* m_volumeLabel = nullptr;
-	//??:???(????)+ ?????? + "????"??
+
+	//更新
 	class QLineEdit* m_updateSourcesEdit = nullptr;
 	QCheckBox* m_keepBackupCheck = nullptr;
 	QCheckBox* m_useMirrorCheck = nullptr;
@@ -64,5 +75,5 @@ private slots:
 	//基座风格：保存下来、下次启动生效（当场切换要重新 polish 所有控件，明显卡顿）
 	void onBaseStyleChanged();
 	void onOkClicked();
-	void onCancelClicked();
+	//「取消」已删除：它和「返回」功能重复，现在「返回」在有改动时会问是否保存
 };

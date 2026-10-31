@@ -28,6 +28,7 @@
 #include "GameplayPatch.h"
 #include "UiTokens.h"
 #include "NetworkProtocol.h"
+#include "NetSession.h"
 #include "LaunchGuard.h"
 #include "FileManager.h"
 #include "DirectoryLayout.h"
@@ -245,6 +246,15 @@ static void testMapGeneration()
 	spec.enemyHp = 4;
 	spec.seed = 12345;
 
+	// Multiplayer passes every corner as a spawn point. The generator must keep
+	// all of them (and a one-cell ring around each) free of bricks.
+	spec.playerStart = bp::GridPos(1, 1);
+	spec.playerStarts = {
+		bp::GridPos(1, kCols - 2),
+		bp::GridPos(kRows - 2, 1),
+		bp::GridPos(kRows - 2, kCols - 2)
+	};
+
 	GameBoard boardA;
 	GameBoard boardB;
 	const GeneratedMap mapA = generator.generate(boardA, spec);
@@ -281,6 +291,25 @@ static void testMapGeneration()
 	}
 	CHECK_EQ_INT(wallGaps, 0, "border walls intact after generation");
 	CHECK(boardA.tile(spec.playerStart) == TileType::Player, "player start marked");
+
+	QList<GridPos> allStarts = spec.playerStarts;
+	allStarts.prepend(spec.playerStart);
+	for (const GridPos& start : allStarts)
+	{
+		CHECK(boardA.tile(start) != TileType::Wall, "spawn cell is not a wall");
+		CHECK(boardA.tile(start) != TileType::Brick, "spawn cell is not a brick");
+
+		// The standard Bomberman guarantee: the full 3x3 around a spawn is clear.
+		for (int dr = -1; dr <= 1; ++dr)
+		{
+			for (int dc = -1; dc <= 1; ++dc)
+			{
+				const GridPos p(start.row + dr, start.col + dc);
+				if (!GameBoard::inBounds(p)) { continue; }
+				CHECK(boardA.tile(p) != TileType::Brick, "spawn safe zone has no brick");
+			}
+		}
+	}
 
 	for (const EnemySpawn& spawn : mapA.enemies)
 	{
@@ -759,6 +788,28 @@ static void testMultiplayerSetup()
 	CHECK(engine.board().tile(cells[0]) != bp::TileType::Wall, "spawn cell is not a wall");
 	CHECK(engine.board().tile(cells[0]) != bp::TileType::Brick, "spawn cell is not a brick");
 
+	// Regression: the random generator used to protect only points[0], so with
+	// a real (random) map players 2-4 could spawn inside bricks. Every seed must
+	// place every player on a walkable cell.
+	for (const quint32 seed : { 1u, 7u, 42u, 2024u, 99999u })
+	{
+		bp::MultiGameEngine randomEngine(config);
+		randomEngine.setMapGenerator(std::make_unique<bp::RandomMapGenerator>());
+		randomEngine.setRandomSeed(seed);
+		randomEngine.setLocalPlayerId(1);
+		randomEngine.addPlayer(1, QStringLiteral("P1"));
+		randomEngine.addPlayer(2, QStringLiteral("P2"));
+		randomEngine.addPlayer(3, QStringLiteral("P3"));
+		randomEngine.addPlayer(4, QStringLiteral("P4"));
+		randomEngine.beginMatch();
+
+		for (const bp::MultiPlayer& player : randomEngine.players())
+		{
+			CHECK(randomEngine.board().walkable(player.pos.cell),
+				  "random spawn puts every player on a walkable cell");
+		}
+	}
+
 	const bp::GameSnapshot& snap = engine.snapshot();
 	CHECK_EQ_INT(snap.players.size(), 4, "snapshot exposes the multiplayer player list");
 	CHECK_EQ_INT(snap.localPlayerIndex, 0, "snapshot marks which entry is the local player");
@@ -974,6 +1025,20 @@ static void testMultiplayerClientMirror()
 	CHECK_NEAR(engine.players().at(0).pos.col(), 3.5, 0.0001, "mirrored position of player 1");
 	CHECK_EQ_INT(engine.players().at(1).lives, 1, "mirrored lives of player 2");
 	CHECK_NEAR(engine.snapshot().players.at(1).pos.row(), 4.5, 0.0001, "mirrored state reaches the snapshot");
+
+	// Optional stat lists (pickups change range / capacity / max lives): the
+	// client HUD must mirror them too, not just position and current lives.
+	QList<int> ranges;
+	ranges << 5 << 2;
+	QList<int> maxBombs;
+	maxBombs << 6 << 3;
+	QList<int> maxLives;
+	maxLives << 7 << 4;
+	engine.applyRemotePlayers(ids, positions, lives, ranges, maxBombs, maxLives);
+
+	CHECK_EQ_INT(engine.players().at(0).bombRange, 5, "mirrored bomb range of player 1");
+	CHECK_EQ_INT(engine.players().at(1).maxBombs, 3, "mirrored bomb capacity of player 2");
+	CHECK_EQ_INT(engine.snapshot().players.at(0).maxLives, 7, "mirrored max lives reach the snapshot");
 
 	// mirrored bombs keep their fuse progress, and the board marker follows
 	QList<bp::Bomb> bombs;
@@ -2177,6 +2242,108 @@ static void testModHooksAndWriteRequests()
 	CHECK_NEAR(tickLoop.timeScale(), 4.0, 1e-9, "the scale is clamped to 4 (determinism guard)");
 }
 
+// ============================================================
+// ghost anti-stuck: the ghost item lets you walk THROUGH walls;
+// when it expires while you stand inside one, the player must be
+// pushed back to a walkable cell instead of being stuck forever.
+// ============================================================
+static void testGhostAntiStuck()
+{
+	GameConfig config;
+	config.enemyCountPerLevel = 0;
+	config.playerSpeed = 4.0;
+
+	SingleGameEngine engine(config);
+	engine.setRandomSeed(7);
+	engine.startLevel(1);
+
+	CHECK(engine.applyEffect(bp::EffectId::Star), "ghost item (star) applies");
+	CHECK(engine.playerGhost(), "player is in ghost state (can pass walls)");
+
+	// find a brick cell in the interior: bricks are NOT walkable, so standing on
+	// one when the ghost expires is exactly the "stuck inside a solid tile" case
+	GridPos brick(0, 0);
+	bool foundBrick = false;
+	for (int r = 1; r < engine.board().rows() - 1 && !foundBrick; ++r)
+	{
+		for (int c = 1; c < engine.board().cols() - 1; ++c)
+		{
+			const GridPos candidate(r, c);
+			if (engine.board().tile(candidate) == TileType::Brick)
+			{
+				brick = candidate;
+				foundBrick = true;
+				break;
+			}
+		}
+	}
+	CHECK(foundBrick, "the level contains at least one brick");
+
+	if (foundBrick)
+	{
+		// with the ghost active we walk through everything: align row, then column
+		for (int guard = 0; guard < 600 && engine.playerPos().cell.row != brick.row; ++guard)
+		{
+			InputState in;
+			if (engine.playerPos().cell.row > brick.row) { in.up = true; } else { in.down = true; }
+			engine.setInput(in);
+			engine.tick(1.0 / 60.0);
+		}
+		for (int guard = 0; guard < 600 && engine.playerPos().cell.col != brick.col; ++guard)
+		{
+			InputState in;
+			if (engine.playerPos().cell.col > brick.col) { in.left = true; } else { in.right = true; }
+			engine.setInput(in);
+			engine.tick(1.0 / 60.0);
+		}
+
+		CHECK(engine.playerPos().cell == brick, "ghost walked onto a brick tile");
+		CHECK(engine.board().tile(engine.playerPos().cell) == TileType::Brick,
+			  "the player really stands on a non-walkable tile");
+
+		// stop moving and let the ghost timer run out (15s for the star, 18s is safe)
+		InputState none;
+		for (int i = 0; i < 18 * 60; ++i) { engine.setInput(none); engine.tick(1.0 / 60.0); }
+
+		CHECK(!engine.playerGhost(), "ghost expired");
+		const GridPos after = engine.playerPos().cell;
+		CHECK(engine.board().walkable(after),
+			  "after the ghost expires the player was nudged onto a walkable cell (anti-stuck)");
+	}
+}
+
+// ============================================================
+// lobby bind sequence: refresh (bind 0) then join (bind 0 again)
+// must NOT fail. This is the reported "port bind failed after
+// refreshing the room list" bug, reproduced without any UI.
+// ============================================================
+static void testLobbyBindSequence()
+{
+	NetSession& session = NetSession::instance();
+	session.close();
+
+	CHECK(session.bind(0), "refresh: binds an ephemeral port");
+	const quint16 ephemeral = session.localPort();
+	CHECK(ephemeral != 0, "refresh: system assigned a port");
+
+	// the regression: joining right after a refresh used to call bind(0) again
+	CHECK(session.bindOrRebind(0), "join after refresh: does not fail");
+	CHECK_EQ_INT(static_cast<int>(session.localPort()), static_cast<int>(ephemeral),
+				 "join after refresh: keeps the already bound port");
+
+	// joining then hosting needs the lobby port, so it must rebind
+	// (any free port here: 9999 may be taken by a real lobby on this machine)
+	const quint16 hostPort = 45999;
+	CHECK(session.bindOrRebind(hostPort), "host after join: rebinds to the lobby port");
+	CHECK_EQ_INT(static_cast<int>(session.localPort()), static_cast<int>(hostPort),
+				 "host: bound to the lobby port");
+
+	CHECK(session.bindOrRebind(hostPort), "rebinding the same port is a no-op success");
+
+	session.close();
+	CHECK(!session.isOpen(), "session closed cleanly");
+}
+
 int main(int argc, char* argv[])
 {
 	QCoreApplication app(argc, argv);
@@ -2214,6 +2381,8 @@ int main(int argc, char* argv[])
 	testLaunchGuard();
 	testNativeAbiContract();
 	testModHooksAndWriteRequests();
+	testGhostAntiStuck();
+	testLobbyBindSequence();
 
 	std::printf("-------------------------------------\n");
 	std::printf("passed %d, failed %d\n", g_passed, g_failed);

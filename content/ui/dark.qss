@@ -92,6 +92,57 @@ QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
 }
 
 /* ---------- 按钮：三种角色 ---------- */
+/* 兜底角色：没有 objectName 的按钮（对话框标准按钮、模组/第三方加的按钮）
+   也必须和主/次/强调三种角色同一套语言，不能退回系统默认的白底蓝悬停。 */
+QPushButton {
+	background-color: #24282F;
+	color: #ECF0F5;
+	border: 1px solid #3A3F48;
+	border-radius: @radius;
+	padding: 8px 14px;
+	font-size: @fontBase;
+}
+
+QPushButton:hover {
+	background-color: #1B1D21;
+	border-color: @primary;
+	color: @primaryHi;
+}
+
+QPushButton:pressed {
+	background-color: #1B1D21;
+	border-color: @primaryLo;
+	color: #A8AFBB;
+}
+
+QPushButton:focus {
+	border-color: @primary;
+}
+
+QPushButton:default {
+	background-color: @primary;
+	color: #FFFFFF;
+	border: 1px solid @primary;
+}
+
+QPushButton:default:hover {
+	background-color: @primaryHi;
+	border-color: @primaryHi;
+}
+
+QPushButton:default:pressed {
+	background-color: @primaryLo;
+	border-color: @primaryLo;
+}
+
+/* 禁用态：灰字 + 虚线，和不透明/实心的可点按钮明显区分 */
+QPushButton:disabled {
+	background-color: #1B1D21;
+	color: #8A9099;
+	border: 1px dashed #3A404B;
+}
+
+/* 主要动作（开始游戏 / 确定 / 使用） */
 #primaryBtn, #startBtn, #useBtn, #okBtn {
 	background-color: @primary;
 	color: @onPrimary;
@@ -138,6 +189,19 @@ QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
 #ghostBtn:hover, #reloadModsBtn:hover {
 	border-color: @primary;
 	color: @primaryHi;
+}
+
+#primaryBtn:disabled, #startBtn:disabled, #useBtn:disabled, #okBtn:disabled,
+#accentBtn:disabled, #backBtn:disabled, #cancelBtn:disabled {
+	background-color: #2A2E35;
+	color: #8A9099;
+	border: 1px dashed #3A404B;
+}
+
+#ghostBtn:disabled, #reloadModsBtn:disabled {
+	background-color: #1B1D21;
+	color: #8A9099;
+	border: 1px dashed #3A404B;
 }
 
 #startBtn {
@@ -435,6 +499,28 @@ QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
 	background-color: #23262D;
 	color: #8A9099;
 	border: 2px dashed #3A404B;
+}
+
+/* ---------- 联机暂停菜单（Esc） ---------- */
+#pauseOverlay {
+	background-color: rgba(8, 9, 12, 180);
+}
+
+#pausePanel {
+	background-color: #2A2E35;
+	border: 1px solid #3A404B;
+	border-radius: @radius;
+}
+
+#pauseTitle {
+	color: #F2F4F7;
+	font-size: 24px;
+	font-weight: bold;
+}
+
+#pauseHint {
+	color: #A8AFBB;
+	font-size: @fontBase;
 }
 
 /* ---------- 安全模式横幅（原生模组被崩溃保护禁用时的顶部提示） ---------- */

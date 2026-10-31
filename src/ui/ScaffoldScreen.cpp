@@ -1,5 +1,4 @@
 #include "ScaffoldScreen.h"
-
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 #include <QLabel>
@@ -44,7 +43,6 @@ ScaffoldScreen::ScaffoldScreen(QWidget* parent) : ScreenBase(parent)
 	m_headerExtra->setSpacing(8);
 	headerLayout->addLayout(m_headerExtra);
 
-	header->setLayout(headerLayout);
 	m_pageLayout->addWidget(header);
 
 	// ---------- 内容区 ----------
@@ -55,7 +53,6 @@ ScaffoldScreen::ScaffoldScreen(QWidget* parent) : ScreenBase(parent)
 	m_contentLayout = new QVBoxLayout(content);
 	m_contentLayout->setContentsMargins(20, 16, 20, 16);
 	m_contentLayout->setSpacing(14);
-	content->setLayout(m_contentLayout);
 
 	m_pageLayout->addWidget(content, 1);   //内容区吃掉所有多余空间
 
@@ -67,7 +64,6 @@ ScaffoldScreen::ScaffoldScreen(QWidget* parent) : ScreenBase(parent)
 	m_footerLayout = new QHBoxLayout(footer);
 	m_footerLayout->setContentsMargins(20, 10, 20, 10);
 	m_footerLayout->setSpacing(14);
-	footer->setLayout(m_footerLayout);
 
 	m_pageLayout->addWidget(footer);
 
