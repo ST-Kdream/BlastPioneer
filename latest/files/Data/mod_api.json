@@ -1,0 +1,28 @@
+{
+  "_comment": "本构建的 mod 兼容性声明。启动时读它，再拿每个 mod 的 apiVersion/features 去比对；不支持就跳过该 mod（绝不影响游戏本体启动）。改这份文件就能调整兼容范围，不用重新编译引擎。",
+  "_versioning": "0.x 阶段的进位规则：0.1.0 -> 0.1.1 -> 0.1.2 都是加法式改动（新增能力、新增可覆盖的键、C ABI 末尾追加函数与字段、把预留槽位填成真函数），老 mod 不用改也不用重编；0.1.2 -> 0.2.0 才是破坏性改动（删能力、改字段含义、改键名、重命名既有令牌或 objectName）。1.0.0 留给接口稳定那天。",
+  "engineApiVersion": "0.1.2",
+  "supportedModApiVersions": ["0.1.0", "0.1.1", "0.1.2"],
+  "features": {
+    "gameplay": true,
+    "items": true,
+    "levels": true,
+    "ui": true,
+    "hooks": true,
+    "modes": false
+  },
+  "history": [
+    {
+      "apiVersion": "0.1.0",
+      "note": "gameplay（玩法数值）、items（道具字段）、levels（关卡覆盖/新增）、ui（界面外观：令牌覆盖 config/ui.json + 追加样式表 ui/override.qss）、hooks（原生模组 C ABI：先做事件订阅 / 只读查询 / 暂停 / 触发已有道具效果；生成实体、时间倍率、地图生成器、敌人 AI、全新模式属于后续版本，has_feature 会如实返回 0）。hooks 从“拒绝”变成“接受”属于加法式改动，所以版本号保持 0.1.0。"
+    },
+    {
+      "apiVersion": "0.1.1",
+      "note": "纯加法式：C ABI 末尾追加 bombs_snapshot（炸弹引信/威力/归属）、level_index、phase、step_index、player_count；tile_at 新增“爆炸痕”格子；事件补 ENEMY_DAMAGED 与 ITEM_USED（0.1.0 把它们错误地并进了 ENEMY_DIED / DROP_PICKED），掉落与关卡事件带上道具名、关卡号与胜负；has_feature 新增 world.read.bombs / world.read.meta / world.read.players / event.level_result。生成/移除实体、伤害、改数值、时间倍率仍未开放。"
+    },
+    {
+      "apiVersion": "0.1.2",
+      "note": "L3（钩子与模式）：把 ABI 里 0.1.0 就预留的槽位填成真函数 —— register_mode（在「开始游戏 → 选择模式」里注册自己的模式）、on_generate_map（自己铺地图）、on_enemy_think（决定敌人怎么走）、on_check_win（自己判胜负）、on_mode_start / on_mode_stop；末尾追加 set_tile / set_player_start（铺地图时用）。写请求（生成/移除/伤害实体、改数值、时间倍率）从“返回不支持”变成真实生效。has_feature 里 world.write.var / world.write.entity / time.scale / mode.register / mode.hooks / map.generator / ai.controller / win.condition 全部返回 1。ABI 版本仍是 1：布局与既有偏移一个字节都没变，声明 0.1.0 / 0.1.1 的老 mod 继续可用。"
+    }
+  ]
+}

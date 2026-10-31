@@ -1,0 +1,540 @@
+/* ============================================================
+ * BlastPioneer 深色主题（L1 层）
+ *
+ * 结构与 light.qss **完全一致**，只换令牌值 —— 两份并排看，就能看出"设计变量"在哪。
+ * 深色主题还会同时应用一套深色 QPalette（见 ThemeManager::applyPalette）：
+ * 菜单、滚动条、对话框、tooltip 这些不是 QSS 能全覆盖的。
+ * ============================================================ */
+
+/* ---------- 通用控件 ---------- */
+QToolTip {
+	background-color: #2E333B;
+	color: #F2F4F7;
+	border: 1px solid #454B55;
+	padding: 6px 8px;
+}
+
+QGroupBox {
+	border: 1px solid #3A3F48;
+	border-radius: @radius;
+	margin-top: 14px;
+	padding: 12px;
+	font-size: @fontBase;
+}
+
+QGroupBox::title {
+	subcontrol-origin: margin;
+	left: 10px;
+	padding: 0 6px;
+	color: #C6CBD3;
+}
+
+QListWidget, QListView, QComboBox, QLineEdit, QSpinBox, QTextBrowser, QTextEdit {
+	background-color: #1B1D21;
+	border: 1px solid #3A3F48;
+	border-radius: 6px;
+	color: #ECF0F5;
+	padding: 4px;
+	selection-background-color: #2D5BFF;
+	selection-color: #FFFFFF;
+}
+
+QListWidget::item, QListView::item {
+	padding: 6px 8px;
+	border-radius: @radiusSm;
+}
+
+QListWidget::item:hover, QListView::item:hover {
+	background-color: #2A2F37;
+}
+
+QListWidget::item:selected, QListView::item:selected {
+	background-color: #2D5BFF;
+	color: #FFFFFF;
+}
+
+QCheckBox {
+	color: #ECF0F5;
+	spacing: 8px;
+}
+
+QSlider::groove:horizontal {
+	height: 4px;
+	background: #3A3F48;
+	border-radius: 2px;
+}
+
+QSlider::handle:horizontal {
+	background: #6EA8FF;
+	width: 14px;
+	margin: -6px 0;
+	border-radius: 7px;
+}
+
+QScrollBar:vertical {
+	background: transparent;
+	width: 10px;
+	margin: 2px;
+}
+
+QScrollBar::handle:vertical {
+	background: #454B55;
+	border-radius: 5px;
+	min-height: 24px;
+}
+
+QScrollBar::handle:vertical:hover {
+	background: #58606C;
+}
+
+QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+	height: 0;
+}
+
+/* ---------- 按钮：三种角色 ---------- */
+/* 兜底角色：没有 objectName 的按钮（对话框标准按钮、模组/第三方加的按钮）
+   也必须和主/次/强调三种角色同一套语言，不能退回系统默认的白底蓝悬停。 */
+QPushButton {
+	background-color: #24282F;
+	color: #ECF0F5;
+	border: 1px solid #3A3F48;
+	border-radius: @radius;
+	padding: 8px 14px;
+	font-size: @fontBase;
+}
+
+QPushButton:hover {
+	background-color: #1B1D21;
+	border-color: @primary;
+	color: @primaryHi;
+}
+
+QPushButton:pressed {
+	background-color: #1B1D21;
+	border-color: @primaryLo;
+	color: #A8AFBB;
+}
+
+QPushButton:focus {
+	border-color: @primary;
+}
+
+QPushButton:default {
+	background-color: @primary;
+	color: #FFFFFF;
+	border: 1px solid @primary;
+}
+
+QPushButton:default:hover {
+	background-color: @primaryHi;
+	border-color: @primaryHi;
+}
+
+QPushButton:default:pressed {
+	background-color: @primaryLo;
+	border-color: @primaryLo;
+}
+
+/* 禁用态：灰字 + 虚线，和不透明/实心的可点按钮明显区分 */
+QPushButton:disabled {
+	background-color: #1B1D21;
+	color: #8A9099;
+	border: 1px dashed #3A404B;
+}
+
+/* 主要动作（开始游戏 / 确定 / 使用） */
+#primaryBtn, #startBtn, #useBtn, #okBtn {
+	background-color: @primary;
+	color: @onPrimary;
+	border: none;
+	border-radius: @radius;
+	padding: 10px 18px;
+	font-size: 16px;
+}
+
+#primaryBtn:hover, #startBtn:hover, #useBtn:hover, #okBtn:hover {
+	background-color: @primaryHi;
+}
+
+#primaryBtn:pressed, #startBtn:pressed, #useBtn:pressed, #okBtn:pressed {
+	background-color: @primaryLo;
+}
+
+#accentBtn, #backBtn, #cancelBtn {
+	background-color: @accent;
+	color: @onPrimary;
+	border: none;
+	border-radius: @radius;
+	padding: 10px 18px;
+	font-size: 16px;
+}
+
+#accentBtn:hover, #backBtn:hover, #cancelBtn:hover {
+	background-color: @accentHi;
+}
+
+#accentBtn:pressed, #backBtn:pressed, #cancelBtn:pressed {
+	background-color: @accentLo;
+}
+
+#ghostBtn, #reloadModsBtn {
+	background-color: #24282F;
+	color: #ECF0F5;
+	border: 1px solid #3A3F48;
+	border-radius: @radius;
+	padding: 8px 14px;
+	font-size: @fontBase;
+}
+
+#ghostBtn:hover, #reloadModsBtn:hover {
+	border-color: @primary;
+	color: @primaryHi;
+}
+
+#primaryBtn:disabled, #startBtn:disabled, #useBtn:disabled, #okBtn:disabled,
+#accentBtn:disabled, #backBtn:disabled, #cancelBtn:disabled {
+	background-color: #2A2E35;
+	color: #8A9099;
+	border: 1px dashed #3A404B;
+}
+
+#ghostBtn:disabled, #reloadModsBtn:disabled {
+	background-color: #1B1D21;
+	color: #8A9099;
+	border: 1px dashed #3A404B;
+}
+
+#startBtn {
+	font-size: 22px;
+	padding: 22px 24px;
+	font-weight: bold;
+}
+
+/* ---------- 页面骨架 ---------- */
+#pageRoot {
+	background-color: #23262B;
+}
+
+#pageHeader {
+	background-color: #1E2128;
+	border-bottom: 1px solid #3A404B;
+}
+
+#pageTitle {
+	color: #F2F4F7;
+	font-size: @fontTitle;
+	font-weight: bold;
+}
+
+#pageSubtitle {
+	color: #A8AFBB;
+	font-size: @fontBase;
+}
+
+#pageFooter {
+	background-color: #1E2128;
+	border-top: 1px solid #3A404B;
+}
+
+#pageContent {
+	background-color: #23262B;
+}
+
+/* ---------- 模式选择 ---------- */
+#modeCard {
+	background-color: #2A2E35;
+	border: 1px solid #3A404B;
+	border-radius: @radius;
+	color: #ECF0F5;
+	font-size: 18px;
+	padding: 18px;
+	text-align: left;
+}
+
+#modeCard:hover {
+	border-color: @primary;
+	color: @primaryHi;
+}
+
+#modeCard:pressed {
+	background-color: #23262B;
+}
+
+#modeCardHint {
+	color: #A8AFBB;
+	font-size: @fontSmall;
+}
+
+#modeEmptyHint {
+	color: #A8AFBB;
+	font-size: @fontBase;
+}
+
+/* ---------- 主页 ---------- */
+#heroCard {
+	background-color: @heroBg;
+	border: 1px solid @heroLine;
+	border-radius: @radius;
+}
+
+#heroTitle {
+	color: @heroInk;
+	font-size: 34px;
+	font-weight: bold;
+}
+
+#heroTagline {
+	color: @heroInkWeak;
+	font-size: 15px;
+}
+
+#heroStats {
+	color: @heroAccent;
+	font-size: 14px;
+	font-weight: bold;
+}
+
+#headerMeta {
+	color: #A8AFBB;
+	font-size: 13px;
+}
+
+#entryCard {
+	background-color: #2A2E35;
+	border: 1px solid #3A404B;
+	border-radius: @radius;
+	color: #ECF0F5;
+	font-size: 17px;
+	padding: 14px 18px;
+	text-align: left;
+}
+
+#entryCard:hover {
+	border-color: @primary;
+	color: @primaryHi;
+}
+
+#entryCard:pressed {
+	background-color: #23262B;
+}
+
+/* ---------- 左侧导航（SideTabWidget） ---------- */
+#sideTabsList {
+	background-color: #1E2128;
+	border: none;
+	border-right: 1px solid #3A404B;
+	border-radius: 0;
+	padding: 8px 0;
+	font-size: 15px;
+}
+
+#sideTabsList::item {
+	padding: 12px 16px;
+	border: none;
+	border-radius: 0;
+	color: #A8AFBB;
+}
+
+#sideTabsList::item:hover {
+	background-color: #23262B;
+	color: #ECF0F5;
+}
+
+#sideTabsList::item:selected {
+	background-color: #23262B;
+	color: @primaryHi;
+	font-weight: bold;
+	border-left: 3px solid @primary;
+}
+
+#sideTabsPane {
+	background-color: #23262B;
+	border: none;
+	border-radius: 0;
+}
+
+/* ---------- 模组页与通用小字 ---------- */
+#modList {
+	min-height: 120px;
+}
+
+#modSummary, #modDetail, #fieldHint {
+	color: #A8AFBB;
+	font-size: @fontSmall;
+}
+
+#sectionTitle {
+	color: #F2F4F7;
+	font-size: 17px;
+	font-weight: bold;
+}
+
+#rulesView {
+	border: none;
+	border-radius: 0;
+}
+
+/* ---------- 启动页 ---------- */
+#splashRoot {
+	background-color: @heroBg;
+}
+
+#splashTitle {
+	color: #FFCC00;
+	font-size: 28px;
+	font-weight: bold;
+}
+
+#splashStep {
+	color: #C9CFD8;
+	font-size: 14px;
+}
+
+/* ---------- 首次启动（没有存档时） ---------- */
+#welcomeTitle {
+	color: #FFCC00;
+	font-size: 30px;
+	font-weight: bold;
+}
+
+#welcomeTip {
+	color: #ECF0F5;
+	font-size: 15px;
+}
+
+/* ---------- 商店与联机大厅 ---------- */
+#coinLabel {
+	color: #FFCC00;
+	font-size: 16px;
+	font-weight: bold;
+}
+
+#countdownLabel {
+	color: #FF6B6B;
+	font-size: 36px;
+	font-weight: bold;
+}
+
+/* ---------- 游戏内顶部信息条 ---------- */
+#gameHud {
+	background-color: @hudBg;
+	border-bottom: 1px solid @hudLine;
+}
+
+#hudValue {
+	color: @hudInk;
+	font-size: 14px;
+	font-weight: bold;
+}
+
+#hudHint {
+	color: @hudInkWeak;
+	font-size: 13px;
+}
+
+/* ---------- 背包：两种角色 ---------- */
+#bagPanel {
+	background-color: #23262B;
+}
+
+#bagOverlay {
+	background-color: rgba(8, 9, 12, 165);
+}
+
+#bagTitle {
+	color: #ECF0F5;
+	font-size: 20px;
+	font-weight: bold;
+}
+
+#bagOverlay #bagTitle {
+	color: @onPrimary;
+}
+
+#itemList {
+	background-color: #1B1D21;
+	border: 1px solid #3A3F48;
+	border-radius: @radius;
+	color: #ECF0F5;
+	padding: 6px;
+}
+
+#itemList::item {
+	padding: 8px 10px;
+	border-radius: @radiusSm;
+}
+
+#itemList::item:hover {
+	background-color: #2A2F37;
+}
+
+#itemList::item:selected {
+	background-color: #2D5BFF;
+	color: #FFFFFF;
+}
+
+/* ---------- 关卡选择：圆形大号数字按钮（与浅色主题同一套结构） ---------- */
+#levelBtn {
+	background-color: #2A2F37;
+	color: #7FD3FF;
+	border: 2px solid #3A404B;
+	border-radius: 40px;
+	font-size: 26px;
+	font-weight: bold;
+}
+
+#levelBtn:hover {
+	background-color: #2D5BFF;
+	color: #FFFFFF;
+	border-color: #2D5BFF;
+}
+
+#levelBtn:pressed {
+	background-color: #1F45C8;
+	color: #FFFFFF;
+	border-color: #1F45C8;
+}
+
+#levelBtn:disabled {
+	background-color: #23262D;
+	color: #8A9099;
+	border: 2px dashed #3A404B;
+}
+
+/* ---------- 联机暂停菜单（Esc） ---------- */
+#pauseOverlay {
+	background-color: rgba(8, 9, 12, 180);
+}
+
+#pausePanel {
+	background-color: #2A2E35;
+	border: 1px solid #3A404B;
+	border-radius: @radius;
+}
+
+#pauseTitle {
+	color: #F2F4F7;
+	font-size: 24px;
+	font-weight: bold;
+}
+
+#pauseHint {
+	color: #A8AFBB;
+	font-size: @fontBase;
+}
+
+/* ---------- 安全模式横幅（原生模组被崩溃保护禁用时的顶部提示） ---------- */
+#safeModeBanner {
+	background-color: @accent;
+	color: @onPrimary;
+	font-size: @fontSmall;
+	font-weight: bold;
+	padding: 6px 12px;
+}
+
+/* ---------- 模组页：原生模组开关要重启才生效的提示 ---------- */
+#modHint {
+	color: @accentHi;
+	font-size: @fontSmall;
+	padding: 4px 0;
+}

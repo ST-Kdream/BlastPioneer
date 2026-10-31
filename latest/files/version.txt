@@ -1,0 +1,4 @@
+version=0.1.0-rc.1
+channel=beta
+built=2026-10-31T03:11:39Z
+graphics=d3d11

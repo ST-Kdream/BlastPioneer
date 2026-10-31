@@ -1,0 +1,17 @@
+﻿BlastPioneer 0.1.0-rc.1
+Third-party notices
+
+Qt 6 (QtCore/QtGui/QtWidgets/QtNetwork/QtQuick/QtQml/QtSvg)
+  (c) The Qt Company. Licensed under the GNU Lesser General Public License v3
+  (LGPLv3). This application links Qt dynamically; the Qt libraries are the
+  unmodified upstream binaries shipped alongside this file, so you may replace
+  them with your own build of the same version.
+  Full license text: https://www.gnu.org/licenses/lgpl-3.0.html
+
+d3dcompiler_47.dll
+  Microsoft Direct3D shader compiler, redistributable per the Windows SDK terms.
+
+ICU (icuuc.dll)
+  (c) Unicode, Inc. Licensed under the Unicode License.
+
+Images and level data are part of this project (see LICENSE).

@@ -1,0 +1,18 @@
+{
+  "_comment": "道具覆盖：键 = 道具名，值是「要改的字段」。只写 price 就只改价格，描述/图标/权重保持原值。名字在原表里不存在时会新增一个道具。",
+  "生命药水": {
+    "price": 10,
+    "dropWeight": 60
+  },
+  "远航星": {
+    "price": 100,
+    "dropWeight": 1.0
+  },
+  "示例护符": {
+    "description": "模组新增的道具示例：效果ID 用引擎已有的 heal（认不出的效果不会崩，只是没反应）",
+    "price": 1,
+    "iconPath": "Assets/picture/liveBottle.png",
+    "effect": "heal",
+    "dropWeight": 5
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "_comment": "第 2 关：敌人多一个、血厚一点；砖块也更多，可炸的地方变多",
+  "id": 2,
+  "name": "砖墙渐密",
+  "playerStart": [1, 1],
+  "bricks": 30,
+  "enemyCount": 2,
+  "enemyHp": 4,
+  "seed": 1002,
+  "coins": 60,
+  "ep": 20
+}

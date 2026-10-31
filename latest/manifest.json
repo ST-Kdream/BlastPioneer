@@ -1,0 +1,412 @@
+{
+    "schema":  1,
+    "version":  "0.1.0-rc.1",
+    "channel":  "beta",
+    "publishedAt":  "2026-10-31T03:31:19Z",
+    "minUpdater":  "0.1.0",
+    "files":  [
+                  {
+                      "path":  "BlastPioneer.exe",
+                      "size":  1346560,
+                      "sha256":  "eefda051a2053b3df79281865c7f73cde0cf0b93138d3fdc56fe7afa5220f9ec"
+                  },
+                  {
+                      "path":  "concrt140.dll",
+                      "size":  374200,
+                      "sha256":  "54716f0738af891f283d213b5c8d11b25896bb8ee3097d301eae718560cf974e"
+                  },
+                  {
+                      "path":  "d3dcompiler_47.dll",
+                      "size":  4173928,
+                      "sha256":  "e994847e01a6f1e4cbdc5a864616ac262f67ee4f14db194984661a8d927ab7f4"
+                  },
+                  {
+                      "path":  "icuuc.dll",
+                      "size":  36864,
+                      "sha256":  "59d134ddc15ae0594f0a328979f8201662fc82634ddb7c537b156e7cf871f5eb"
+                  },
+                  {
+                      "path":  "LICENSE",
+                      "size":  35723,
+                      "sha256":  "342d5eed880830abfdd1bf1b9d8c1126f4559703d232f3e2f2e6d13e56ae2453"
+                  },
+                  {
+                      "path":  "msvcp140.dll",
+                      "size":  643512,
+                      "sha256":  "7c26614e1d733892c2deac7e245ce115504b1d80592dd0a01b08e3e5a55f89ca"
+                  },
+                  {
+                      "path":  "NOTICE.txt",
+                      "size":  691,
+                      "sha256":  "cb93be2933acd94a33e8276f5b63d9ec6b9257281d7d3e1a4484c87769c02822"
+                  },
+                  {
+                      "path":  "Qt6Core.dll",
+                      "size":  10242360,
+                      "sha256":  "b98eea394a95563879b614dbd4432ce074b0fceeb154c3bae252f4e7a9376a40"
+                  },
+                  {
+                      "path":  "Qt6Gui.dll",
+                      "size":  9494840,
+                      "sha256":  "28ca8b9e7d3d1c4e3cfafd6fe63877a05cf10202a240134a11f98384f01c9e37"
+                  },
+                  {
+                      "path":  "Qt6Network.dll",
+                      "size":  1766712,
+                      "sha256":  "905e1ce3947fadaad566b6deffe345daf7f6efbc57207ea7fcdbfa77669e3de6"
+                  },
+                  {
+                      "path":  "Qt6OpenGL.dll",
+                      "size":  1977144,
+                      "sha256":  "a41b71127d07924ddda67e787e8765ebf60f217817199f1becdd63f3db88847e"
+                  },
+                  {
+                      "path":  "Qt6Qml.dll",
+                      "size":  5333816,
+                      "sha256":  "b1cad2aef8936cede67fecdc13c8eb930c77d0b189a1e970d72ab903902e611d"
+                  },
+                  {
+                      "path":  "Qt6QmlMeta.dll",
+                      "size":  160056,
+                      "sha256":  "6da039d0fd79d978b87d6477d2aa60e6161b7f7f8f2dd66006517fb4656afcbd"
+                  },
+                  {
+                      "path":  "Qt6QmlModels.dll",
+                      "size":  986936,
+                      "sha256":  "3e4075935cd52710628d559e690391ef0bf03f4484aa47ddf1287c57aa0066a0"
+                  },
+                  {
+                      "path":  "Qt6QmlWorkerScript.dll",
+                      "size":  76600,
+                      "sha256":  "e1ceef21a868e29ddad78624039219676ceff591eb7304c151ff8b5e8bb74c73"
+                  },
+                  {
+                      "path":  "Qt6Quick.dll",
+                      "size":  6506296,
+                      "sha256":  "14ab58cbe8aabd2eedad322c361119ff628eb602ea62998a5da1051071aeca7e"
+                  },
+                  {
+                      "path":  "Qt6QuickWidgets.dll",
+                      "size":  134456,
+                      "sha256":  "01a81cb443b112071fabad1cb591d0539f58200f7327a6861b5c83f35e94e242"
+                  },
+                  {
+                      "path":  "Qt6Svg.dll",
+                      "size":  632120,
+                      "sha256":  "982a589e52680d7b525da0031eba783d3bbd77e6611cdea5cd276a2b9213f4c9"
+                  },
+                  {
+                      "path":  "Qt6Widgets.dll",
+                      "size":  6576952,
+                      "sha256":  "f383fb6b3f6996efe23327ff607e7298fc47ee76e8b8ef8a65f8d2e0a91707e4"
+                  },
+                  {
+                      "path":  "Updater.exe",
+                      "size":  231424,
+                      "sha256":  "da09f5eae9fd94880a2e7e551935b3b90a48f2eec48890db7d322ea730b41c4a"
+                  },
+                  {
+                      "path":  "vcruntime140.dll",
+                      "size":  178616,
+                      "sha256":  "d1f4225df2cd877dbf130d5668a021dce3f94118455ff5ec952061c30afc9ce7"
+                  },
+                  {
+                      "path":  "vcruntime140_1.dll",
+                      "size":  50112,
+                      "sha256":  "a7146c08f89fe5b04541ab507cdb59ff7b44534d4ba3c668a426c6450a03434e"
+                  },
+                  {
+                      "path":  "Assets/picture/BlastPioneer.ico",
+                      "size":  81351,
+                      "sha256":  "d3abd0a81023ffbe404279a669130f20603b001a7a5d2de7a405ca295c39149d"
+                  },
+                  {
+                      "path":  "Assets/picture/bomb.png",
+                      "size":  213029,
+                      "sha256":  "20123d123e4fe1246e95553dfdd812fac945489abd2e9ac3567e1ae26813245b"
+                  },
+                  {
+                      "path":  "Assets/picture/bombUpper.png",
+                      "size":  213530,
+                      "sha256":  "ab81d2fd73fcabb3982da12029afc654f40524a10fbcf28f538a07d7602748b1"
+                  },
+                  {
+                      "path":  "Assets/picture/bonVoyagingStar.png",
+                      "size":  1316661,
+                      "sha256":  "089dd37701d16b571053afde6169ff9419ebf501e5e9b9f40dec833551beded7"
+                  },
+                  {
+                      "path":  "Assets/picture/bonVoyagingStar_broken.png",
+                      "size":  5053883,
+                      "sha256":  "f419141d6df9d5f7c5c17f051b7970b7e19c957eee5660faf7a4872b85be0c29"
+                  },
+                  {
+                      "path":  "Assets/picture/enemy.png",
+                      "size":  408775,
+                      "sha256":  "2a21cf315f3fa7bab257e7e775376126f01656514b259cf8997511c942d42980"
+                  },
+                  {
+                      "path":  "Assets/picture/liveBottle.png",
+                      "size":  1026128,
+                      "sha256":  "0c1ce3e51c67d4dfc03ea3c92ca8ca856b3434b5f9cdd69eed4ac0472566a905"
+                  },
+                  {
+                      "path":  "Assets/picture/player.png",
+                      "size":  320266,
+                      "sha256":  "3b45aff2ca3b41009bfb85c0a312fe19597fc01cb39b408c896c15adba09746a"
+                  },
+                  {
+                      "path":  "Assets/picture/quickBoots.png",
+                      "size":  472503,
+                      "sha256":  "6438a2b703dbc06c0068c57c1c405feed1a291e2aa6e4b256757ba78309806f7"
+                  },
+                  {
+                      "path":  "Assets/picture/setup.ico",
+                      "size":  97501,
+                      "sha256":  "38046621d5a6b23271986a9c7339a911a032809daf629248afb74a48426deb40"
+                  },
+                  {
+                      "path":  "Assets/picture/stringUnravelEye.png",
+                      "size":  1506759,
+                      "sha256":  "57625f456e8f3d346be1fb667ac610ce3d06059553cb40dafeb0a194bf073260"
+                  },
+                  {
+                      "path":  "Assets/picture/stringUnravelEye_broken.png",
+                      "size":  4614105,
+                      "sha256":  "91b8df653e41663168860b91593169110740ae498a87aa7426a464347db196b2"
+                  },
+                  {
+                      "path":  "Assets/picture/superBag.png",
+                      "size":  626342,
+                      "sha256":  "5bf900fa82da8d788b4164b5528556300eabde2cea6fc081b4ddc4f0191b890a"
+                  },
+                  {
+                      "path":  "Assets/picture/updater.ico",
+                      "size":  96868,
+                      "sha256":  "8ca51026615c22d6568c6bf9c41ea78a3756a5db50d78fc983b2fe486c578d9d"
+                  },
+                  {
+                      "path":  "Data/gamerules.txt",
+                      "size":  2283,
+                      "sha256":  "65114f185de8256d743f68f31fcc5fbe4c18d64dc6026681e5f1a7d3dd689804"
+                  },
+                  {
+                      "path":  "Data/itemInfo.json",
+                      "size":  2178,
+                      "sha256":  "ea0454392a8f47a5ab0edce486676c905ad318259428cab285d6eafb77815911"
+                  },
+                  {
+                      "path":  "Data/mod_api.json",
+                      "size":  2849,
+                      "sha256":  "e1c359036c3cc7eddff1fcd114602944155da41d88d85efaf832c7118f8427fa"
+                  },
+                  {
+                      "path":  "Data/levels/level_01.json",
+                      "size":  280,
+                      "sha256":  "da767167174c8ead263b557193201bf80a219d2fb2afcbaed5606543490143cc"
+                  },
+                  {
+                      "path":  "Data/levels/level_02.json",
+                      "size":  261,
+                      "sha256":  "6888dd72d8dffe8d304412243fe08c56c2871424f9fb9898abf5ec91a8940560"
+                  },
+                  {
+                      "path":  "Data/levels/level_03.json",
+                      "size":  279,
+                      "sha256":  "008bafca134524a0405b764eb12c9e6afd381224267c88befa341ebeb4fb9475"
+                  },
+                  {
+                      "path":  "Data/levels/level_04.json",
+                      "size":  259,
+                      "sha256":  "c29bb93c040aaa6ed13feb106c690f52dbf191c15e5a11723b7a797a8f71f307"
+                  },
+                  {
+                      "path":  "Data/levels/level_05.json",
+                      "size":  252,
+                      "sha256":  "48920b2515b28cb046b2166cb4b5e7a79acfa4be9d6a3b97837b9fe93e8839d5"
+                  },
+                  {
+                      "path":  "Data/levels/level_06.json",
+                      "size":  264,
+                      "sha256":  "72cc45432f2e91e35c39d27fa204f670dfe84378551fb1d70a074dd33ec21734"
+                  },
+                  {
+                      "path":  "Data/levels/level_07.json",
+                      "size":  646,
+                      "sha256":  "57225f743c06f15399eee761486d6a27685ac7174752abecc5145a774a8d3858"
+                  },
+                  {
+                      "path":  "iconengines/qsvgicon.dll",
+                      "size":  71480,
+                      "sha256":  "6221fed44f0f560a864312553c6918a536b8e2f04c7cb4e8ee5ba9445338aa96"
+                  },
+                  {
+                      "path":  "imageformats/qgif.dll",
+                      "size":  47928,
+                      "sha256":  "4fe24916a961587173c846055a34735b904900fb75716de4fa458c203da3e7ef"
+                  },
+                  {
+                      "path":  "imageformats/qico.dll",
+                      "size":  45880,
+                      "sha256":  "0d79934047e06591b74201d826af72f6ab595f5df4705ad7f0c234c0e2cf3a32"
+                  },
+                  {
+                      "path":  "imageformats/qjpeg.dll",
+                      "size":  577848,
+                      "sha256":  "004f456d513a6bfc58320652c326a023fa8fea905d26b642a561f7081442aff0"
+                  },
+                  {
+                      "path":  "imageformats/qsvg.dll",
+                      "size":  39224,
+                      "sha256":  "b34f721be6e1a451a2eea3c146b0808091577143587d9e6bc689fe8214ff47d7"
+                  },
+                  {
+                      "path":  "mods/example_numbers/mod.json",
+                      "size":  595,
+                      "sha256":  "9eb86ca7258478e0581e9c33746579f0364abf5b74106493fc5a986837292176"
+                  },
+                  {
+                      "path":  "mods/example_numbers/config/gameplay.json",
+                      "size":  362,
+                      "sha256":  "bacf914a1dcffff2a21fe0509e0c4fa3475f2d2478cedbfd4b7a223c03bc40d7"
+                  },
+                  {
+                      "path":  "mods/example_numbers/config/items.json",
+                      "size":  597,
+                      "sha256":  "d21e3ee1dbe0f38ccbd6eed996c1fea60007263af861238b63cf398e841d3d23"
+                  },
+                  {
+                      "path":  "mods/example_numbers/config/levels.json",
+                      "size":  443,
+                      "sha256":  "ff19c903f7deded9ac70c08a2e5d09f7c8ce951838adc275c04b6a979e46001c"
+                  },
+                  {
+                      "path":  "networkinformation/qnetworklistmanager.dll",
+                      "size":  70968,
+                      "sha256":  "2f76ab1699bf9a1ef89404d054dc7325c4e18d4d27f52cd3ca3b5088d944eb18"
+                  },
+                  {
+                      "path":  "platforms/qwindows.dll",
+                      "size":  997688,
+                      "sha256":  "540211565db496024246cb8a44437212e6b967f3ee7b899e888f41cc556bf041"
+                  },
+                  {
+                      "path":  "qml/QML/plugins.qmltypes",
+                      "size":  160655,
+                      "sha256":  "012552181d35df114782fd954393dc2d821e1624b285e2341a1146434b0e97cf"
+                  },
+                  {
+                      "path":  "qml/QML/qmldir",
+                      "size":  114,
+                      "sha256":  "0ba0b60157111b988cc583b73ceb445a2d0c8633179513e284ede7a2794bce70"
+                  },
+                  {
+                      "path":  "qml/QtQml/plugins.qmltypes",
+                      "size":  7780,
+                      "sha256":  "4387cbc395e3964c16cc1e9f72551af7cbb8a4455b3bf86d72bbabad228dd658"
+                  },
+                  {
+                      "path":  "qml/QtQml/qmldir",
+                      "size":  253,
+                      "sha256":  "4487f30737a083fa69c5b9d408fc29856908cb50956a0652db50c47b9683a289"
+                  },
+                  {
+                      "path":  "qml/QtQml/qmlplugin.dll",
+                      "size":  30520,
+                      "sha256":  "bb810c3574d4f3f68e71da498addb210a95cb40b2f9f15e797c233a67fbb9913"
+                  },
+                  {
+                      "path":  "qml/QtQml/Models/modelsplugin.dll",
+                      "size":  30520,
+                      "sha256":  "9064190e71a3d0ceef44f618d7987fda310e8fdf1db5668ab6941ccd09bd4c48"
+                  },
+                  {
+                      "path":  "qml/QtQml/Models/plugins.qmltypes",
+                      "size":  80148,
+                      "sha256":  "7d28a38798b20242b702cfaae44659a5a56a67680893ffe86d6031907d93d290"
+                  },
+                  {
+                      "path":  "qml/QtQml/Models/qmldir",
+                      "size":  222,
+                      "sha256":  "313cec98e20382271b7627998f3afba3cbb1c69bc05204728406517000db0247"
+                  },
+                  {
+                      "path":  "qml/QtQml/WorkerScript/plugins.qmltypes",
+                      "size":  1510,
+                      "sha256":  "701cd44fd43b9bdae92685471d0e8f8cf6d7c743518aaa6fc3e544fb3989807d"
+                  },
+                  {
+                      "path":  "qml/QtQml/WorkerScript/qmldir",
+                      "size":  252,
+                      "sha256":  "7e930397861106a9a5931f5448f76b3e981c0bc0c150a1e7bc6fbe6a049f9ed8"
+                  },
+                  {
+                      "path":  "qml/QtQml/WorkerScript/workerscriptplugin.dll",
+                      "size":  30520,
+                      "sha256":  "510e4f37e9b9392aaa9fe95e835a989ca4e56a54ee763fa042a0ed5840fc4a38"
+                  },
+                  {
+                      "path":  "qml/QtQuick/plugins.qmltypes",
+                      "size":  654794,
+                      "sha256":  "758cd68eccc6a720ead8c6961a7752b26c679930417fe5ad1daa7b25fe2208d6"
+                  },
+                  {
+                      "path":  "qml/QtQuick/qmldir",
+                      "size":  215,
+                      "sha256":  "137c386f9b2ba49fb3a3417b55096f6f1bd15a794a98613a862b490a6fe4fa79"
+                  },
+                  {
+                      "path":  "qml/QtQuick/qtquick2plugin.dll",
+                      "size":  30520,
+                      "sha256":  "77f7ecc4ab149736c325e1ad2d3a8a0d919837c20c482a151a9ea4b091c25d22"
+                  },
+                  {
+                      "path":  "qml/QtQuick/Window/qmldir",
+                      "size":  213,
+                      "sha256":  "cf518c3574e25f91acaec7ad8831e28c18fccfe15411672ea56809b2eb94077c"
+                  },
+                  {
+                      "path":  "qml/QtQuick/Window/quickwindow.qmltypes",
+                      "size":  215,
+                      "sha256":  "a96c7bf5832767bdc9d91e2290a3920aec3abfbf2e3814bce38b49483f16f84a"
+                  },
+                  {
+                      "path":  "qml/QtQuick/Window/quickwindowplugin.dll",
+                      "size":  31544,
+                      "sha256":  "ff8092583f7680fda2dab033dd2c036ae41e410a978c6b5e8e2cf7c53117cdf0"
+                  },
+                  {
+                      "path":  "styles/qmodernwindowsstyle.dll",
+                      "size":  220984,
+                      "sha256":  "f9ddcd6f6319be76ec8ea1b95e6829cdc0f9600242b6bdd07babb0185e9762ab"
+                  },
+                  {
+                      "path":  "tls/qcertonlybackend.dll",
+                      "size":  103224,
+                      "sha256":  "584392e25d46b6edc255e4c5849920da3e52c01172199def876284525587bb05"
+                  },
+                  {
+                      "path":  "tls/qschannelbackend.dll",
+                      "size":  262968,
+                      "sha256":  "4632404cb87f860e7bb811f525685509127da8d05f398aada5b2b88318e4a621"
+                  },
+                  {
+                      "path":  "ui/dark.qss",
+                      "size":  9647,
+                      "sha256":  "5a055fa7739f6e18c6aff11a70b0ec405a3a540a3b458267a1d35b8965b68cae"
+                  },
+                  {
+                      "path":  "ui/light.qss",
+                      "size":  11404,
+                      "sha256":  "2253bf64ccd2cac372bc3f934d478958c34e0c963ffe6d846b8bc9ea000597d8"
+                  },
+                  {
+                      "path":  "ui/tokens.json",
+                      "size":  1414,
+                      "sha256":  "58497787fed1684fe12da0f1f5f2b2a4c8f71840e9cc250cf625bd647b7e0022"
+                  }
+              ],
+    "delete":  [
+
+               ]
+}
