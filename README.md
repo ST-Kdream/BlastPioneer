@@ -146,6 +146,11 @@ BlastPioneer/
 > Releases 页面同时给出每个版本的更新清单；老版本可以直接用 `Updater.exe` 差分升级，
 > 不必重新下一整包。
 
+发布包校验（SHA-256）：
+
+- `BlastPioneer-0.1.0-rc.1.zip`：`7AE358F0295044B1B2BB74765CF0F165BE61FB729C0D6476B3AED29E00D0791F`
+- `BlastPioneer-0.1.0-rc.1-setup.exe`：`45F640B272EF60BE28B8F712D9CA4A7D0E5A61AE1F04F584791E208B03B54CAD`
+
 ---
 
 ## 🧩 模组
